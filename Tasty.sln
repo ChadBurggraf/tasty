@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Http", "Tasty.Http\Tasty.Http.csproj", "{3ED1B072-D0F2-41CD-ABCE-BFCEE45F5A61}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3A9B5709-206A-4295-8F94-C12D74304D5F}"
+	ProjectSection(SolutionItems) = preProject
+		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
+		SolutionInfo.cs = SolutionInfo.cs
+		SolutionVersionInfo.cs = SolutionVersionInfo.cs
+		Tasty.vsmdi = Tasty.vsmdi
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Test", "Tasty.Test\Tasty.Test.csproj", "{AD2D60AD-FEFB-4361-8957-E0EB1F90CA1F}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "tasty", "http://localhost/tasty", "{0B636F98-DA80-4641-9DBB-DDDED276084A}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFramework = "3.5"
+		ProjectReferences = "{3ED1B072-D0F2-41CD-ABCE-BFCEE45F5A61}|Tasty.Http.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/tasty"
+		Debug.AspNetCompiler.PhysicalPath = "Web\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\tasty\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/tasty"
+		Release.AspNetCompiler.PhysicalPath = "Web\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\tasty\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		SlnRelativePath = "..\..\inetpub\wwwroot\tasty\"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Tasty.vsmdi
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3ED1B072-D0F2-41CD-ABCE-BFCEE45F5A61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ED1B072-D0F2-41CD-ABCE-BFCEE45F5A61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ED1B072-D0F2-41CD-ABCE-BFCEE45F5A61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ED1B072-D0F2-41CD-ABCE-BFCEE45F5A61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD2D60AD-FEFB-4361-8957-E0EB1F90CA1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD2D60AD-FEFB-4361-8957-E0EB1F90CA1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD2D60AD-FEFB-4361-8957-E0EB1F90CA1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD2D60AD-FEFB-4361-8957-E0EB1F90CA1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B636F98-DA80-4641-9DBB-DDDED276084A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B636F98-DA80-4641-9DBB-DDDED276084A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B636F98-DA80-4641-9DBB-DDDED276084A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B636F98-DA80-4641-9DBB-DDDED276084A}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

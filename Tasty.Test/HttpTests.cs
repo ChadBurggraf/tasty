@@ -16,13 +16,20 @@ namespace Tasty.Test
         public void HttpRedirect_CanMatchRules()
         {
             HttpRedirectRuleElement[] rules = new HttpRedirectRuleElement[] {
-                new HttpRedirectRuleElement() { Pattern = @"^(https?://)www\.(.*)", RedirectsTo = "$1$2" }
+                new HttpRedirectRuleElement() { Pattern = @"^(https?://)www\.(.*)", RedirectsTo = "$1$2" },
+                new HttpRedirectRuleElement() { Pattern = @"^(.*)?default\.aspx(.*)", RedirectsTo = "$1index.html$2" }
             };
 
             HttpRedirectRuleMatcher matcher = new HttpRedirectRuleMatcher();
 
             Uri uri = new Uri("https://www.virtualkeychain.com/vault.html");
             Assert.AreEqual("https://virtualkeychain.com/vault.html", matcher.Match(uri, rules).RedirectResult);
+
+            uri = new Uri("https://virtualkeychain.com/default.aspx?name=home");
+            Assert.AreEqual("https://virtualkeychain.com/index.html?name=home", matcher.Match(uri, rules).RedirectResult);
+
+            uri = new Uri("http://localhost/vkc/default.aspx?name=home");
+            Assert.AreEqual("http://localhost/vkc/index.html?name=home", matcher.Match(uri, rules).RedirectResult);
         }
 
         public static HttpContextBase MockHttpContext(string url)

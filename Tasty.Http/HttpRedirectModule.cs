@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
+using System.Web.Caching;
 
 namespace Tasty.Http
 {
@@ -48,6 +49,7 @@ namespace Tasty.Http
             {
                 Dictionary<string, HttpRedirectRuleMatch> cache = (Dictionary<string, HttpRedirectRuleMatch>)(httpContext.Cache[MATCH_CACHE_KEY] ?? new Dictionary<string, HttpRedirectRuleMatch>());
                 string key = httpContext.Request.Url.AbsoluteUri.ToUpperInvariant();
+                bool cacheUpdated = false;
 
                 if (cache.ContainsKey(key))
                 {
@@ -57,9 +59,22 @@ namespace Tasty.Http
                 {
                     ruleMatch = RuleMatcher.Match(httpContext.Request.Url, HttpSettings.Section.Redirects);
                     cache[key] = ruleMatch;
+                    cacheUpdated = true;
                 }
 
-                httpContext.Cache[MATCH_CACHE_KEY] = cache;
+                if (cacheUpdated)
+                {
+                    httpContext.Cache.Remove(MATCH_CACHE_KEY);
+                    httpContext.Cache.Add(
+                        MATCH_CACHE_KEY,
+                        cache,
+                        null,
+                        DateTime.Now.AddMinutes(15),
+                        Cache.NoSlidingExpiration,
+                        CacheItemPriority.Normal,
+                        null
+                    );
+                }
             }
 
             return ruleMatch;

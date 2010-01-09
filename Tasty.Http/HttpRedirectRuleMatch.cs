@@ -23,12 +23,12 @@ namespace Tasty.Http
         {
             if (rule == null)
             {
-                throw new ArgumentNullException("rule cannot be null.", "rule");
+                throw new ArgumentNullException("rule", "rule cannot be null.");
             }
 
             if (matchResult == null)
             {
-                throw new ArgumentNullException("matchResult cannot be null.", "matchResult");
+                throw new ArgumentNullException("matchResult", "matchResult cannot be null.");
             }
 
             Rule = rule;

@@ -12,9 +12,17 @@ namespace Tasty.Http
     public class HttpSettings : ConfigurationSection
     {
         /// <summary>
+        /// Constructor.
+        /// </summary>
+        static HttpSettings()
+        {
+            Section = (HttpSettings)(ConfigurationManager.GetSection("tasty.http") ?? new HttpSettings());
+        }
+
+        /// <summary>
         /// Gets the currently configured tasty.http settings section.
         /// </summary>
-        public static readonly HttpSettings Section = (HttpSettings)(ConfigurationManager.GetSection("tasty.http") ?? new HttpSettings());
+        public static HttpSettings Section { get; private set; }
 
         /// <summary>
         /// Gets the configured HTTP redirects collection.

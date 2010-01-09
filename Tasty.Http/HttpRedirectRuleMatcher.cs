@@ -21,7 +21,7 @@ namespace Tasty.Http
         {
             if (requestUri == null)
             {
-                throw new ArgumentNullException("requestUrl cannot be null.", "requestUri");
+                throw new ArgumentNullException("requestUri", "requestUrl cannot be null.");
             }
 
             HttpRedirectRuleMatch ruleMatch = null;

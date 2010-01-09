@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		SolutionVersionInfo.cs = SolutionVersionInfo.cs
 		Tasty.vsmdi = Tasty.vsmdi
 		tasty1.vsmdi = tasty1.vsmdi
+		Tasty2.vsmdi = Tasty2.vsmdi
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Test", "Tasty.Test\Tasty.Test.csproj", "{AD2D60AD-FEFB-4361-8957-E0EB1F90CA1F}"
@@ -36,9 +37,11 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "tasty", "http://localhost/t
 		DefaultWebSiteLanguage = "Visual C#"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Build", "Tasty.Build\Tasty.Build.csproj", "{7242F157-1B47-4175-BD84-E99F9DB6E532}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = tasty1.vsmdi
+		CategoryFile = Tasty2.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +60,10 @@ Global
 		{0B636F98-DA80-4641-9DBB-DDDED276084A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B636F98-DA80-4641-9DBB-DDDED276084A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{0B636F98-DA80-4641-9DBB-DDDED276084A}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{7242F157-1B47-4175-BD84-E99F9DB6E532}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7242F157-1B47-4175-BD84-E99F9DB6E532}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7242F157-1B47-4175-BD84-E99F9DB6E532}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7242F157-1B47-4175-BD84-E99F9DB6E532}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,15 +5,15 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3ED1B072-D0F2-41CD-ABCE-BFCEE45F5A61}</ProjectGuid>
+    <ProjectGuid>{7242F157-1B47-4175-BD84-E99F9DB6E532}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tasty.Http</RootNamespace>
-    <AssemblyName>Tasty.Http</AssemblyName>
+    <RootNamespace>Tasty.Build</RootNamespace>
+    <AssemblyName>Tasty.Build</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Tasty.Http.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Tasty.Build.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,7 +23,7 @@
     <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\Tasty.Http.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\Tasty.Build.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -32,18 +32,14 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Tasty.Http.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\Tasty.Build.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Web" />
-    <Reference Include="System.Web.Abstractions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -60,17 +56,20 @@
     <Compile Include="..\SolutionVersionInfo.cs">
       <Link>Properties\SolutionVersionInfo.cs</Link>
     </Compile>
-    <Compile Include="HttpRedirectModule.cs" />
-    <Compile Include="HttpRedirectRuleElement.cs" />
-    <Compile Include="HttpRedirectRuleElementCollection.cs" />
-    <Compile Include="HttpRedirectRuleMatch.cs" />
-    <Compile Include="HttpRedirectRuleMatcher.cs" />
-    <Compile Include="HttpRedirectType.cs" />
-    <Compile Include="HttpSettings.cs" />
+    <Compile Include="ISchemaUpgradeDelegate.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SchemaUpgradeCommandSet.cs" />
+    <Compile Include="SchemaUpgrade.cs" />
+    <Compile Include="SchemaUpgradeCommandSetResult.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Tasty.Http.snk" />
+    <EmbeddedResource Include="Sql\CreateDatabase.sql" />
+    <EmbeddedResource Include="Sql\CreateDatabaseLogin.sql" />
+    <EmbeddedResource Include="Sql\CreateDatabaseUser.sql" />
+    <EmbeddedResource Include="Sql\DropDatabase.sql" />
+    <EmbeddedResource Include="Sql\DropLogin.sql" />
+    <None Include="Tasty.Build.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

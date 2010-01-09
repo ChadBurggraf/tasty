@@ -19,12 +19,20 @@ namespace Tasty.Http
 
         #endregion
 
-        #region Fields
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        static HttpRedirectModule()
+        {
+            RuleMatcher = new HttpRedirectRuleMatcher();
+        }
+
+        #region Properties
 
         /// <summary>
         /// Gets the rule matcher used when matching rules.
         /// </summary>
-        public static readonly HttpRedirectRuleMatcher RuleMatcher = new HttpRedirectRuleMatcher();
+        public static HttpRedirectRuleMatcher RuleMatcher { get; private set; }
 
         #endregion
 
@@ -40,7 +48,7 @@ namespace Tasty.Http
         {
             if (httpContext == null)
             {
-                throw new ArgumentNullException("httpContext cannot be null.", "httpContext");
+                throw new ArgumentNullException("httpContext", "httpContext cannot be null.");
             }
 
             HttpRedirectRuleMatch ruleMatch = null;
@@ -89,12 +97,12 @@ namespace Tasty.Http
         {
             if (httpContext == null)
             {
-                throw new ArgumentNullException("httpContext cannot be null.", "httpContext");
+                throw new ArgumentNullException("httpContext", "httpContext cannot be null.");
             }
 
             if (ruleMatch == null)
             {
-                throw new ArgumentNullException("rule cannot be null.", "rule");
+                throw new ArgumentNullException("ruleMatch", "rule cannot be null.");
             }
 
             if (!String.IsNullOrEmpty(ruleMatch.RedirectResult))

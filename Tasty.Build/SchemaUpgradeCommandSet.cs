@@ -1,0 +1,48 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+
+namespace Tasty.Build
+{
+    /// <summary>
+    /// Represents a set of SQL commands corresponding to a specific version number.
+    /// </summary>
+    public sealed class SchemaUpgradeCommandSet
+    {
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        /// <param name="sql">A string of SQL script to create the command set for.</param>
+        /// <param name="versionNumber">The version number to create the command set for.</param>
+        /// <param name="runInTransaction">A value indicating whether to run this command set in a trasaction.</param>
+        public SchemaUpgradeCommandSet(string sql, Version versionNumber, bool runInTransaction)
+        {
+            if (versionNumber == null)
+            {
+                throw new ArgumentNullException("versionNumber", "versionNumber must contain a value.");
+            }
+
+            Commands = new ReadOnlyCollection<string>((sql ?? String.Empty).SplitSqlCommands());
+            RunInTransaction = runInTransaction;
+            VersionNumber = versionNumber;
+        }
+
+        /// <summary>
+        /// Gets a collection of the individual commands in this command set.
+        /// </summary>
+        public ReadOnlyCollection<string> Commands { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to run this command set in a trasaction.
+        /// Set to false if one or more of the commands in the set are illegal inside of a transaction.
+        /// </summary>
+        public bool RunInTransaction { get; set; }
+
+        /// <summary>
+        /// Gets this command set's version number.
+        /// </summary>
+        public Version VersionNumber { get; private set; }
+    }
+}

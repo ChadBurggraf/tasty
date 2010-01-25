@@ -5,15 +5,15 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3ED1B072-D0F2-41CD-ABCE-BFCEE45F5A61}</ProjectGuid>
+    <ProjectGuid>{2FA9607D-DC0D-4318-B13D-028C2BA3FF85}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Tasty.Http</RootNamespace>
-    <AssemblyName>Tasty.Http</AssemblyName>
+    <RootNamespace>Tasty</RootNamespace>
+    <AssemblyName>Tasty</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Tasty.Http.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Tasty.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,7 +23,7 @@
     <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\Tasty.Http.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\Tasty.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -32,9 +32,21 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Tasty.Http.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\Tasty.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AWSSDK, Version=1.0.3.0, Culture=neutral, PublicKeyToken=498aea76c1205a29, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dependencies\AWSSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="DotZLib, Version=1.0.3647.27392, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dependencies\DotZLib.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Build.Framework" />
+    <Reference Include="Microsoft.Build.Utilities.v3.5">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core">
@@ -60,17 +72,40 @@
     <Compile Include="..\SolutionVersionInfo.cs">
       <Link>Properties\SolutionVersionInfo.cs</Link>
     </Compile>
-    <Compile Include="HttpRedirectModule.cs" />
-    <Compile Include="HttpRedirectRuleElement.cs" />
-    <Compile Include="HttpRedirectRuleElementCollection.cs" />
-    <Compile Include="HttpRedirectRuleMatch.cs" />
-    <Compile Include="HttpRedirectRuleMatcher.cs" />
-    <Compile Include="HttpRedirectType.cs" />
-    <Compile Include="HttpSettings.cs" />
+    <Compile Include="Build\Extensions.cs" />
+    <Compile Include="Build\IS3PublisherDelegate.cs" />
+    <Compile Include="Build\ISchemaUpgradeDelegate.cs" />
+    <Compile Include="Build\S3Publisher.cs" />
+    <Compile Include="Build\S3Publish.cs" />
+    <Compile Include="Build\SchemaUpgrade.cs" />
+    <Compile Include="Build\SchemaUpgradeCommandSet.cs" />
+    <Compile Include="Build\SchemaUpgradeCommandSetResult.cs" />
+    <Compile Include="Files.cs" />
+    <Compile Include="Http\HttpRedirectModule.cs" />
+    <Compile Include="Http\HttpRedirectRuleElement.cs" />
+    <Compile Include="Http\HttpRedirectRuleElementCollection.cs" />
+    <Compile Include="Http\HttpRedirectRuleMatch.cs" />
+    <Compile Include="Http\HttpRedirectRuleMatcher.cs" />
+    <Compile Include="Http\HttpRedirectType.cs" />
+    <Compile Include="Http\HttpSettings.cs" />
+    <Compile Include="Primitives.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryString.cs" />
+    <Compile Include="Urls.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Tasty.Http.snk" />
+    <EmbeddedResource Include="Build\Sql\CreateDatabase.sql" />
+    <EmbeddedResource Include="Build\Sql\CreateDatabaseLogin.sql" />
+    <EmbeddedResource Include="Build\Sql\CreateDatabaseUser.sql" />
+    <EmbeddedResource Include="Build\Sql\DropDatabase.sql" />
+    <EmbeddedResource Include="Build\Sql\DropLogin.sql" />
+    <None Include="Tasty.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\Dependencies\zlib1.dll">
+      <Link>zlib1.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

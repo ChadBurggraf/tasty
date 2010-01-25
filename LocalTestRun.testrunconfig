@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<TestRunConfiguration name="Local Test Run" id="3a9f31fd-a03a-4c2b-8c52-9052ee593a31" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
+<TestRunConfiguration name="Local Test Run" id="d7d79beb-52c0-4b91-bf84-3c80b647d0f3" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
   <Description>This is a default test run configuration for a local test run.</Description>
+  <Deployment>
+    <DeploymentItem filename="Tasty.Test\assets-test\" />
+  </Deployment>
   <TestTypeSpecific />
 </TestRunConfiguration>

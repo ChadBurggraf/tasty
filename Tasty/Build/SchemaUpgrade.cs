@@ -28,7 +28,7 @@ namespace Tasty.Build
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="connection">A connection to the database to upgrade.</param>
+        /// <param name="connectionString">A connection string to the database to upgrade.</param>
         /// <param name="upgradeDelegate">An <see cref="ISchemaUpgradeDelegate"/> that will provide meta-data information about the target database.</param>
         public SchemaUpgrade(string connectionString, ISchemaUpgradeDelegate upgradeDelegate)
         {

@@ -19,6 +19,8 @@ namespace Tasty.Http
 
         #endregion
 
+        #region Construction
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -26,6 +28,8 @@ namespace Tasty.Http
         {
             RuleMatcher = new HttpRedirectRuleMatcher();
         }
+
+        #endregion
 
         #region Properties
 

@@ -1,0 +1,6 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="Tasty.Build.S3Publish" AssemblyFile="Tasty.dll"/>
+  <Target Name="Build">
+    <S3Publish AccessKeyId="AKIAINHPOUE2OKVQTZLQ" SecretAccessKeyId="X4/rnRUVjwDE+CG8sFXQ3sdNuWtiP1Z/RtDeJ1SS" BucketName="nac.tests" DirectoryPath=".\"/> 
+  </Target>
+</Project>

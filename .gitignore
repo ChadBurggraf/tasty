@@ -2,6 +2,5 @@
 *.csproj.user
 *.vsmdi
 bin
-Bin
 obj
 TestResults

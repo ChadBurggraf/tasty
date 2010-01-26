@@ -39,9 +39,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dependencies\AWSSDK.dll</HintPath>
     </Reference>
-    <Reference Include="DotZLib, Version=1.0.3647.27392, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Ionic.Zlib, Version=1.9.1.2, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\DotZLib.dll</HintPath>
+      <HintPath>..\Dependencies\Ionic.Zlib.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v3.5">
@@ -100,12 +100,6 @@
     <EmbeddedResource Include="Build\Sql\DropDatabase.sql" />
     <EmbeddedResource Include="Build\Sql\DropLogin.sql" />
     <None Include="Tasty.snk" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="..\Dependencies\zlib1.dll">
-      <Link>zlib1.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

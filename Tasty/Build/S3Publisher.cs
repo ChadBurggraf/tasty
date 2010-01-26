@@ -8,7 +8,7 @@ using System.Web;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
-using DotZLib;
+using Ionic.Zlib;
 
 namespace Tasty.Build
 {
@@ -279,20 +279,23 @@ namespace Tasty.Build
                 if (contentType.StartsWith("text", StringComparison.OrdinalIgnoreCase))
                 {
                     gzip = true;
-                    tempPath = Path.GetTempFileName();
+                    tempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Path.GetRandomFileName());
 
                     headers["Content-Encoding"] = "gzip";
 
-                    using (GZipStream gz = new GZipStream(tempPath, CompressLevel.Default))
+                    using (FileStream fs = File.OpenRead(filePath))
                     {
-                        using (FileStream fs = File.OpenRead(filePath))
+                        using (FileStream temp = File.Create(tempPath))
                         {
-                            byte[] buffer = new byte[4096];
-                            int count = 0;
-
-                            while (0 < (count = fs.Read(buffer, 0, buffer.Length)))
+                            using (GZipStream gz = new GZipStream(temp, CompressionMode.Compress))
                             {
-                                gz.Write(buffer, 0, count);
+                                byte[] buffer = new byte[4096];
+                                int count;
+
+                                while (0 < (count = fs.Read(buffer, 0, buffer.Length)))
+                                {
+                                    gz.Write(buffer, 0, count);
+                                }
                             }
                         }
                     }

@@ -4,56 +4,76 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Build.BuildEngine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Tasty;
 using Tasty.Build;
+using Tasty.Web;
 
 namespace Tasty.Test
 {
     [TestClass]
-    public class S3PublisherTests
+    public class S3PublisherTests : IS3PublisherDelegate
     {
-        [TestMethod]
-        public void S3Publisher_CanGetObjectKey()
-        {
-            string basePath = @"C:\Projects\Tasty\Web\assets";
-            string filePath = @"C:\Projects\Tasty\Web\assets\script\my-script.js";
-            string prefix = "assets";
+        private static string accessKeyId = ConfigurationManager.AppSettings["S3AccessKeyId"];
+        private static string secretAccessKeyId = ConfigurationManager.AppSettings["S3SecretAccessKeyId"];
+        private static string bucketName = ConfigurationManager.AppSettings["TestS3BucketName"];
+        private static AmazonS3 s3Client;
 
-            Assert.AreEqual("assets/script/my-script.js", S3Publisher.GetObjectKey(prefix, basePath, filePath));
+        static S3PublisherTests()
+        {
+            AmazonS3Config config = new AmazonS3Config() { CommunicationProtocol = Protocol.HTTP };
+            s3Client = AWSClientFactory.CreateAmazonS3Client(accessKeyId, secretAccessKeyId, config);
         }
 
         [TestMethod]
-        public void S3Publisher_CanPublishDirectory()
+        public void S3Publisher_Publisher()
         {
-            string accessKeyId = ConfigurationManager.AppSettings["S3AccessKeyId"];
-            string secretAccessKeyId = ConfigurationManager.AppSettings["S3SecretAccessKeyId"];
-            string bucketName = ConfigurationManager.AppSettings["TestS3BucketName"];
-            string prefix = DateTime.UtcNow.ToIso8601UtcPathSafeString();
+            new S3Publisher(accessKeyId, secretAccessKeyId)
+                .WithBasePath(@".\")
+                .WithBucketName(bucketName)
+                .WithFiles(new string[] {
+                    @"css\yui-fonts-min.css",
+                    @"css\yui-reset-min.css",
+                    @"images\accept.png",
+                    @"images\add.png",
+                    @"images\anchor.png",
+                    @"script\jquery-ui.min.js",
+                    @"script\jquery.min.js"
+                })
+                .WithPrefix(DateTime.UtcNow.ToIso8601UtcPathSafeString())
+                .WithPublisherDelegate(this) // Asserts are happening in the delegate.
+                .WithUseSsl(false).Publish();
+        }
 
-            var publisher = new S3Publisher(accessKeyId, secretAccessKeyId)
-            {
-                BucketName = bucketName,
-                DirectoryPath = Environment.CurrentDirectory,
-                Prefix = prefix
-            };
+        [TestMethod]
+        public void S3Publisher_PublishMsBuild()
+        {
+            Assert.IsTrue(Engine.GlobalEngine.BuildProjectFile("S3Publish.proj"));
+        }
 
-            publisher.Publish();
+        #region IS3PublisherDelegate Members
 
-            AmazonS3 client = AWSClientFactory.CreateAmazonS3Client(accessKeyId, secretAccessKeyId, new AmazonS3Config() { CommunicationProtocol = Protocol.HTTP });
-
+        public void OnFilePublished(string path, string objectKey, bool withGzip)
+        {
             GetObjectMetadataRequest request = new GetObjectMetadataRequest()
                 .WithBucketName(bucketName)
-                .WithKey(S3Publisher.GetObjectKey(prefix, Environment.CurrentDirectory, Path.Combine(Environment.CurrentDirectory, @"css\yui-fonts-min.css")));
+                .WithKey(objectKey);
 
-            using (GetObjectMetadataResponse response = client.GetObjectMetadata(request))
+            using (GetObjectMetadataResponse response = s3Client.GetObjectMetadata(request))
             {
-                Assert.AreEqual("text/css", response.ContentType);
-                Assert.AreEqual("gzip", response.Headers["Content-Encoding"]);
+                Assert.AreEqual(MimeType.FromCommon(objectKey).ContentType, response.ContentType);
+
+                if (withGzip)
+                {
+                    Assert.AreEqual("gzip", response.Headers["Content-Encoding"]);
+                }
             }
         }
+
+        #endregion
     }
 }

@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
-namespace Tasty
+namespace Tasty.Web
 {
     /// <summary>
     /// Providest extensions and helpers for URLs.

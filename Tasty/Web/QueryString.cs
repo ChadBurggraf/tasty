@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Web;
 
-namespace Tasty
+namespace Tasty.Web
 {
     /// <summary>
     /// Represents a URL query string as a key/value collection.

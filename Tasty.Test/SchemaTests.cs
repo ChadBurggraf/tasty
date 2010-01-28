@@ -20,14 +20,14 @@ namespace Tasty.Test
         private static string testDatabaseUserPassword = "tastypassword1234";
 
         [TestMethod]
-        public void Schema_CanCreateDatabase()
+        public void Schema_CreateDatabase()
         {
             SchemaUpgrade.DropDatabase(connectionString, testDatabaseName, testDatabaseUserName);
             SchemaUpgrade.CreateDatabase(connectionString, testDatabaseName, testDatabaseFilesPath, testDatabaseUserName, testDatabaseUserPassword);
         }
 
         [TestMethod]
-        public void Schema_CanDropDatabase()
+        public void Schema_DropDatabase()
         {
             SchemaUpgrade.CreateDatabase(connectionString, testDatabaseName, testDatabaseFilesPath, testDatabaseUserName, testDatabaseUserPassword);
             SchemaUpgrade.DropDatabase(connectionString, testDatabaseName, testDatabaseUserName);

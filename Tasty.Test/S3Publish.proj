@@ -1,6 +1,21 @@
 ﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <OutputPath></OutputPath>
+  </PropertyGroup>
   <UsingTask TaskName="Tasty.Build.S3Publish" AssemblyFile="Tasty.dll"/>
+  <ItemGroup>
+    <S3PublishFiles Include="css\*.css"/>
+    <S3PublishFiles Include="images\*.png"/>
+    <S3PublishFiles Include="script/*.js"/>
+  </ItemGroup>
   <Target Name="Build">
-    <S3Publish AccessKeyId="AKIAINHPOUE2OKVQTZLQ" SecretAccessKeyId="X4/rnRUVjwDE+CG8sFXQ3sdNuWtiP1Z/RtDeJ1SS" BucketName="nac.tests" DirectoryPath=".\"/> 
+    <S3Publish 
+      AccessKeyId="0Z1PY5QNJKZM08W10NG2" 
+      SecretAccessKeyId="NJJ+PvLXMs5KzbTlYs/KXpkfNYNqSenDZBQRLlRL" 
+      BasePath=".\"
+      BucketName="tc.tests" 
+      Files="@(S3PublishFiles)"
+      Prefix="proj-test"
+      UseSsl="false"/> 
   </Target>
 </Project>

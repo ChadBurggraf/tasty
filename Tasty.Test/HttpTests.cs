@@ -13,7 +13,7 @@ namespace Tasty.Test
     public class HttpTests
     {
         [TestMethod]
-        public void HttpRedirect_CanMatchRules()
+        public void HttpRedirect_MatchRules()
         {
             HttpRedirectRuleElement[] rules = new HttpRedirectRuleElement[] {
                 new HttpRedirectRuleElement() { Pattern = @"^(https?://)www\.(.*)", RedirectsTo = "$1$2" },

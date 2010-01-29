@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="S3Publish.cs" company="Chad Burggraf">
-//     Copyright (c) 2010 Chad Burggraf.
+// <copyright file="S3Publish.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
 

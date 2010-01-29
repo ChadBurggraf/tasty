@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="QueryString.cs" company="Chad Burggraf">
-//     Copyright (c) 2010 Chad Burggraf.
+// <copyright file="QueryString.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
 

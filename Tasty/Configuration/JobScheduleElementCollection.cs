@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="HttpRedirectRuleElementCollection.cs" company="Tasty Codes">
+// <copyright file="JobScheduleElementCollection.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -7,25 +7,22 @@
 namespace Tasty.Configuration
 {
     using System;
-    using System.Collections.Generic;
     using System.Configuration;
     using System.Linq;
-    
+
     /// <summary>
-    /// Represents a collection of <see cref="HttpRedirectRuleElement"/>s in the configuration.
+    /// Represents a collection of <see cref="JobScheduleElement"/>s in the configuration.
     /// </summary>
-    public class HttpRedirectRuleElementCollection : TastyConfigurationElementCollection<HttpRedirectRuleElement>
+    public class JobScheduleElementCollection : TastyConfigurationElementCollection<JobScheduleElement>
     {
         /// <summary>
         /// Gets a value indicating whether the collection contains the given item.
         /// </summary>
         /// <param name="item">The item to check for.</param>
         /// <returns>True if the collection contains the item, false otherwise.</returns>
-        public override bool Contains(HttpRedirectRuleElement item)
+        public override bool Contains(JobScheduleElement item)
         {
-            return 0 < (from e in this
-                        where item.Pattern.Equals(e.Pattern, StringComparison.OrdinalIgnoreCase)
-                        select e).Count();
+            return 0 < this.Where(se => se.Name.Equals(item.Name, StringComparison.OrdinalIgnoreCase)).Count();
         }
 
         /// <summary>
@@ -35,7 +32,7 @@ namespace Tasty.Configuration
         /// <returns>The given element's key.</returns>
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((HttpRedirectRuleElement)element).Pattern;
+            return ((JobScheduleElement)element).Name;
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SolutionVersionInfo.cs" company="Chad Burggraf">
-//     Copyright (c) 2010 Chad Burggraf.
+// <copyright file="SolutionVersionInfo.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
 

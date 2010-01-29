@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="Uris.cs" company="Chad Burggraf">
-//     Copyright (c) 2010 Chad Burggraf.
+// <copyright file="Uris.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
 

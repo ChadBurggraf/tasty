@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="TastySettings.cs" company="Chad Burggraf">
-//     Copyright (c) 2010 Chad Burggraf.
+// <copyright file="TastySettings.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
 
@@ -22,6 +22,15 @@ namespace Tasty.Configuration
         public static TastySettings Section
         {
             get { return section; }
+        }
+
+        /// <summary>
+        /// Gets the jobs configuration element.
+        /// </summary>
+        [ConfigurationProperty("jobs", IsRequired = false)]
+        public JobsElement Jobs
+        {
+            get { return (JobsElement)(this["jobs"] ?? (this["jobs"] = new JobsElement())); }
         }
 
         /// <summary>

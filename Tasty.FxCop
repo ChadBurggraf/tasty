@@ -21,6 +21,7 @@
   <IgnoreGeneratedCode>False</IgnoreGeneratedCode>
  </ProjectOptions>
  <Targets>
+  <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/tastyc.exe" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
  <Rules>

@@ -12,13 +12,24 @@ namespace Tasty.Build
     using System.Data.SqlClient;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     
     /// <summary>
     /// Provides a simple SQL schema upgrade service.
     /// </summary>
     public class SchemaUpgradeService
     {
+        #region Public Fields
+
+        /// <summary>
+        /// Gets a regular expression that can be used to mach a version number.
+        /// </summary>
+        public const string VersionNumberExpression = @"\d+?\.\d+?(\.\d+?|\.\d+?\.\d+?)?\.sql$";
+
+        #endregion
+
         #region Private Fields
 
         private string connectionString;
@@ -243,6 +254,97 @@ namespace Tasty.Build
             }
 
             SqlConnection.ClearAllPools();
+        }
+
+        /// <summary>
+        /// Generates a SQL installation script by searching the given directory for SQL script files with
+        /// names that correspond to version numbers and concatenating them together into a file created
+        /// at the given output path.
+        /// </summary>
+        /// <param name="fromVersion">The lower-bound version number to restrict the resulting script to (exclusive).</param>
+        /// <param name="toVersion">The upper-bound version number to restrict the resulting script to (inclusive).</param>
+        /// <param name="searchPath">The directory to search for scripts within (the search with be recursive).</param>
+        /// <param name="outputPath">The path of the output file to create or overwrite.</param>
+        public static void GenerateInstallScript(Version fromVersion, Version toVersion, string searchPath, string outputPath)
+        {
+            GenerateInstallScript(fromVersion, toVersion, searchPath, outputPath, null);
+        }
+
+        /// <summary>
+        /// Generates a SQL installation script by searching the given directory for SQL script files with
+        /// names that correspond to version numbers and concatenating them together into a file created
+        /// at the given output path.
+        /// </summary>
+        /// <param name="fromVersion">The lower-bound version number to restrict the resulting script to (exclusive).</param>
+        /// <param name="toVersion">The upper-bound version number to restrict the resulting script to (inclusive).</param>
+        /// <param name="searchPath">The directory to search for scripts within (the search with be recursive).</param>
+        /// <param name="outputPath">The path of the output file to create or overwrite.</param>
+        /// <param name="onGenerating">A function that should be called for each script that is found and added to the output.</param>
+        public static void GenerateInstallScript(Version fromVersion, Version toVersion, string searchPath, string outputPath, Action<Version, string> onGenerating)
+        {
+            if (String.IsNullOrEmpty(searchPath))
+            {
+                throw new ArgumentNullException("searchPath", "searchPath must have a value.");
+            }
+
+            if (String.IsNullOrEmpty(outputPath))
+            {
+                throw new ArgumentNullException("outputPath", "outputPath must have a value.");
+            }
+
+            if (fromVersion != null && toVersion != null && toVersion <= fromVersion)
+            {
+                throw new ArgumentException("If both fromVersion and toVersion are supplied, toVersion must be greater than fromVersion.", "toVersion");
+            }
+
+            var allScripts = from s in Directory.GetFiles(searchPath, "*.sql", SearchOption.AllDirectories)
+                             where Regex.IsMatch(s, SchemaUpgradeService.VersionNumberExpression)
+                             select new
+                             {
+                                 FilePath = s,
+                                 VersionNumber = new Version(Path.GetFileNameWithoutExtension(s))
+                             };
+
+            if (fromVersion != null)
+            {
+                allScripts = allScripts.Where(s => s.VersionNumber > fromVersion);
+            }
+
+            if (toVersion != null)
+            {
+                allScripts = allScripts.Where(s => s.VersionNumber <= toVersion);
+            }
+
+            using (FileStream ofs = File.Create(outputPath))
+            {
+                using (StreamWriter sw = new StreamWriter(ofs))
+                {
+                    foreach (var script in allScripts.OrderBy(s => s.VersionNumber))
+                    {
+                        using (FileStream ifs = File.OpenRead(script.FilePath))
+                        {
+                            using (StreamReader sr = new StreamReader(ifs))
+                            {
+                                sw.WriteLine(sr.ReadToEnd());
+                            }
+                        }
+
+                        sw.WriteLine("GO");
+
+                        if (onGenerating != null)
+                        {
+                            string relativePath = script.FilePath.Substring(searchPath.Length);
+
+                            if (relativePath.StartsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+                            {
+                                relativePath = relativePath.Substring(1);
+                            }
+
+                            onGenerating(script.VersionNumber, relativePath);
+                        }
+                    }
+                }
+            }
         }
 
         #endregion

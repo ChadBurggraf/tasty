@@ -49,6 +49,15 @@
      </Message>
     </Messages>
    </Namespace>
+   <Namespace Name="Tasty.Http">
+    <Messages>
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-01-29 03:52:15Z">
+      <Issue>
+       <Item>Tasty.Http</Item>
+      </Issue>
+     </Message>
+    </Messages>
+   </Namespace>
    <Namespace Name="Tasty.Web">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-01-28 05:49:31Z">

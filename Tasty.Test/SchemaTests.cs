@@ -22,15 +22,15 @@ namespace Tasty.Test
         [TestMethod]
         public void Schema_CreateDatabase()
         {
-            SchemaUpgrade.DropDatabase(connectionString, testDatabaseName, testDatabaseUserName);
-            SchemaUpgrade.CreateDatabase(connectionString, testDatabaseName, testDatabaseFilesPath, testDatabaseUserName, testDatabaseUserPassword);
+            SchemaUpgradeService.DropDatabase(connectionString, testDatabaseName, testDatabaseUserName);
+            SchemaUpgradeService.CreateDatabase(connectionString, testDatabaseName, testDatabaseFilesPath, testDatabaseUserName, testDatabaseUserPassword);
         }
 
         [TestMethod]
         public void Schema_DropDatabase()
         {
-            SchemaUpgrade.CreateDatabase(connectionString, testDatabaseName, testDatabaseFilesPath, testDatabaseUserName, testDatabaseUserPassword);
-            SchemaUpgrade.DropDatabase(connectionString, testDatabaseName, testDatabaseUserName);
+            SchemaUpgradeService.CreateDatabase(connectionString, testDatabaseName, testDatabaseFilesPath, testDatabaseUserName, testDatabaseUserPassword);
+            SchemaUpgradeService.DropDatabase(connectionString, testDatabaseName, testDatabaseUserName);
         }
     }
 }

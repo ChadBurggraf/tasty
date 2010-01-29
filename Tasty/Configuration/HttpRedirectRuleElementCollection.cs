@@ -1,40 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
+﻿//-----------------------------------------------------------------------
+// <copyright file="HttpRedirectRuleElementCollection.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace Tasty.Http
+namespace Tasty.Configuration
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Configuration;
+    using System.Linq;
+    
     /// <summary>
     /// Represents a collection of <see cref="HttpRedirectRuleElement"/>s in the configuration.
     /// </summary>
     public class HttpRedirectRuleElementCollection : ConfigurationElementCollection, ICollection<HttpRedirectRuleElement>
     {
-        #region Base Overrides
+        #region Public Properties
 
         /// <summary>
-        /// Creates a new element.
+        /// Gets a value indicating whether the collection is read only.
         /// </summary>
-        /// <returns>The created element.</returns>
-        protected override ConfigurationElement CreateNewElement()
+        public new bool IsReadOnly
         {
-            return new HttpRedirectRuleElement();
-        }
-
-        /// <summary>
-        /// Gets the unique key of the given element.
-        /// </summary>
-        /// <param name="element">The element to get the key of.</param>
-        /// <returns>The given element's key.</returns>
-        protected override object GetElementKey(ConfigurationElement element)
-        {
-            return ((HttpRedirectRuleElement)element).Pattern;
+            get { return base.IsReadOnly(); }
         }
 
         #endregion
 
-        #region ICollection<HttpRedirectRuleElement> Members
+        #region Public Instance Methods
 
         /// <summary>
         /// Adds a configuation element to the collection.
@@ -78,33 +72,21 @@ namespace Tasty.Http
         }
 
         /// <summary>
-        /// Gets a value indicating whether the collection is read only.
-        /// </summary>
-        public new bool IsReadOnly
-        {
-            get { return base.IsReadOnly(); }
-        }
-
-        /// <summary>
         /// Removes the given element from the collection.
         /// </summary>
         /// <param name="item">The element to remove.</param>
         /// <returns>True if the element was found and removed, false otherwise.</returns>
         public bool Remove(HttpRedirectRuleElement item)
         {
-            bool removed = Contains(item);
+            bool removed = this.Contains(item);
 
             if (removed)
             {
-                BaseRemove(GetElementKey(item));
+                BaseRemove(this.GetElementKey(item));
             }
 
             return removed;
         }
-
-        #endregion
-
-        #region IEnumerable<HttpRedirectRuleElement> Members
 
         /// <summary>
         /// Gets the enumerator used to enumerate over the collection.
@@ -116,6 +98,29 @@ namespace Tasty.Http
             {
                 yield return (HttpRedirectRuleElement)BaseGet(i);
             }
+        }
+
+        #endregion
+
+        #region Protected Instance Methods
+
+        /// <summary>
+        /// Creates a new element.
+        /// </summary>
+        /// <returns>The created element.</returns>
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new HttpRedirectRuleElement();
+        }
+
+        /// <summary>
+        /// Gets the unique key of the given element.
+        /// </summary>
+        /// <param name="element">The element to get the key of.</param>
+        /// <returns>The given element's key.</returns>
+        protected override object GetElementKey(ConfigurationElement element)
+        {
+            return ((HttpRedirectRuleElement)element).Pattern;
         }
 
         #endregion

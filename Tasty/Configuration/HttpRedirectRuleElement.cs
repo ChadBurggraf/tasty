@@ -1,11 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
+﻿//-----------------------------------------------------------------------
+// <copyright file="HttpRedirectRuleElement.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace Tasty.Http
+namespace Tasty.Configuration
 {
+    using System;
+    using System.Configuration;
+    using Tasty.Http;
+    
     /// <summary>
     /// Represents a redirect rule element in the configuration.
     /// </summary>

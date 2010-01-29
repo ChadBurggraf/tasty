@@ -1,14 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
+﻿//-----------------------------------------------------------------------
+// <copyright file="ISchemaUpgradeDelegate.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Build
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    
     /// <summary>
     /// Delegate for providing meta-data information about a database being upgraded
-    /// with a <see cref="SchemaUpgrade"/> process.
+    /// with a <see cref="SchemaUpgradeService"/> process.
     /// </summary>
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix", Justification = "Well, it is a delegate isn't it?")]
     public interface ISchemaUpgradeDelegate

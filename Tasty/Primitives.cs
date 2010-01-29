@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Primitives.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty
 {
+    using System;
+    using System.Globalization;
+    using System.Linq;
+    using System.Text;
+    using System.Text.RegularExpressions;
+
     /// <summary>
     /// Provides extensions and helpers for primitive and built-in types.
     /// </summary>
@@ -64,7 +69,7 @@ namespace Tasty
         /// that conforms to ISO 8601 (in UTC).
         /// </summary>
         /// <param name="dateTime">The DateTime object to convert.</param>
-        /// <returns>A string.</returns>
+        /// <returns>A string representing the date in ISO 8601 format.</returns>
         public static string ToIso8601UtcString(this DateTime dateTime)
         {
             dateTime = dateTime.ToUniversalTime();
@@ -77,7 +82,7 @@ namespace Tasty
         /// with dashes for use in filenames.
         /// </summary>
         /// <param name="dateTime">The DateTime object to convert.</param>
-        /// <returns>A string.</returns>
+        /// <returns>A string representing the date in ISO 8601 format with unsaf path characters removed.</returns>
         public static string ToIso8601UtcPathSafeString(this DateTime dateTime)
         {
             return Regex.Replace(dateTime.ToIso8601UtcString(), @"[\.:]", "-");

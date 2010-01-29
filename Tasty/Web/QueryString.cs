@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
-using System.Web;
+﻿//-----------------------------------------------------------------------
+// <copyright file="QueryString.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Web
 {
+    using System;
+    using System.Collections.ObjectModel;
+    using System.Collections.Specialized;
+    using System.Text;
+    using System.Web;
+
     /// <summary>
     /// Represents a URL query string as a key/value collection.
     /// </summary>
@@ -23,31 +27,16 @@ namespace Tasty.Web
         #region Construction
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the QueryString class.
         /// </summary>
         public QueryString()
         {
-            innerCollection = new NameValueCollection();
+            this.innerCollection = new NameValueCollection();
         }
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Gets or sets the value for the specified key.
-        /// </summary>
-        /// <param name="key">The key to get or set the value for.</param>
-        /// <returns>The key's value.</returns>
-        public string this[string key]
-        {
-            get { return innerCollection[key]; }
-            set 
-            { 
-                innerCollection[key] = value;
-                keys = null;
-            }
-        }
 
         /// <summary>
         /// Gets a collection of all of the keys in the query string.
@@ -56,87 +45,37 @@ namespace Tasty.Web
         {
             get
             {
-                if (keys == null)
+                if (this.keys == null)
                 {
-                    keys = new ReadOnlyCollection<string>(innerCollection.AllKeys);
+                    this.keys = new ReadOnlyCollection<string>(this.innerCollection.AllKeys);
                 }
 
-                return keys;
+                return this.keys;
             }
         }
 
-        #endregion
-
-        #region Instance Methods
-
         /// <summary>
-        /// Adds a value to the query string for the specified key.
+        /// Gets or sets the value for the specified key.
         /// </summary>
-        /// <param name="key">The key to add the value for.</param>
-        /// <param name="value">The value to add.</param>
-        public void Add(string key, string value)
+        /// <param name="key">The key to get or set the value for.</param>
+        /// <returns>The key's value.</returns>
+        public string this[string key]
         {
-            innerCollection.Add(key, value);
-            keys = null;
-        }
-
-        /// <summary>
-        /// Removes the specified key and its value(s) from the query string.
-        /// </summary>
-        /// <param name="key">The key to remove.</param>
-        public void Remove(string key)
-        {
-            innerCollection.Remove(key);
-            keys = null;
-        }
-
-        /// <summary>
-        /// Sets the value in the query string for the specified key.
-        /// </summary>
-        /// <param name="key">The key to set the value for.</param>
-        /// <param name="value">The value to set.</param>
-        public void Set(string key, string value)
-        {
-            innerCollection[key] = value;
-            keys = null;
-        }
-
-        #endregion
-
-        #region Base Overrides
-
-        /// <summary>
-        /// Converts this instance to a URL-encoded query string.
-        /// </summary>
-        /// <returns>A URL-encoded query string.</returns>
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-
-            for (int i = 0; i < innerCollection.Count; i++)
+            get
             {
-                string key = HttpUtility.UrlEncode(innerCollection.GetKey(i));
-
-                foreach (string value in innerCollection.GetValues(i))
-                {
-                    sb.Append(key);
-                    sb.Append("=");
-                    sb.Append(HttpUtility.UrlEncode(value));
-                    sb.Append("&");
-                }
+                return this.innerCollection[key];
             }
 
-            if (sb.Length > 0 && sb[sb.Length - 1] == '&')
+            set
             {
-                sb.Remove(sb.Length - 1, 1);
+                this.innerCollection[key] = value;
+                this.keys = null;
             }
-
-            return sb.ToString();
         }
 
         #endregion
 
-        #region Static Methods
+        #region Public Static Methods
 
         /// <summary>
         /// Parses the given query string into a <see cref="QueryString"/> instance.
@@ -158,7 +97,7 @@ namespace Tasty.Web
                     if (!String.IsNullOrEmpty(pair[0]))
                     {
                         string key = HttpUtility.UrlDecode(pair[0]);
-                        
+
                         if (pair.Length > 1)
                         {
                             string[] values = HttpUtility.UrlDecode(pair[1]).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -173,6 +112,71 @@ namespace Tasty.Web
             }
 
             return collection;
+        }
+
+        #endregion
+
+        #region Public Instance Methods
+
+        /// <summary>
+        /// Adds a value to the query string for the specified key.
+        /// </summary>
+        /// <param name="key">The key to add the value for.</param>
+        /// <param name="value">The value to add.</param>
+        public void Add(string key, string value)
+        {
+            this.innerCollection.Add(key, value);
+            this.keys = null;
+        }
+
+        /// <summary>
+        /// Removes the specified key and its value(s) from the query string.
+        /// </summary>
+        /// <param name="key">The key to remove.</param>
+        public void Remove(string key)
+        {
+            this.innerCollection.Remove(key);
+            this.keys = null;
+        }
+
+        /// <summary>
+        /// Sets the value in the query string for the specified key.
+        /// </summary>
+        /// <param name="key">The key to set the value for.</param>
+        /// <param name="value">The value to set.</param>
+        public void Set(string key, string value)
+        {
+            this.innerCollection[key] = value;
+            this.keys = null;
+        }
+
+        /// <summary>
+        /// Converts this instance to a URL-encoded query string.
+        /// </summary>
+        /// <returns>A URL-encoded query string.</returns>
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            for (int i = 0; i < this.innerCollection.Count; i++)
+            {
+                string key = HttpUtility.UrlEncode(this.innerCollection.GetKey(i));
+
+                foreach (string value in this.innerCollection.GetValues(i))
+                {
+                    sb.Append(key);
+                    sb.Append("=");
+                    sb.Append(HttpUtility.UrlEncode(value));
+                    sb.Append("&");
+                }
+            }
+
+            if (sb.Length > 0 && sb[sb.Length - 1] == '&')
+            {
+                sb.Remove(sb.Length - 1, 1);
+            }
+
+            return sb.ToString();
         }
 
         #endregion

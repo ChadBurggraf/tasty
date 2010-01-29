@@ -1,26 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
+﻿//-----------------------------------------------------------------------
+// <copyright file="S3Publish.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Build
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Linq;
+    using Microsoft.Build.Framework;
+    using Microsoft.Build.Utilities;
+
     /// <summary>
     /// Extends <see cref="Task"/> to publish static assets to Amazon S3.
     /// Very primitive implementation: does not allow gzip toggling or ACL setting.
     /// </summary>
     public class S3Publish : Task, IS3PublisherDelegate
     {
-        #region Member Variables
+        #region Private Fields
 
         private List<ITaskItem> filesPublished;
 
         #endregion
 
-        #region Properties
+        #region Public Instance Properties
 
         /// <summary>
         /// Gets or sets the Amazon S3 access key ID to use when connecting to the service.
@@ -46,7 +51,7 @@ namespace Tasty.Build
         public ITaskItem[] Files { get; set; }
 
         /// <summary>
-        /// Gets the collection of files that were published.
+        /// Gets or sets the collection of files that were published.
         /// </summary>
         [Output]
         public ITaskItem[] FilesPublished { get; set; }
@@ -69,7 +74,7 @@ namespace Tasty.Build
 
         #endregion
 
-        #region Instance Methods
+        #region Public Instance Methods
 
         /// <summary>
         /// Executes the task.
@@ -77,24 +82,20 @@ namespace Tasty.Build
         /// <returns>True if the task executed successfully, false otherwise.</returns>
         public override bool Execute()
         {
-            filesPublished = new List<ITaskItem>();
+            this.filesPublished = new List<ITaskItem>();
 
-            new S3Publisher(AccessKeyId, SecretAccessKeyId)
-                .WithBasePath(BasePath)
-                .WithBucketName(BucketName)
-                .WithFiles(Files.Select(ti => ti.ItemSpec))
-                .WithPrefix(Prefix)
+            new S3Publisher(this.AccessKeyId, this.SecretAccessKeyId)
+                .WithBasePath(this.BasePath)
+                .WithBucketName(this.BucketName)
+                .WithFiles(this.Files.Select(ti => ti.ItemSpec))
+                .WithPrefix(this.Prefix)
                 .WithPublisherDelegate(this)
-                .WithUseSsl(UseSsl).Publish();
+                .WithUseSsl(this.UseSsl).Publish();
 
-            FilesPublished = filesPublished.ToArray();
+            this.FilesPublished = this.filesPublished.ToArray();
 
             return true;
         }
-
-        #endregion
-
-        #region IS3PublisherDelegate Members
 
         /// <summary>
         /// Called when a file has been successfully published to Amazon S3.
@@ -107,7 +108,7 @@ namespace Tasty.Build
             ITaskItem item = new TaskItem(objectKey);
             item.SetMetadata("Path", path);
             item.SetMetadata("WithGzip", withGzip.ToString(CultureInfo.InvariantCulture));
-            filesPublished.Add(item);
+            this.filesPublished.Add(item);
 
             string message = "{0} published to {1}";
             message += withGzip ? " with gzip compression" : String.Empty;

@@ -1,26 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Web;
-using Amazon;
-using Amazon.S3;
-using Amazon.S3.Model;
-using Ionic.Zlib;
-using Tasty.Web;
+﻿//-----------------------------------------------------------------------
+// <copyright file="S3Publisher.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Build
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Specialized;
+    using System.IO;
+    using System.Linq;
+    using Amazon;
+    using Amazon.S3;
+    using Amazon.S3.Model;
+    using Ionic.Zlib;
+    using Tasty.Web;
+
     /// <summary>
     /// Publishes static assets to an Amazon S3 bucket.
     /// Compresses files with text-based content types (*.css, *.js, etc.)
-    /// and publishes them with a "gzip" content encoding.
+    /// and publishes them with a gzip content encoding.
     /// </summary>
     public class S3Publisher : IS3PublisherDelegate
     {
-        #region Member Variables
+        #region Private Fields
 
         private string accessKeyId, secretAccessKeyId;
         private IList<string> files;
@@ -31,7 +35,7 @@ namespace Tasty.Build
         #region Construction
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the S3Publisher class.
         /// </summary>
         /// <param name="accessKeyId">The Amazon S3 access key ID to use when connecting to the service.</param>
         /// <param name="secretAccessKeyId">The Amazon S3 secret access key ID to use when connecting to the service.</param>
@@ -53,7 +57,7 @@ namespace Tasty.Build
 
         #endregion
 
-        #region Properties
+        #region Public Instance Properties
 
         /// <summary>
         /// Gets or sets the base path to use when relativising file paths to publish.
@@ -70,7 +74,7 @@ namespace Tasty.Build
         /// </summary>
         public IList<string> Files
         {
-            get { return files ?? (files = new List<string>()); }
+            get { return this.files ?? (this.files = new List<string>()); }
         }
 
         /// <summary>
@@ -83,8 +87,8 @@ namespace Tasty.Build
         /// </summary>
         public IS3PublisherDelegate PublisherDelegate
         {
-            get { return publisherDelegate ?? (publisherDelegate = this); }
-            set { publisherDelegate = value; }
+            get { return this.publisherDelegate ?? (this.publisherDelegate = this); }
+            set { this.publisherDelegate = value; }
         }
 
         /// <summary>
@@ -94,7 +98,110 @@ namespace Tasty.Build
 
         #endregion
 
-        #region Instance Methods
+        #region Public Instance Methods
+
+        /// <summary>
+        /// Called when a file has been successfully published to Amazon S3.
+        /// </summary>
+        /// <param name="path">The path of the file that was published.</param>
+        /// <param name="objectKey">The resulting object key of the file on Amazon S3.</param>
+        /// <param name="withGzip">A value indicating whether the file was compressed with GZip before publishing.</param>
+        public void OnFilePublished(string path, string objectKey, bool withGzip)
+        {
+        }
+
+        /// <summary>
+        /// Publishes the currently-identified file set to Amazon S3.
+        /// </summary>
+        public void Publish()
+        {
+            if (String.IsNullOrEmpty(this.BucketName))
+            {
+                throw new InvalidOperationException("BucketName must have a value.");
+            }
+
+            foreach (string filePath in this.Files)
+            {
+                this.PublishFile(filePath);
+            }
+        }
+
+        /// <summary>
+        /// Sets the value of <see cref="BasePath"/> and returns this instance.
+        /// </summary>
+        /// <param name="basePath">The value to set.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithBasePath(string basePath)
+        {
+            this.BasePath = basePath;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the value of <see cref="BucketName"/> and returns this instance.
+        /// </summary>
+        /// <param name="bucketName">The value to set.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithBucketName(string bucketName)
+        {
+            this.BucketName = bucketName;
+            return this;
+        }
+
+        /// <summary>
+        /// Clears the <see cref="Files"/> collection and then fills it with the given collection and returns this instance.
+        /// </summary>
+        /// <param name="files">The new file collection.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithFiles(IEnumerable<string> files)
+        {
+            List<string> list = new List<string>();
+
+            if (files != null)
+            {
+                list.AddRange(files.ToArray());
+            }
+
+            this.files = list;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the value of <see cref="Prefix"/> and returns this instance.
+        /// </summary>
+        /// <param name="prefix">The value to set.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithPrefix(string prefix)
+        {
+            this.Prefix = prefix;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the value of <see cref="PublisherDelegate"/> and returns this instance.
+        /// </summary>
+        /// <param name="publisherDelegate">The value to set.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithPublisherDelegate(IS3PublisherDelegate publisherDelegate)
+        {
+            this.PublisherDelegate = publisherDelegate;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the value of <see cref="UseSsl"/> and returns this instance.
+        /// </summary>
+        /// <param name="useSsl">The value to set.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithUseSsl(bool useSsl)
+        {
+            this.UseSsl = useSsl;
+            return this;
+        }
+
+        #endregion
+
+        #region Private Instance Methods
 
         /// <summary>
         /// Gets a new <see cref="AmazonS3"/> client base on this instance's current state.
@@ -103,9 +210,9 @@ namespace Tasty.Build
         private AmazonS3 Client()
         {
             AmazonS3Config config = new AmazonS3Config();
-            config.CommunicationProtocol = UseSsl ? Protocol.HTTPS : Protocol.HTTP;
-            
-            return AWSClientFactory.CreateAmazonS3Client(accessKeyId, secretAccessKeyId, config);
+            config.CommunicationProtocol = this.UseSsl ? Protocol.HTTPS : Protocol.HTTP;
+
+            return AWSClientFactory.CreateAmazonS3Client(this.accessKeyId, this.secretAccessKeyId, config);
         }
 
         /// <summary>
@@ -120,8 +227,8 @@ namespace Tasty.Build
                 throw new ArgumentNullException("filePath", "filePath must have a value.");
             }
 
-            string basePath = (BasePath ?? String.Empty).Trim();
-            string prefix = (Prefix ?? String.Empty).Trim();
+            string basePath = (this.BasePath ?? String.Empty).Trim();
+            string prefix = (this.Prefix ?? String.Empty).Trim();
             string key;
 
             if (!Path.IsPathRooted(filePath))
@@ -142,29 +249,13 @@ namespace Tasty.Build
             {
                 key = Path.GetFileName(filePath);
             }
-            
+
             if (!String.IsNullOrEmpty(prefix) && !key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
             {
-                key = Urls.Combine(prefix, key);
+                key = Uris.Combine(prefix, key);
             }
 
             return key;
-        }
-
-        /// <summary>
-        /// Publishes the currently-identified file set to Amazon S3.
-        /// </summary>
-        public void Publish()
-        {
-            if (String.IsNullOrEmpty(BucketName))
-            {
-                throw new InvalidOperationException("BucketName must have a value.");
-            }
-
-            foreach (string filePath in Files)
-            {
-                PublishFile(filePath);
-            }
         }
 
         /// <summary>
@@ -175,10 +266,10 @@ namespace Tasty.Build
         {
             NameValueCollection headers = new NameValueCollection();
             string contentType = MimeType.FromCommon(filePath).ContentType;
-            string objectKey = ObjectKey(filePath);
+            string objectKey = this.ObjectKey(filePath);
 
             PutObjectRequest request = new PutObjectRequest()
-                .WithBucketName(BucketName)
+                .WithBucketName(this.BucketName)
                 .WithCannedACL(S3CannedACL.PublicRead)
                 .WithContentType(contentType)
                 .WithKey(objectKey);
@@ -218,100 +309,17 @@ namespace Tasty.Build
 
             request.AddHeaders(headers);
 
-            using (PutObjectResponse response = Client().PutObject(request)) { }
+            using (PutObjectResponse response = this.Client().PutObject(request))
+            {
+            }
 
             if (!String.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
             {
                 File.Delete(tempPath);
             }
 
-            PublisherDelegate.OnFilePublished(filePath, objectKey, gzip);
+            this.PublisherDelegate.OnFilePublished(filePath, objectKey, gzip);
         }
-
-        /// <summary>
-        /// Sets the value of <see cref="BasePath"/> and returns this instance.
-        /// </summary>
-        /// <param name="basePath">The value to set.</param>
-        /// <returns>This instance.</returns>
-        public S3Publisher WithBasePath(string basePath)
-        {
-            BasePath = basePath;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the value of <see cref="BucketName"/> and returns this instance.
-        /// </summary>
-        /// <param name="bucketName">The value to set.</param>
-        /// <returns>This instance.</returns>
-        public S3Publisher WithBucketName(string bucketName)
-        {
-            BucketName = bucketName;
-            return this;
-        }
-
-        /// <summary>
-        /// Clears the <see cref="Files"/> collection and then fills it with the given collection and returns this instance.
-        /// </summary>
-        /// <param name="files">The new file collection.</param>
-        /// <returns>This instance.</returns>
-        public S3Publisher WithFiles(IEnumerable<string> files)
-        {
-            List<string> list = new List<string>();
-
-            if (files != null)
-            {
-                list.AddRange(files.ToArray());
-            }
-
-            this.files = list;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the value of <see cref="Prefix"/> and returns this instance.
-        /// </summary>
-        /// <param name="prefix">The value to set.</param>
-        /// <returns>This instance.</returns>
-        public S3Publisher WithPrefix(string prefix)
-        {
-            Prefix = prefix;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the value of <see cref="PublisherDelegate"/> and returns this instance.
-        /// </summary>
-        /// <param name="publisherDelegate">The value to set.</param>
-        /// <returns>This instance.</returns>
-        public S3Publisher WithPublisherDelegate(IS3PublisherDelegate publisherDelegate)
-        {
-            PublisherDelegate = publisherDelegate;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets the value of <see cref="UseSsl"/> and returns this instance.
-        /// </summary>
-        /// <param name="useSsl">The value to set.</param>
-        /// <returns>This instance.</returns>
-        public S3Publisher WithUseSsl(bool useSsl)
-        {
-            UseSsl = useSsl;
-            return this;
-        }
-
-        #endregion
-
-        #region IS3PublisherDelegate Members
-
-        /// <summary>
-        /// Called when a file has been successfully published to Amazon S3.
-        /// </summary>
-        /// <param name="path">The path of the file that was published.</param>
-        /// <param name="objectKey">The resulting object key of the file on Amazon S3.</param>
-        /// <param name="withGzip">A value indicating whether the file was compressed with GZip before publishing.</param>
-        public void OnFilePublished(string path, string objectKey, bool withGzip) { }
 
         #endregion
     }

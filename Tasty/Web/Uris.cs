@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Uris.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Web
 {
+    using System;
+
     /// <summary>
     /// Providest extensions and helpers for URLs.
     /// </summary>
-    public static class Urls
+    public static class Uris
     {
         /// <summary>
         /// Adds the given key/value to the given URL's query string.

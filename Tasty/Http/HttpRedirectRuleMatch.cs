@@ -1,21 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
+﻿//-----------------------------------------------------------------------
+// <copyright file="HttpRedirectRuleMatch.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Http
 {
+    using System;
+    using System.Text.RegularExpressions;
+    using Tasty.Configuration;
+    
     /// <summary>
     /// Represents a matching HTTP redirect rule.
     /// </summary>
     public class HttpRedirectRuleMatch
     {
+        #region Private Fields
+
         private string redirectResult;
 
+        #endregion
+
+        #region Construction
+
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the HttpRedirectRuleMatch class.
         /// </summary>
         /// <param name="rule">The rule that matched.</param>
         /// <param name="matchResult">The result of the match.</param>
@@ -31,9 +40,13 @@ namespace Tasty.Http
                 throw new ArgumentNullException("matchResult", "matchResult cannot be null.");
             }
 
-            Rule = rule;
-            MatchResult = matchResult;
+            this.Rule = rule;
+            this.MatchResult = matchResult;
         }
+
+        #endregion
+
+        #region Public Instance Properties
 
         /// <summary>
         /// Gets the result of the match.
@@ -47,12 +60,12 @@ namespace Tasty.Http
         {
             get
             {
-                if (redirectResult == null)
+                if (this.redirectResult == null)
                 {
-                    redirectResult = MatchResult.Success ? MatchResult.Result(Rule.RedirectsTo) : String.Empty;
+                    this.redirectResult = this.MatchResult.Success ? this.MatchResult.Result(this.Rule.RedirectsTo) : String.Empty;
                 }
 
-                return redirectResult;
+                return this.redirectResult;
             }
         }
 
@@ -60,5 +73,7 @@ namespace Tasty.Http
         /// Gets the rule that matched.
         /// </summary>
         public HttpRedirectRuleElement Rule { get; private set; }
+
+        #endregion
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Web;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Tasty.Configuration;
 using Tasty.Http;
 
 namespace Tasty.Test

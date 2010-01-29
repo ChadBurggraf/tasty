@@ -1,28 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Web;
-using System.Web.Caching;
+﻿//-----------------------------------------------------------------------
+// <copyright file="HttpRedirectModule.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Http
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text.RegularExpressions;
+    using System.Web;
+    using System.Web.Caching;
+    using Tasty.Configuration;
+
     /// <summary>
     /// Implements <see cref="IHttpModule"/> to do simple regular-expression based HTTP redirection.
     /// </summary>
     public class HttpRedirectModule : IHttpModule
     {
-        #region Member Variables
+        #region Private Fields
 
-        private const string MATCH_CACHE_KEY = "Tasty.Http.HttpRedirectModule.Cache";
+        private const string MatchCacheKey = "Tasty.Http.HttpRedirectModule.Cache";
 
         #endregion
 
         #region Construction
 
         /// <summary>
-        /// Constructor.
+        /// Initializes static members of the HttpRedirectModule class.
         /// </summary>
         static HttpRedirectModule()
         {
@@ -31,7 +36,7 @@ namespace Tasty.Http
 
         #endregion
 
-        #region Properties
+        #region Public Static Properties
 
         /// <summary>
         /// Gets the rule matcher used when matching rules.
@@ -40,7 +45,14 @@ namespace Tasty.Http
 
         #endregion
 
-        #region Instance Methods
+        #region Public Instance Methods
+
+        /// <summary>
+        /// Disposes of any unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+        }
 
         /// <summary>
         /// Gets a rule matching the given HTTP context from the configuration.
@@ -59,7 +71,7 @@ namespace Tasty.Http
 
             lock (httpContext.Cache)
             {
-                Dictionary<string, HttpRedirectRuleMatch> cache = (Dictionary<string, HttpRedirectRuleMatch>)(httpContext.Cache[MATCH_CACHE_KEY] ?? new Dictionary<string, HttpRedirectRuleMatch>());
+                Dictionary<string, HttpRedirectRuleMatch> cache = (Dictionary<string, HttpRedirectRuleMatch>)(httpContext.Cache[MatchCacheKey] ?? new Dictionary<string, HttpRedirectRuleMatch>());
                 string key = httpContext.Request.Url.AbsoluteUri.ToUpperInvariant();
                 bool cacheUpdated = false;
 
@@ -69,27 +81,35 @@ namespace Tasty.Http
                 }
                 else
                 {
-                    ruleMatch = RuleMatcher.Match(httpContext.Request.Url, HttpSettings.Section.Redirects);
+                    ruleMatch = RuleMatcher.Match(httpContext.Request.Url, TastySettings.Section.Http.Redirects);
                     cache[key] = ruleMatch;
                     cacheUpdated = true;
                 }
 
                 if (cacheUpdated)
                 {
-                    httpContext.Cache.Remove(MATCH_CACHE_KEY);
+                    httpContext.Cache.Remove(MatchCacheKey);
                     httpContext.Cache.Add(
-                        MATCH_CACHE_KEY,
+                        MatchCacheKey,
                         cache,
                         null,
                         DateTime.Now.AddMinutes(15),
                         Cache.NoSlidingExpiration,
                         CacheItemPriority.Normal,
-                        null
-                    );
+                        null);
                 }
             }
 
             return ruleMatch;
+        }
+
+        /// <summary>
+        /// Initializes the module.
+        /// </summary>
+        /// <param name="context">The <see cref="HttpApplication"/> that is handling the current request.</param>
+        public void Init(HttpApplication context)
+        {
+            context.BeginRequest += new EventHandler(this.ContextBeginRequest);
         }
 
         /// <summary>
@@ -120,37 +140,21 @@ namespace Tasty.Http
 
         #endregion
 
-        #region IHttpModule Members
-
-        /// <summary>
-        /// Disposes of any unmanaged resources.
-        /// </summary>
-        public void Dispose() { }
-
-        /// <summary>
-        /// Initializes the module.
-        /// </summary>
-        /// <param name="context">The <see cref="HttpApplication"/> that is handling the current request.</param>
-        public void Init(HttpApplication context)
-        {
-            context.BeginRequest += new EventHandler(context_BeginRequest);
-        }
-
-        #endregion
-
-        #region Event Handlers
+        #region Private Instance Methods
 
         /// <summary>
         /// Raises this module's <see cref="HttpApplication"/>'s BeginRequest event.
         /// </summary>
-        private void context_BeginRequest(object sender, EventArgs e)
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void ContextBeginRequest(object sender, EventArgs e)
         {
             HttpContextBase httpContext = new HttpContextWrapper(((HttpApplication)sender).Context);
-            HttpRedirectRuleMatch ruleMatch = GetMatchingRule(httpContext);
+            HttpRedirectRuleMatch ruleMatch = this.GetMatchingRule(httpContext);
 
             if (ruleMatch != null)
             {
-                RedirectContext(httpContext, ruleMatch);
+                this.RedirectContext(httpContext, ruleMatch);
             }
         }
 

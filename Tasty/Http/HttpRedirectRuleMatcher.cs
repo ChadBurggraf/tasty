@@ -1,11 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿//-----------------------------------------------------------------------
+// <copyright file="HttpRedirectRuleMatcher.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Http
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Text.RegularExpressions;
+    using Tasty.Configuration;
+
     /// <summary>
     /// Matches URIs to <see cref="HttpRedirectRuleElement"/>s.
     /// </summary>

@@ -1,18 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+﻿//-----------------------------------------------------------------------
+// <copyright file="SchemaUpgradeCommandSet.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Build
 {
+    using System;
+    using System.Collections.ObjectModel;
+
     /// <summary>
     /// Represents a set of SQL commands corresponding to a specific version number.
     /// </summary>
     public sealed class SchemaUpgradeCommandSet
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the SchemaUpgradeCommandSet class.
         /// </summary>
         /// <param name="sql">A string of SQL script to create the command set for.</param>
         /// <param name="versionNumber">The version number to create the command set for.</param>
@@ -24,9 +27,9 @@ namespace Tasty.Build
                 throw new ArgumentNullException("versionNumber", "versionNumber must contain a value.");
             }
 
-            Commands = new ReadOnlyCollection<string>((sql ?? String.Empty).SplitSqlCommands());
-            RunInTransaction = runInTransaction;
-            VersionNumber = versionNumber;
+            this.Commands = new ReadOnlyCollection<string>((sql ?? String.Empty).SplitSqlCommands());
+            this.RunInTransaction = runInTransaction;
+            this.VersionNumber = versionNumber;
         }
 
         /// <summary>

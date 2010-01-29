@@ -1,10 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿//-----------------------------------------------------------------------
+// <copyright file="SchemaUpgradeCommandSetResult.cs" company="Chad Burggraf">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Build
 {
+    using System;
+
     /// <summary>
     /// Represents the results of an <see cref="ISchemaUpgradeDelegate"/> request for 
     /// a string of SQL representing a set of upgrade commands.
@@ -12,11 +15,11 @@ namespace Tasty.Build
     public class SchemaUpgradeCommandSetResult
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the SchemaUpgradeCommandSetResult class.
         /// </summary>
         public SchemaUpgradeCommandSetResult()
         {
-            RunInTransaction = true;
+            this.RunInTransaction = true;
         }
 
         /// <summary>

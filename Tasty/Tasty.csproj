@@ -77,21 +77,22 @@
     <Compile Include="Build\ISchemaUpgradeDelegate.cs" />
     <Compile Include="Build\S3Publisher.cs" />
     <Compile Include="Build\S3Publish.cs" />
-    <Compile Include="Build\SchemaUpgrade.cs" />
+    <Compile Include="Build\SchemaUpgradeService.cs" />
     <Compile Include="Build\SchemaUpgradeCommandSet.cs" />
     <Compile Include="Build\SchemaUpgradeCommandSetResult.cs" />
+    <Compile Include="Configuration\HttpElement.cs" />
+    <Compile Include="Configuration\HttpRedirectRuleElement.cs" />
+    <Compile Include="Configuration\HttpRedirectRuleElementCollection.cs" />
+    <Compile Include="Configuration\TastySettings.cs" />
     <Compile Include="Files.cs" />
     <Compile Include="Http\HttpRedirectModule.cs" />
-    <Compile Include="Http\HttpRedirectRuleElement.cs" />
-    <Compile Include="Http\HttpRedirectRuleElementCollection.cs" />
     <Compile Include="Http\HttpRedirectRuleMatch.cs" />
     <Compile Include="Http\HttpRedirectRuleMatcher.cs" />
     <Compile Include="Http\HttpRedirectType.cs" />
-    <Compile Include="Http\HttpSettings.cs" />
     <Compile Include="Primitives.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Web\QueryString.cs" />
-    <Compile Include="Web\Urls.cs" />
+    <Compile Include="Web\Uris.cs" />
     <Compile Include="Web\MimeType.cs" />
   </ItemGroup>
   <ItemGroup>

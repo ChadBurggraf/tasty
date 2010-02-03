@@ -30,6 +30,11 @@ namespace Tasty.Jobs
         JobRecord Enqueue();
 
         /// <summary>
+        /// Executes the job.
+        /// </summary>
+        void Execute();
+
+        /// <summary>
         /// Serializes the job state for enqueueing.
         /// </summary>
         /// <returns>The serialized job data.</returns>

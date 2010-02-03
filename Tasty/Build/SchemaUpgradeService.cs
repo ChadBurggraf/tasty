@@ -245,6 +245,66 @@ namespace Tasty.Build
             SqlConnection.ClearAllPools();
         }
 
+        /// <summary>
+        /// Executes the given <see cref="SchemaUpgradeCommandSet"/> on the given <see cref="SqlConnection"/>.
+        /// </summary>
+        /// <param name="commandSet">The <see cref="SchemaUpgradeCommandSet"/> containing the SQL commands to execute.</param>
+        /// <param name="connection">The <see cref="SqlConnection"/> to execute the command set on.</param>
+        public static void ExecuteCommandSet(SchemaUpgradeCommandSet commandSet, SqlConnection connection)
+        {
+            ExecuteCommandSet(commandSet, connection, null);
+        }
+
+        /// <summary>
+        /// Executes the given <see cref="SchemaUpgradeCommandSet"/> on the given <see cref="SqlConnection"/>.
+        /// </summary>
+        /// <param name="commandSet">The <see cref="SchemaUpgradeCommandSet"/> containing the SQL commands to execute.</param>
+        /// <param name="connection">The <see cref="SqlConnection"/> to execute the command set on.</param>
+        /// <param name="commandTimeout">The timeout to set for each command, or null to use the default value.</param>
+        public static void ExecuteCommandSet(SchemaUpgradeCommandSet commandSet, SqlConnection connection, int? commandTimeout)
+        {
+            SqlTransaction transaction = null;
+
+            if (commandSet.RunInTransaction)
+            {
+                transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted, "Tasty.Build.SchemaUpgradeService");
+            }
+
+            try
+            {
+                foreach (string command in commandSet.Commands)
+                {
+                    using (SqlCommand sqlCommand = connection.CreateCommand())
+                    {
+                        sqlCommand.Transaction = transaction;
+                        sqlCommand.CommandType = CommandType.Text;
+                        sqlCommand.CommandText = command;
+
+                        if (commandTimeout != null)
+                        {
+                            sqlCommand.CommandTimeout = commandTimeout.Value;
+                        }
+
+                        sqlCommand.ExecuteNonQuery();
+                    }
+                }
+
+                if (transaction != null)
+                {
+                    transaction.Commit();
+                }
+            }
+            catch
+            {
+                if (transaction != null)
+                {
+                    transaction.Rollback();
+                }
+
+                throw;
+            }
+        }
+
         #endregion
 
         #region Public Instance Methods
@@ -269,42 +329,8 @@ namespace Tasty.Build
                     {
                         SchemaUpgradeCommandSetResult commands = this.UpgradeDelegate.GetCommandSet(version);
                         SchemaUpgradeCommandSet commandSet = new SchemaUpgradeCommandSet(commands.Sql, version, commands.RunInTransaction);
-                        SqlTransaction transaction = null;
 
-                        if (commands.RunInTransaction)
-                        {
-                            transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted, "Tasty.Build.SchemaUpgradeService");
-                        }
-
-                        try
-                        {
-                            foreach (string command in commandSet.Commands)
-                            {
-                                using (SqlCommand sqlCommand = connection.CreateCommand())
-                                {
-                                    sqlCommand.Transaction = transaction;
-                                    sqlCommand.CommandTimeout = this.CommandTimeout;
-                                    sqlCommand.CommandType = CommandType.Text;
-                                    sqlCommand.CommandText = command;
-
-                                    sqlCommand.ExecuteNonQuery();
-                                }
-                            }
-
-                            if (transaction != null)
-                            {
-                                transaction.Commit();
-                            }
-                        }
-                        catch
-                        {
-                            if (transaction != null)
-                            {
-                                transaction.Rollback();
-                            }
-
-                            throw;
-                        }
+                        ExecuteCommandSet(commandSet, connection, this.CommandTimeout);
 
                         this.UpgradeDelegate.MarkAsUpgraded(version);
                     }

@@ -20,9 +20,9 @@ namespace Tasty.Jobs
         /// Opens a new transaction, then calls the delegate to perform any work. The transaction
         /// is committed when the delegate returns.
         /// </summary>
-        /// <param name="cancelling">The function to call with the cancelling job collection.</param>
+        /// <param name="canceling">The function to call with the canceling job collection.</param>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
-        void CancellingJobs(Action<IEnumerable<JobRecord>> cancelling);
+        void CancelingJobs(Action<IEnumerable<JobRecord>> canceling);
 
         /// <summary>
         /// Creates a new job record.
@@ -37,9 +37,11 @@ namespace Tasty.Jobs
         /// is committed when the delegate returns.
         /// </summary>
         /// <param name="dequeueing">The function to call with the dequeued job collection.</param>
+        /// <param name="runsAvailable">The maximum number of job job runs currently available, as determined by
+        /// the <see cref="Tasty.Configuration.JobsElement.MaximumConcurrency"/> - the number of currently running jobs.</param>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "I'd be happy to learn of an alternative spelling.")]
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
-        void DequeueJobs(Action<IEnumerable<JobRecord>> dequeueing);
+        void DequeueJobs(Action<IEnumerable<JobRecord>> dequeueing, int runsAvailable);
 
         /// <summary>
         /// Updates a collection of jobs. Opens a new transaction, then calls the delegate to perform

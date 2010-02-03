@@ -12,8 +12,37 @@ namespace Tasty.Jobs
     /// <summary>
     /// Represents a job record in persistent storage.
     /// </summary>
+    [Serializable]
     public sealed class JobRecord
     {
+        /// <summary>
+        /// Initializes a new instance of the JobRecord class.
+        /// </summary>
+        public JobRecord()
+        {
+        }
+        
+        /// <summary>
+        /// Initializes a new instance of the JobRecord class.
+        /// </summary>
+        /// <param name="record">The prototype <see cref="JobRecord"/> to initialize this instance from.</param>
+        public JobRecord(JobRecord record)
+        {
+            if (record != null)
+            {
+                this.Data = record.Data;
+                this.Exception = record.Exception;
+                this.FinishDate = record.FinishDate;
+                this.Id = record.Id;
+                this.JobType = record.JobType != null ? Type.GetType(record.JobType.AssemblyQualifiedName) : null;
+                this.Name = record.Name;
+                this.QueueDate = record.QueueDate;
+                this.ScheduleName = record.ScheduleName;
+                this.StartDate = record.StartDate;
+                this.Status = record.Status;
+            }
+        }
+
         /// <summary>
         /// Gets or sets the serialized job data (i.e., from calling <see cref="IJob.Serialize"/>.
         /// </summary>
@@ -29,7 +58,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Gets or sets the date the job finished, no matter the final status.
         /// </summary>
-        public DateTime FinishDate { get; set; }
+        public DateTime? FinishDate { get; set; }
 
         /// <summary>
         /// Gets or sets the job ID. Use null for a new record.

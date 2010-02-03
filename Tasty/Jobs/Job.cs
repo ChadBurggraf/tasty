@@ -12,6 +12,7 @@ namespace Tasty.Jobs
     using System.Runtime.Serialization;
     using System.Text;
     using System.Xml;
+    using Tasty.Configuration;
 
     /// <summary>
     /// Base <see cref="IJob"/> implementation.
@@ -19,10 +20,46 @@ namespace Tasty.Jobs
     [DataContract(Namespace = Job.XmlNamespace)]
     public abstract class Job : IJob
     {
+        #region Public Fields
+
         /// <summary>
         /// Gets the XML namespace used during job serialization.
         /// </summary>
         public const string XmlNamespace = "http://tastycodes.com/tasty-dll/job/";
+
+        #endregion
+
+        #region Private Fields
+
+        private static readonly object jobStoreLocker = new object();
+        private static IJobStore jobStore;
+
+        #endregion
+
+        #region Public Static Properties
+
+        /// <summary>
+        /// Gets the currently configured <see cref="IJobStore"/> to use for persistent job data.
+        /// </summary>
+        public static IJobStore JobStore
+        {
+            get
+            {
+                lock (jobStoreLocker)
+                {
+                    if (jobStore == null)
+                    {
+                        jobStore = (IJobStore)Activator.CreateInstance(Type.GetType(TastySettings.Section.Jobs.Store.JobStoreType));
+                    }
+
+                    return jobStore;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Public Instance Properties
 
         /// <summary>
         /// Gets the job's display name.
@@ -37,23 +74,39 @@ namespace Tasty.Jobs
         [IgnoreDataMember]
         public virtual long Timeout 
         { 
-            get { return 60000; } 
+            get { return 60000; }
         }
+
+        #endregion
+
+        #region Public Instance Methods
 
         /// <summary>
         /// Enqueues the job for execution.
         /// </summary>
         /// <returns>The job record that was persisted.</returns>
-        public JobRecord Enqueue()
+        public virtual JobRecord Enqueue()
         {
-            throw new NotImplementedException();
+            return JobStore.CreateJob(new JobRecord()
+            {
+                Data = this.Serialize(),
+                JobType = GetType(),
+                Name = this.Name,
+                QueueDate = DateTime.UtcNow,
+                Status = JobStatus.Queued
+            });
         }
+
+        /// <summary>
+        /// Executes the job.
+        /// </summary>
+        public abstract void Execute();
 
         /// <summary>
         /// Serializes the job state for enqueueing.
         /// </summary>
         /// <returns>The serialized job data.</returns>
-        public string Serialize()
+        public virtual string Serialize()
         {
             DataContractSerializer serializer = new DataContractSerializer(this.GetType());
             StringBuilder sb = new StringBuilder();
@@ -68,5 +121,7 @@ namespace Tasty.Jobs
 
             return sb.ToString();
         }
+
+        #endregion
     }
 }

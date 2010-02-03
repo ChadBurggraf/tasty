@@ -12,13 +12,13 @@ namespace Tasty.Http
     public enum HttpRedirectType
     {
         /// <summary>
-        /// Identifies a permanent redirect (301).
-        /// </summary>
-        Permanent,
-
-        /// <summary>
         /// Identifies a temporary redirect (302).
         /// </summary>
-        Temporary = 0
+        Temporary = 0,
+
+        /// <summary>
+        /// Identifies a permanent redirect (301).
+        /// </summary>
+        Permanent
     }
 }

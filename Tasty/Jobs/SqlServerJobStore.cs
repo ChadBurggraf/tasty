@@ -359,11 +359,11 @@ namespace Tasty.Jobs
 
                 if (!String.IsNullOrEmpty(connectionStringName))
                 {
-                    message = String.Format(CultureInfo.InvariantCulture, "You've specified that the job store should use the connection string named \"{0}\", but there is either no connection string configured with that name or it is empty.", connectionStringName);
+                    message = String.Format(CultureInfo.InvariantCulture, "You've specified that the job configuredStore should use the connection string named \"{0}\", but there is either no connection string configured with that name or it is empty.", connectionStringName);
                 }
                 else
                 {
-                    message = "Please configure the name of the connection string to use for the Tasty.Jobs.SqlServerJobStore under /configuration/tasty/jobs/store[type=\"Tasty.Jobs.SqlServerJobStore, Tasty\"]/metadata/add[key=\"ConnectionStringName\"].";
+                    message = "Please configure the name of the connection string to use for the Tasty.Jobs.SqlServerJobStore under /configuration/tasty/jobs/configuredStore[type=\"Tasty.Jobs.SqlServerJobStore, Tasty\"]/metadata/add[key=\"ConnectionStringName\"].";
                 }
 
                 throw new InvalidOperationException(message);

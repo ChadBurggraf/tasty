@@ -25,9 +25,9 @@ namespace Tasty.Test
             var record3 = new TestJob().Enqueue();
 
             record1.Status = JobStatus.Canceling;
-            Job.JobStore.UpdateJobs(new JobRecord[] { record1 }, null);
+            Job.ConfiguredStore.UpdateJobs(new JobRecord[] { record1 }, null);
 
-            Job.JobStore.CancelingJobs(delegate(IEnumerable<JobRecord> records)
+            Job.ConfiguredStore.CancelingJobs(delegate(IEnumerable<JobRecord> records)
             {
                 Assert.AreEqual(1, records.Where(r => r.Id == record1.Id).Count());
                 Assert.AreEqual(0, records.Where(r => r.Id == record2.Id).Count());
@@ -49,7 +49,7 @@ namespace Tasty.Test
                 Status = JobStatus.Queued
             };
 
-            Assert.IsTrue(0 < Job.JobStore.CreateJob(record).Id);
+            Assert.IsTrue(0 < Job.ConfiguredStore.CreateJob(record).Id);
         }
 
         [TestMethod]
@@ -61,9 +61,9 @@ namespace Tasty.Test
 
             record1.Status = JobStatus.Succeeded;
             record1.FinishDate = record1.StartDate = DateTime.UtcNow;
-            Job.JobStore.UpdateJobs(new JobRecord[] { record1 }, null);
+            Job.ConfiguredStore.UpdateJobs(new JobRecord[] { record1 }, null);
 
-            Job.JobStore.DequeueJobs(delegate(IEnumerable<JobRecord> records)
+            Job.ConfiguredStore.DequeueJobs(delegate(IEnumerable<JobRecord> records)
             {
                 Assert.AreEqual(0, records.Where(r => r.Id == record1.Id).Count());
                 Assert.AreEqual(1, records.Where(r => r.Id == record2.Id).Count());
@@ -91,8 +91,8 @@ namespace Tasty.Test
             record.ScheduleName = Guid.NewGuid().ToString();
             record.StartDate = DateTime.UtcNow.AddDays(-1);
 
-            Job.JobStore.UpdateJobs(new JobRecord[] { record }, null);
-            Job.JobStore.DequeueJobs(delegate(IEnumerable<JobRecord> records)
+            Job.ConfiguredStore.UpdateJobs(new JobRecord[] { record }, null);
+            Job.ConfiguredStore.DequeueJobs(delegate(IEnumerable<JobRecord> records)
             {
                 var updated = records.Where(r => r.Id == record.Id).FirstOrDefault();
 

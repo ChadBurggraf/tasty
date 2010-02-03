@@ -105,6 +105,8 @@
     <Compile Include="Jobs\IJobStore.cs" />
     <Compile Include="Jobs\Job.cs" />
     <Compile Include="Jobs\JobRecord.cs" />
+    <Compile Include="Jobs\JobRun.cs" />
+    <Compile Include="Jobs\JobRunner.cs" />
     <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="Jobs\SqlServerJobStore.cs" />
     <Compile Include="NameValueCollections.cs" />

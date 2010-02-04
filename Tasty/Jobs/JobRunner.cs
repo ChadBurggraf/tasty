@@ -9,6 +9,7 @@ namespace Tasty.Jobs
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.Serialization;
     using System.Threading;
     using Tasty.Configuration;
 
@@ -161,7 +162,22 @@ namespace Tasty.Jobs
                                 record.Status = JobStatus.Started;
                                 record.StartDate = DateTime.UtcNow;
 
-                                JobRun run = new JobRun(record.Id.Value, record.ToJob());
+                                IJob job = null;
+
+                                try
+                                {
+                                    job = record.ToJob();
+                                }
+                                catch (SerializationException ex)
+                                {
+                                    record.Status = JobStatus.Failed;
+                                    record.Exception = new ExceptionXElement(ex).ToString();
+                                    record.FinishDate = DateTime.UtcNow;
+
+                                    return;
+                                }
+
+                                JobRun run = new JobRun(record.Id.Value, job);
                                 this.runningJobs.Add(run);
 
                                 run.Run();

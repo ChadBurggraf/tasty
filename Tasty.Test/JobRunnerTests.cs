@@ -16,7 +16,18 @@ namespace Tasty.Test
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Bootstrapper.CreateTestDatabase();
+            Bootstrapper.EnsureTestDatabase();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(SerializationException))]
+        public void JobRunner_Serialize()
+        {
+            new JobRecord()
+            {
+                Data = Guid.NewGuid().ToString(),
+                JobType = typeof(JobRunnerQuickJob)
+            }.ToJob();
         }
 
         [TestMethod]

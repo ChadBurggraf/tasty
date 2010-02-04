@@ -11,7 +11,8 @@ using Tasty.Jobs;
 
 namespace Tasty.Test
 {
-    internal static class Bootstrapper
+    [TestClass]
+    public static class Bootstrapper
     {
         internal static string ConnectionString, CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword;
 
@@ -27,7 +28,13 @@ namespace Tasty.Test
             DatabaseUserPassword = "tastypassword1234";
         }
 
-        public static void CreateTestDatabase()
+        [AssemblyInitialize]
+        public static void AssemblyInitialize(TestContext textContext)
+        {
+            CreateTestDatabase();
+        }
+
+        private static void CreateTestDatabase()
         {
             SchemaUpgradeService.DropDatabase(CreateDropConnectionString, DatabaseName, DatabaseUserName);
             SchemaUpgradeService.CreateDatabase(CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword);
@@ -49,10 +56,18 @@ namespace Tasty.Test
             }
         }
 
-        public static void DropTestDatabase()
+        private static void DropTestDatabase()
         {
             SchemaUpgradeService.CreateDatabase(CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword);
             SchemaUpgradeService.DropDatabase(CreateDropConnectionString, DatabaseName, DatabaseUserName);
+        }
+
+        public static void EnsureTestDatabase()
+        {
+            if (!SchemaUpgradeService.DatabaseExists(CreateDropConnectionString, DatabaseName))
+            {
+                CreateTestDatabase();
+            }
         }
     }
 }

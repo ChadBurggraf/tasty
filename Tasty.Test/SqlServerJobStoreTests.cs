@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tasty.Configuration;
 using Tasty.Jobs;
@@ -11,23 +13,42 @@ namespace Tasty.Test
     [TestClass]
     public class SqlServerJobStoreTests
     {
+        public SqlServerJobStoreTests()
+        {
+            Store = new SqlServerJobStore();
+        }
+
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
-            Bootstrapper.CreateTestDatabase();
+            Bootstrapper.EnsureTestDatabase();
+        }
+
+        protected IJobStore Store { get; private set; }
+
+        protected JobRecord Enqueue(IJob job)
+        {
+            return Store.CreateJob(new JobRecord()
+            {
+                Data = job.Serialize(),
+                JobType = job.GetType(),
+                Name = job.Name,
+                QueueDate = DateTime.UtcNow,
+                Status = JobStatus.Queued
+            });
         }
 
         [TestMethod]
         public void SqlServerJobStore_CancellingJobs()
         {
-            var record1 = new SqlServerTestJob().Enqueue();
-            var record2 = new SqlServerTestJob().Enqueue();
-            var record3 = new SqlServerTestJob().Enqueue();
+            var record1 = Enqueue(new SqlServerTestJob());
+            var record2 = Enqueue(new SqlServerTestJob());
+            var record3 = Enqueue(new SqlServerTestJob());
 
             record1.Status = JobStatus.Canceling;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record1 }, null);
+            Store.UpdateJobs(new JobRecord[] { record1 }, null);
 
-            JobStore.Current.CancelingJobs(new int[] { record1.Id.Value, record2.Id.Value, record3.Id.Value }, delegate(IEnumerable<JobRecord> records)
+            Store.CancelingJobs(new int[] { record1.Id.Value, record2.Id.Value, record3.Id.Value }, delegate(IEnumerable<JobRecord> records)
             {
                 Assert.AreEqual(1, records.Where(r => r.Id == record1.Id).Count());
                 Assert.AreEqual(0, records.Where(r => r.Id == record2.Id).Count());
@@ -49,21 +70,21 @@ namespace Tasty.Test
                 Status = JobStatus.Queued
             };
 
-            Assert.IsTrue(0 < JobStore.Current.CreateJob(record).Id);
+            Assert.IsTrue(0 < Store.CreateJob(record).Id);
         }
 
         [TestMethod]
         public void SqlServerJobStore_DequeueingJobs()
         {
-            var record1 = new SqlServerTestJob().Enqueue();
-            var record2 = new SqlServerTestJob().Enqueue();
-            var record3 = new SqlServerTestJob().Enqueue();
+            var record1 = Enqueue(new SqlServerTestJob());
+            var record2 = Enqueue(new SqlServerTestJob());
+            var record3 = Enqueue(new SqlServerTestJob());
 
             record1.Status = JobStatus.Succeeded;
             record1.FinishDate = record1.StartDate = DateTime.UtcNow;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record1 }, null);
+            Store.UpdateJobs(new JobRecord[] { record1 }, null);
 
-            JobStore.Current.DequeueingJobs(100, delegate(IEnumerable<JobRecord> records)
+            Store.DequeueingJobs(100, delegate(IEnumerable<JobRecord> records)
             {
                 Assert.AreEqual(0, records.Where(r => r.Id == record1.Id).Count());
                 Assert.AreEqual(1, records.Where(r => r.Id == record2.Id).Count());
@@ -74,26 +95,26 @@ namespace Tasty.Test
         [TestMethod]
         public void SqlServerJobStore_EnqueueJob()
         {
-            Assert.IsTrue(0 < new SqlServerTestJob().Enqueue().Id);
+            Assert.IsTrue(0 < Enqueue(new SqlServerTestJob()).Id);
         }
 
         [TestMethod]
         public void SqlServerJobStore_FinishingJobs()
         {
-            var record1 = new SqlServerTestJob().Enqueue();
-            var record2 = new SqlServerTestJob().Enqueue();
-            var record3 = new SqlServerTestJob().Enqueue();
+            var record1 = Enqueue(new SqlServerTestJob());
+            var record2 = Enqueue(new SqlServerTestJob());
+            var record3 = Enqueue(new SqlServerTestJob());
 
             record1.Status = JobStatus.Canceling;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record1 }, null);
+            Store.UpdateJobs(new JobRecord[] { record1 }, null);
 
             record2.Status = JobStatus.Started;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record2 }, null);
+            Store.UpdateJobs(new JobRecord[] { record2 }, null);
 
             record3.Status = JobStatus.Started;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record3 }, null);
+            Store.UpdateJobs(new JobRecord[] { record3 }, null);
 
-            JobStore.Current.FinishingJobs(new int[] { record1.Id.Value, record2.Id.Value, record3.Id.Value }, delegate(IEnumerable<JobRecord> records)
+            Store.FinishingJobs(new int[] { record1.Id.Value, record2.Id.Value, record3.Id.Value }, delegate(IEnumerable<JobRecord> records)
             {
                 Assert.AreEqual(0, records.Where(r => r.Id == record1.Id).Count());
                 Assert.AreEqual(1, records.Where(r => r.Id == record2.Id).Count());
@@ -102,22 +123,29 @@ namespace Tasty.Test
         }
 
         [TestMethod]
+        public void SqlServerJobStore_GetJob()
+        {
+            var id = Enqueue(new SqlServerTestJob()).Id.Value;
+            Assert.IsNotNull(Store.GetJob(id));
+        }
+
+        [TestMethod]
         public void SqlServerJobStore_TimingOutJobs()
         {
-            var record1 = new SqlServerTestJob().Enqueue();
-            var record2 = new SqlServerTestJob().Enqueue();
-            var record3 = new SqlServerTestJob().Enqueue();
+            var record1 = Enqueue(new SqlServerTestJob());
+            var record2 = Enqueue(new SqlServerTestJob());
+            var record3 = Enqueue(new SqlServerTestJob());
 
             record1.Status = JobStatus.Canceling;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record1 }, null);
+            Store.UpdateJobs(new JobRecord[] { record1 }, null);
 
             record2.Status = JobStatus.Started;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record2 }, null);
+            Store.UpdateJobs(new JobRecord[] { record2 }, null);
 
             record3.Status = JobStatus.Started;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record3 }, null);
+            Store.UpdateJobs(new JobRecord[] { record3 }, null);
 
-            JobStore.Current.TimingOutJobs(new int[] { record1.Id.Value, record2.Id.Value, record3.Id.Value }, delegate(IEnumerable<JobRecord> records)
+            Store.TimingOutJobs(new int[] { record1.Id.Value, record2.Id.Value, record3.Id.Value }, delegate(IEnumerable<JobRecord> records)
             {
                 Assert.AreEqual(0, records.Where(r => r.Id == record1.Id).Count());
                 Assert.AreEqual(1, records.Where(r => r.Id == record2.Id).Count());
@@ -128,23 +156,25 @@ namespace Tasty.Test
         [TestMethod]
         public void SqlServerJobStore_UpdateJob()
         {
-            var record = new SqlServerTestJob().Enqueue();
-            
-            record.Data = Guid.NewGuid().ToString();
-            record.Exception = Guid.NewGuid().ToString();
+            var origJob = new SqlServerTestJob();
+            var record = Enqueue(origJob);
+
+            var newJob = new SqlServerTestJob();
+            record.Data = newJob.Serialize();
+            record.Exception = new ExceptionXElement(new Exception()).ToString();
             record.FinishDate = DateTime.UtcNow.AddDays(-1);
             record.Name = Guid.NewGuid().ToString();
             record.QueueDate = DateTime.UtcNow.AddDays(-1);
             record.ScheduleName = Guid.NewGuid().ToString();
             record.StartDate = DateTime.UtcNow.AddDays(-1);
 
-            JobStore.Current.UpdateJobs(new JobRecord[] { record }, null);
-            JobStore.Current.DequeueingJobs(100, delegate(IEnumerable<JobRecord> records)
+            Store.UpdateJobs(new JobRecord[] { record }, null);
+            Store.DequeueingJobs(100, delegate(IEnumerable<JobRecord> records)
             {
                 var updated = records.Where(r => r.Id == record.Id).FirstOrDefault();
 
                 Assert.AreEqual(record.Data, updated.Data);
-                Assert.AreEqual(record.Exception, updated.Exception);
+                Assert.IsFalse(String.IsNullOrEmpty(updated.Exception));
                 SqlDateTimeAssert.AreEqual(record.FinishDate, updated.FinishDate);
                 Assert.AreEqual(record.Name, updated.Name);
                 SqlDateTimeAssert.AreEqual(record.QueueDate, updated.QueueDate);
@@ -154,8 +184,17 @@ namespace Tasty.Test
         }
     }
 
-    public class SqlServerTestJob : Job
+    [DataContract(Namespace = Job.XmlNamespace)]
+    internal class SqlServerTestJob : Job
     {
+        public SqlServerTestJob()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        [DataMember]
+        public Guid Id { get; set; }
+
         public override string Name
         {
             get { return "Tasty Test Job"; }

@@ -54,6 +54,9 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
@@ -61,7 +64,6 @@
     <Compile Include="JobRunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S3PublisherTests.cs" />
-    <Compile Include="SchemaTests.cs" />
     <Compile Include="SqlDateTimeAssert.cs" />
     <Compile Include="SqlServerJobStoreTests.cs" />
   </ItemGroup>

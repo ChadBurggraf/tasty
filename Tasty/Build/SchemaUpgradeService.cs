@@ -107,22 +107,7 @@ namespace Tasty.Build
         /// <param name="databaseUserPassword">The password of the server login and database user to create for accessing the database, or null if not applicable.</param>
         public static void CreateDatabase(string connectionString, string databaseName, string filesPath, string databaseUser, string databaseUserPassword)
         {
-            if (String.IsNullOrEmpty(connectionString))
-            {
-                throw new ArgumentNullException("connectionString", "connectionString must have a value.");
-            }
-
-            if (String.IsNullOrEmpty(databaseName))
-            {
-                throw new ArgumentNullException("databaseName", "databaseName must have a value.");
-            }
-
-            var connectionStringCollection = connectionString.SplitConnectionString();
-
-            if (databaseName.Equals(connectionStringCollection["initial catalog"], StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException("connectionString must point to an initial catalog other than the database being created.", connectionString);
-            }
+            EnsureConnectionStringCatalog(connectionString, databaseName);
 
             filesPath = !String.IsNullOrEmpty(filesPath) ? filesPath : Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
 
@@ -193,6 +178,37 @@ namespace Tasty.Build
         }
 
         /// <summary>
+        /// Gets a value indicating whether the given database exists for the server
+        /// at the given connection string.
+        /// </summary>
+        /// <param name="connectionString">The connection string to use when connecting to the server.</param>
+        /// <param name="databaseName">The name of the database to check for.</param>
+        /// <returns>True if the database exists, false otherwise.</returns>
+        public static bool DatabaseExists(string connectionString, string databaseName)
+        {
+            EnsureConnectionStringCatalog(connectionString, databaseName);
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = String.Format(CultureInfo.InvariantCulture, GetResourceAsText("Tasty.Build.Sql.DatabaseExists.sql"), databaseName);
+
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    {
+                        DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
+                        adapter.Fill(results);
+
+                        return 0 < (int)results.Rows[0]["Exists"];
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Drops the given database.
         /// </summary>
         /// <param name="connectionString">The connection string to use when connecting to the database server.</param>
@@ -210,22 +226,7 @@ namespace Tasty.Build
         /// <param name="databaseUser">The name of the login to drop, if applicable.</param>
         public static void DropDatabase(string connectionString, string databaseName, string databaseUser)
         {
-            if (String.IsNullOrEmpty(connectionString))
-            {
-                throw new ArgumentNullException("connectionString", "connectionString must have a value.");
-            }
-
-            if (String.IsNullOrEmpty(databaseName))
-            {
-                throw new ArgumentNullException("databaseName", "databaseName must have a value.");
-            }
-
-            var connectionStringCollection = connectionString.SplitConnectionString();
-
-            if (databaseName.Equals(connectionStringCollection["initial catalog"], StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException("connectionString must point to an initial catalog other than the database being dropped.", connectionString);
-            }
+            EnsureConnectionStringCatalog(connectionString, databaseName);
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -443,6 +444,32 @@ namespace Tasty.Build
         #endregion
 
         #region Private Static Methods
+
+        /// <summary>
+        /// Ensures that the given connection string and database name both contain values, and that
+        /// the connection string does not point to the given database as its initial catalog.
+        /// </summary>
+        /// <param name="connectionString">The connection string to ensure.</param>
+        /// <param name="databaseName">The database name to ensure.</param>
+        private static void EnsureConnectionStringCatalog(string connectionString, string databaseName)
+        {
+            if (String.IsNullOrEmpty(connectionString))
+            {
+                throw new ArgumentNullException("connectionString", "connectionString must have a value.");
+            }
+
+            if (String.IsNullOrEmpty(databaseName))
+            {
+                throw new ArgumentNullException("databaseName", "databaseName must have a value.");
+            }
+
+            var connectionStringCollection = connectionString.SplitConnectionString();
+
+            if (databaseName.Equals(connectionStringCollection["initial catalog"], StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException("connectionString must point to an initial catalog other than the specified database.", connectionString);
+            }
+        }
 
         /// <summary>
         /// Gets an embedded resource file's contents as a string.

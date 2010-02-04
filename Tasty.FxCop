@@ -69,9 +69,72 @@
     </Messages>
    </Namespace>
   </Namespaces>
+  <Targets>
+   <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll">
+    <Modules>
+     <Module Name="tasty.dll">
+      <Namespaces>
+       <Namespace Name="Tasty.Jobs">
+        <Types>
+         <Type Name="JobRun">
+          <Members>
+           <Member Name="#ExecutionException">
+            <Accessors>
+             <Accessor Name="#get_ExecutionException()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2010-02-04 00:22:24Z">
+                <Issue>
+                 <Item>'JobRun.ExecutionException.get()'</Item>
+                </Issue>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+           <Member Name="#Started">
+            <Accessors>
+             <Accessor Name="#get_Started()">
+              <Messages>
+               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2010-02-04 00:22:24Z">
+                <Issue>
+                 <Item>'JobRun.Started.get()'</Item>
+                </Issue>
+               </Message>
+              </Messages>
+             </Accessor>
+            </Accessors>
+           </Member>
+          </Members>
+         </Type>
+         <Type Name="JobRunner">
+          <Members>
+           <Member Name="#TimeoutJobs()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2010-02-04 00:22:24Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'JobRunner.TimeoutJobs()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+      </Namespaces>
+     </Module>
+    </Modules>
+   </Target>
+  </Targets>
   <Rules>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
+   </Rule>
+   <Rule TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811">
+    <Resolution Name="Default">{0} appears to have no upstream public or protected callers.</Resolution>
+   </Rule>
+   <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
+    <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

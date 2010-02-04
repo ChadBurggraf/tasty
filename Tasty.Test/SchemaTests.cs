@@ -13,24 +13,19 @@ namespace Tasty.Test
     [TestClass]
     public class SchemaTests
     {
-        private static string connectionString = ConfigurationManager.ConnectionStrings["LocalSqlServer"].ConnectionString;
-        private static string testDatabaseName = "TastyBuildTest";
-        private static string testDatabaseFilesPath = ConfigurationManager.AppSettings["TestDatabaseFilesPath"];
-        private static string testDatabaseUserName = "TastyBuildTestUser";
-        private static string testDatabaseUserPassword = "tastypassword1234";
-
         [TestMethod]
         public void Schema_CreateDatabase()
         {
-            SchemaUpgradeService.DropDatabase(connectionString, testDatabaseName, testDatabaseUserName);
-            SchemaUpgradeService.CreateDatabase(connectionString, testDatabaseName, testDatabaseFilesPath, testDatabaseUserName, testDatabaseUserPassword);
+            SchemaUpgradeService.DropDatabase(Bootstrapper.TestCreateDropDatabaseConnectionString, Bootstrapper.TestDatabaseName, Bootstrapper.TestDatabaseUserName);
+            SchemaUpgradeService.CreateDatabase(Bootstrapper.TestCreateDropDatabaseConnectionString, Bootstrapper.TestDatabaseName, Bootstrapper.TestDatabaseFilesPath, Bootstrapper.TestDatabaseUserName, Bootstrapper.TestDatabaseUserPassword);
+
         }
 
         [TestMethod]
         public void Schema_DropDatabase()
         {
-            SchemaUpgradeService.CreateDatabase(connectionString, testDatabaseName, testDatabaseFilesPath, testDatabaseUserName, testDatabaseUserPassword);
-            SchemaUpgradeService.DropDatabase(connectionString, testDatabaseName, testDatabaseUserName);
+            SchemaUpgradeService.CreateDatabase(Bootstrapper.TestCreateDropDatabaseConnectionString, Bootstrapper.TestDatabaseName, Bootstrapper.TestDatabaseFilesPath, Bootstrapper.TestDatabaseUserName, Bootstrapper.TestDatabaseUserPassword);
+            SchemaUpgradeService.DropDatabase(Bootstrapper.TestCreateDropDatabaseConnectionString, Bootstrapper.TestDatabaseName, Bootstrapper.TestDatabaseUserName);
         }
     }
 }

@@ -41,7 +41,7 @@ namespace Tasty.Configuration
         [ConfigurationProperty("redirectType", IsRequired = false)]
         public HttpRedirectType RedirectType
         {
-            get { return (HttpRedirectType)(this["redirectType"] ?? HttpRedirectType.Temporary); }
+            get { return (HttpRedirectType)this["redirectType"]; }
             set { this["redirectType"] = value; }
         }
     }

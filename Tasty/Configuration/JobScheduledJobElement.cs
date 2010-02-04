@@ -10,27 +10,27 @@ namespace Tasty.Configuration
     using System.Configuration;
 
     /// <summary>
-    /// Prepresents a configured scheduled job.
+    /// Represents a configured scheduled job.
     /// </summary>
     public class JobScheduledJobElement : ConfigurationElement
     {
         /// <summary>
         /// Gets the scheduled job's type.
         /// </summary>
-        [ConfigurationProperty("jobType", IsRequired = true, IsKey = true)]
+        [ConfigurationProperty("type", IsRequired = true, IsKey = true)]
         public string JobType
         {
-            get { return (string)this["jobType"]; }
+            get { return (string)this["type"]; }
         }
 
         /// <summary>
         /// Gets the scheduled job's override for the maximum number of times
         /// a failed execution is re-tried.
         /// </summary>
-        [ConfigurationProperty("maximumFailedRetries", IsRequired = false)]
+        [ConfigurationProperty("maximumFailedRetries", IsRequired = false, DefaultValue = 3)]
         public int MaximumFailedRetries
         {
-            get { return (int)(this["maximumFailedRetries"] ?? 3); }
+            get { return (int)this["maximumFailedRetries"]; }
         }
 
         /// <summary>

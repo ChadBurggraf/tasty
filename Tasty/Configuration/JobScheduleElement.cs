@@ -17,10 +17,10 @@ namespace Tasty.Configuration
         /// <summary>
         /// Gets a value indicating whether the schedule is enabled.
         /// </summary>
-        [ConfigurationProperty("enabled", IsRequired = false)]
+        [ConfigurationProperty("enabled", IsRequired = false, DefaultValue = true)]
         public bool Enabled
         {
-            get { return (bool)(this["enabled"] ?? true); }
+            get { return (bool)this["enabled"]; }
         }
 
         /// <summary>

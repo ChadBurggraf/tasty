@@ -19,30 +19,20 @@ namespace Tasty.Configuration
         /// pause for this duration at the end of each cancel/finish/timeout/dequeue loop.
         /// When not configured, defaults to 10,000 (10 seconds).
         /// </summary>
-        [ConfigurationProperty("heartbeat", IsRequired = false)]
+        [ConfigurationProperty("heartbeat", IsRequired = false, DefaultValue = 10000)]
         public int Heartbeat
         {
-            get { return (int)(this["heartbeat"] ?? (this["heartbeat"] = 10000)); }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the job runner should be executed in
-        /// the web process. When not configured, defaults to true.
-        /// </summary>
-        [ConfigurationProperty("inProcess", IsRequired = false)]
-        public bool InProcess
-        {
-            get { return (bool)(this["inProcess"] ?? (this["inProcess"] = true)); }
+            get { return (int)this["heartbeat"]; }
         }
 
         /// <summary>
         /// Gets the maximum number of jobs that are allowed to be
         /// running simultaneously. When not configured, defaults to 10.
         /// </summary>
-        [ConfigurationProperty("maximumConcurrency", IsRequired = false)]
+        [ConfigurationProperty("maximumConcurrency", IsRequired = false, DefaultValue = 10)]
         public int MaximumConcurrency
         {
-            get { return (int)(this["maximumConcurrency"] ?? (this["maximumConcurrency"] = 10)); }
+            get { return (int)this["maximumConcurrency"]; }
         }
 
         /// <summary>
@@ -52,7 +42,7 @@ namespace Tasty.Configuration
         [ConfigurationProperty("maximumFailedRetries", IsRequired = false)]
         public int MaximumFailedRetries
         {
-            get { return (int)(this["maximumFailedRetries"] ?? (this["maximumFailedRetries"] = 0)); }
+            get { return (int)this["maximumFailedRetries"]; }
         }
 
         /// <summary>
@@ -62,6 +52,15 @@ namespace Tasty.Configuration
         public JobScheduleElementCollection Schedules
         {
             get { return (JobScheduleElementCollection)(this["schedules"] ?? (this["schedules"] = new JobScheduleElementCollection())); }
+        }
+
+        /// <summary>
+        /// Gets the configured <see cref="Tasty.Jobs.IJobStore"/> implementation to use for persisting job data.
+        /// </summary>
+        [ConfigurationProperty("configuredStore", IsRequired = false)]
+        public JobStoreElement Store
+        {
+            get { return (JobStoreElement)(this["configuredStore"] ?? (this["configuredStore"] = new JobStoreElement())); }
         }
     }
 }

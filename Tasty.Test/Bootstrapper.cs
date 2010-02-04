@@ -13,17 +13,24 @@ namespace Tasty.Test
 {
     internal static class Bootstrapper
     {
-        internal static string TestCreateDropDatabaseConnectionString = ConfigurationManager.ConnectionStrings["LocalSqlServer"].ConnectionString.SplitConnectionString().Without("initial catalog").ToConnectionString();
-        internal static string TestDatabaseConnectionString = ConfigurationManager.ConnectionStrings["LocalSqlServer"].ConnectionString;
-        internal static string TestDatabaseName = ConfigurationManager.ConnectionStrings["LocalSqlServer"].ConnectionString.SplitConnectionString()["initial catalog"];
-        internal static string TestDatabaseFilesPath = ConfigurationManager.AppSettings["TestDatabaseFilesPath"];
-        internal static string TestDatabaseUserName = "TastyTestUser";
-        internal static string TestDatabaseUserPassword = "tastypassword1234";
+        internal static string ConnectionString, CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword;
+
+        static Bootstrapper()
+        {
+            var cs = ConfigurationManager.ConnectionStrings["LocalSqlServer"].ConnectionString.SplitConnectionString();
+
+            ConnectionString = cs.ToConnectionString();
+            CreateDropConnectionString = cs.Without("initial catalog").ToConnectionString();
+            DatabaseName = cs["initial catalog"];
+            DatabaseFilesPath = ConfigurationManager.AppSettings["DatabaseFilesPath"];
+            DatabaseUserName = "TastyTestUser";
+            DatabaseUserPassword = "tastypassword1234";
+        }
 
         public static void CreateTestDatabase()
         {
-            SchemaUpgradeService.DropDatabase(TestCreateDropDatabaseConnectionString, TestDatabaseName, TestDatabaseUserName);
-            SchemaUpgradeService.CreateDatabase(TestCreateDropDatabaseConnectionString, TestDatabaseName, TestDatabaseFilesPath, TestDatabaseUserName, TestDatabaseUserPassword);
+            SchemaUpgradeService.DropDatabase(CreateDropConnectionString, DatabaseName, DatabaseUserName);
+            SchemaUpgradeService.CreateDatabase(CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword);
 
             var jobStoreAssembly = Assembly.GetAssembly(typeof(IJobStore));
 
@@ -33,7 +40,7 @@ namespace Tasty.Test
                 {
                     var commands = new SchemaUpgradeCommandSet(sr.ReadToEnd(), jobStoreAssembly.GetName().Version, true);
 
-                    using (SqlConnection connection = new SqlConnection(TestDatabaseConnectionString))
+                    using (SqlConnection connection = new SqlConnection(ConnectionString))
                     {
                         connection.Open();
                         SchemaUpgradeService.ExecuteCommandSet(commands, connection);

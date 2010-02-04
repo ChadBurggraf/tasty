@@ -52,48 +52,7 @@ namespace Tasty.Jobs
         /// <param name="canceling">The function to call with the canceling job collection.</param>
         public void CancelingJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> canceling)
         {
-            this.EnsureConnectionString();
-
-            const string Sql = "SELECT * FROM [TastyJob] WHERE [Status]='Canceling' ORDER BY [QueueDate] WHERE [Id] IN ( {0} }";
-
-            string[] jobIds = (from id in ids
-                               select id.ToString(CultureInfo.InvariantCulture)).ToArray();
-
-            if (jobIds.Length > 0)
-            {
-                using (SqlConnection connection = new SqlConnection(this.ConnectionString))
-                {
-                    connection.Open();
-                    SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted, "TastyCancellingJobs");
-
-                    try
-                    {
-                        SqlCommand command = connection.CreateCommand();
-                        command.Transaction = transaction;
-                        command.CommandType = CommandType.Text;
-                        command.CommandText = String.Format(CultureInfo.InvariantCulture, Sql, String.Join(", ", jobIds));
-
-                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
-                        {
-                            DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
-                            adapter.Fill(results);
-
-                            canceling(RecordCollection(results));
-                        }
-
-                        transaction.Commit();
-                    }
-                    catch
-                    {
-                        transaction.Rollback();
-                        throw;
-                    }
-                }
-            }
-            else
-            {
-                canceling(new JobRecord[0]);
-            }
+            DelegatedSetSelect(JobStatus.Canceling, ids, canceling);
         }
 
         /// <summary>
@@ -131,7 +90,7 @@ namespace Tasty.Jobs
         /// <param name="dequeueing">The function to call with the dequeued job collection.</param>
         /// <param name="runsAvailable">The maximum number of job job runs currently available, as determined by
         /// the <see cref="Tasty.Configuration.JobsElement.MaximumConcurrency"/> - the number of currently running jobs.</param>
-        public void DequeueJobs(Action<IEnumerable<JobRecord>> dequeueing, int runsAvailable)
+        public void DequeueingJobs(int runsAvailable, Action<IEnumerable<JobRecord>> dequeueing)
         {
             if (runsAvailable < 1)
             {
@@ -159,7 +118,7 @@ namespace Tasty.Jobs
                         DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
                         adapter.Fill(results);
 
-                        dequeueing(RecordCollection(results));
+                        dequeueing(JobStore.CreateRecordCollection(results));
                     }
 
                     transaction.Commit();
@@ -170,6 +129,30 @@ namespace Tasty.Jobs
                     throw;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>.
+        /// Opens a new transaction, then calls the delegate to perform any work. The transaction
+        /// is committed when the delegate returns.
+        /// </summary>
+        /// <param name="ids">A collection of currently running job IDs.</param>
+        /// <param name="finishing">The function to call with the finishing job collection.</param>
+        public void FinishingJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> finishing)
+        {
+            DelegatedSetSelect(JobStatus.Started, ids, finishing);
+        }
+
+        /// <summary>
+        /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>
+        /// and can be timed out. Opens a new transaction, then calls the delegate to perform any work.
+        /// The transaction is committed when the delegate returns.
+        /// </summary>
+        /// <param name="ids">A collection of currently running job IDs.</param>
+        /// <param name="timingOut">The function to call with the timing-out job collection.</param>
+        public void TimingOutJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> timingOut)
+        {
+            DelegatedSetSelect(JobStatus.Started, ids, timingOut);
         }
 
         /// <summary>
@@ -204,7 +187,7 @@ namespace Tasty.Jobs
                         command.CommandText = Sql;
 
                         command.Parameters.Add(new SqlParameter("@Id", record.Id.Value));
-                        Parameterize(record, command).ExecuteNonQuery();
+                        JobStore.ParameterizeRecord<SqlCommand, SqlParameter>(record, command).ExecuteNonQuery();
                     }
 
                     transaction.Commit();
@@ -267,89 +250,66 @@ namespace Tasty.Jobs
             command.CommandType = CommandType.Text;
             command.CommandText = Sql;
 
-            return Parameterize(record, command);
-        }
-
-        /// <summary>
-        /// Parameterizes the given <see cref="JobRecord"/> into the given <see cref="SqlCommand"/>.
-        /// Does not include the record's ID.
-        /// </summary>
-        /// <param name="record">The record to parameterize.</param>
-        /// <param name="command">The command to parameterize the record into.</param>
-        /// <returns>The command with the record's values added as parameters.</returns>
-        private static SqlCommand Parameterize(JobRecord record, SqlCommand command)
-        {
-            command.Parameters.Add(new SqlParameter("@Name", record.Name));
-            command.Parameters.Add(new SqlParameter("@Type", record.JobType.AssemblyQualifiedName));
-            command.Parameters.Add(new SqlParameter("@Data", record.Data));
-            command.Parameters.Add(new SqlParameter("@Status", record.Status.ToString()));
-
-            SqlParameter exception = new SqlParameter("@Exception", record.Exception);
-
-            if (String.IsNullOrEmpty(record.Exception))
-            {
-                exception.Value = DBNull.Value;
-            }
-
-            command.Parameters.Add(exception);
-            command.Parameters.Add(new SqlParameter("@QueueDate", record.QueueDate));
-
-            SqlParameter startDate = new SqlParameter("@StartDate", record.StartDate);
-
-            if (record.StartDate == null)
-            {
-                startDate.Value = DBNull.Value;
-            }
-
-            command.Parameters.Add(startDate);
-
-            SqlParameter finishDate = new SqlParameter("@FinishDate", record.FinishDate);
-
-            if (record.FinishDate == null)
-            {
-                finishDate.Value = DBNull.Value;
-            }
-
-            command.Parameters.Add(finishDate);
-
-            SqlParameter scheduleName = new SqlParameter("@ScheduleName", record.ScheduleName);
-
-            if (String.IsNullOrEmpty(record.ScheduleName))
-            {
-                scheduleName.Value = DBNull.Value;
-            }
-
-            command.Parameters.Add(scheduleName);
-
-            return command;
-        }
-
-        /// <summary>
-        /// Gets the given result set as a collection of <see cref="JobRecord"/>s
-        /// </summary>
-        /// <param name="resultSet">The result set to convert into a collection of <see cref="JobRecord"/>s.</param>
-        /// <returns>A collection of <see cref="JobRecord"/>s.</returns>
-        private static IEnumerable<JobRecord> RecordCollection(DataTable resultSet)
-        {
-            return from DataRow row in resultSet.Rows
-                   select new JobRecord()
-                   {
-                       Id = (int)row["Id"],
-                       Name = (string)row["Name"],
-                       JobType = Type.GetType((string)row["Type"]),
-                       Data = (string)row["Data"],
-                       Status = (JobStatus)Enum.Parse(typeof(JobStatus), (string)row["Status"]),
-                       Exception = (row["Exception"] != DBNull.Value) ? (string)row["Exception"] : null,
-                       QueueDate = (DateTime)row["QueueDate"],
-                       StartDate = (DateTime?)(row["StartDate"] != DBNull.Value ? row["StartDate"] : null),
-                       FinishDate = (DateTime?)(row["FinishDate"] != DBNull.Value ? row["FinishDate"] : null),
-                       ScheduleName = (row["ScheduleName"] != DBNull.Value) ? (string)row["ScheduleName"] : null
-                   };
+            return JobStore.ParameterizeRecord<SqlCommand, SqlParameter>(record, command);
         }
 
         #endregion
 
         #region Private Instance Methods
+
+        /// <summary>
+        /// Common delegated set select implementation (i.e., Canceling or Finishing).
+        /// </summary>
+        /// <param name="status">The <see cref="JobStatus"/> to filter the result set on.</param>
+        /// <param name="ids">The ID set to filter the result set on.</param>
+        /// <param name="delegating">The delegate action to perform with the result set.</param>
+        private void DelegatedSetSelect(JobStatus status, IEnumerable<int> ids, Action<IEnumerable<JobRecord>> delegating)
+        {
+            this.EnsureConnectionString();
+
+            const string Sql = "SELECT * FROM [TastyJob] WHERE [Status]='{0}' AND [Id] IN ( {1} ) ORDER BY [QueueDate]";
+
+            string[] jobIds = (from id in ids
+                               select id.ToString(CultureInfo.InvariantCulture)).ToArray();
+
+            if (jobIds.Length > 0)
+            {
+                using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+                {
+                    connection.Open();
+
+                    string transactionName = String.Format(CultureInfo.InvariantCulture, "Tasty{0}Jobs", status);
+                    SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted, transactionName);
+
+                    try
+                    {
+                        SqlCommand command = connection.CreateCommand();
+                        command.Transaction = transaction;
+                        command.CommandType = CommandType.Text;
+                        command.CommandText = String.Format(CultureInfo.InvariantCulture, Sql, status, String.Join(", ", jobIds));
+
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                        {
+                            DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
+                            adapter.Fill(results);
+
+                            delegating(JobStore.CreateRecordCollection(results));
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+            else
+            {
+                delegating(new JobRecord[0]);
+            }
+        }
 
         /// <summary>
         /// Ensures that a connection string is configured.
@@ -370,11 +330,11 @@ namespace Tasty.Jobs
 
                 if (!String.IsNullOrEmpty(connectionStringName))
                 {
-                    message = String.Format(CultureInfo.InvariantCulture, "You've specified that the job configuredStore should use the connection string named \"{0}\", but there is either no connection string configured with that name or it is empty.", connectionStringName);
+                    message = String.Format(CultureInfo.InvariantCulture, "You've specified that the job currentStore should use the connection string named \"{0}\", but there is either no connection string configured with that name or it is empty.", connectionStringName);
                 }
                 else
                 {
-                    message = "Please configure the name of the connection string to use for the Tasty.Jobs.SqlServerJobStore under /configuration/tasty/jobs/configuredStore[type=\"Tasty.Jobs.SqlServerJobStore, Tasty\"]/metadata/add[key=\"ConnectionStringName\"].";
+                    message = "Please configure the name of the connection string to use for the Tasty.Jobs.SqlServerJobStore under /configuration/tasty/jobs/currentStore[type=\"Tasty.Jobs.SqlServerJobStore, Tasty\"]/metadata/add[key=\"ConnectionStringName\"].";
                 }
 
                 throw new InvalidOperationException(message);

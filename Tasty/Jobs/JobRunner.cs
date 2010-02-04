@@ -111,27 +111,23 @@ namespace Tasty.Jobs
 
             if (runningIds.Length > 0)
             {
-                Job.ConfiguredStore.CancelingJobs(runningIds, delegate(IEnumerable<JobRecord> records)
-                {
-                    var canceling = from record in records
-                                    join run in this.runningJobs on record.Id equals run.JobId
-                                    select new
-                                    {
-                                        Record = record,
-                                        Run = run
-                                    };
-
-                    foreach (var cancel in canceling)
+                JobStore.Current.CancelingJobs(
+                    runningIds, 
+                    delegate(IEnumerable<JobRecord> records)
                     {
-                        cancel.Run.Abort();
-                        this.runningJobs.Remove(cancel.Run);
+                        JobStore.Current.UpdateJobs(
+                            records, 
+                            delegate(JobRecord record)
+                            {
+                                JobRun run = this.runningJobs.Where(j => j.JobId == record.Id.Value).FirstOrDefault();
+                                run.Abort();
+                                this.runningJobs.Remove(run);
 
-                        cancel.Record.Status = JobStatus.Canceled;
-                        cancel.Record.FinishDate = cancel.Run.Finished;
+                                record.Status = JobStatus.Canceled;
+                                record.FinishDate = run.Finished;
 
-                        Job.ConfiguredStore.UpdateJobs(new JobRecord[] { cancel.Record }, null);
-                    }
-                });
+                            });
+                    });
             }
         }
 
@@ -142,11 +138,10 @@ namespace Tasty.Jobs
         {
             if (TastySettings.Section.Jobs.MaximumConcurrency < this.runningJobs.Count)
             {
-                Job.ConfiguredStore.DequeueJobs(
-                    delegate(IEnumerable<JobRecord> records)
+                JobStore.Current.DequeueingJobs(TastySettings.Section.Jobs.MaximumConcurrency - this.runningJobs.Count, delegate(IEnumerable<JobRecord> records)
                     {
-                        Job.ConfiguredStore.UpdateJobs(
-                            records, 
+                        JobStore.Current.UpdateJobs(
+                            records,
                             delegate(JobRecord record)
                             {
                                 record.Status = JobStatus.Started;
@@ -157,8 +152,7 @@ namespace Tasty.Jobs
 
                                 run.Run();
                             });
-                    }, 
-                    TastySettings.Section.Jobs.MaximumConcurrency - this.runningJobs.Count);
+                    });
             }
         }
 
@@ -167,13 +161,36 @@ namespace Tasty.Jobs
         /// </summary>
         private void FinishJobs()
         {
-            var runs = (from r in this.runningJobs
-                        where !r.IsRunning
-                        select r).ToArray();
+            var finishedIds = (from r in this.runningJobs
+                               where !r.IsRunning
+                               select r.JobId).ToArray();
 
-            if (runs.Length > 0)
+            if (finishedIds.Length > 0)
             {
+                JobStore.Current.FinishingJobs(
+                    finishedIds, 
+                    delegate(IEnumerable<JobRecord> records)
+                    {
+                        JobStore.Current.UpdateJobs(
+                            records, 
+                            delegate(JobRecord record)
+                            {
+                                JobRun run = this.runningJobs.Where(j => j.JobId == record.Id.Value).FirstOrDefault();
+                                this.runningJobs.Remove(run);
 
+                                record.FinishDate = run.Finished;
+
+                                if (run.ExecutionException != null)
+                                {
+                                    record.Exception = new ExceptionXElement(run.ExecutionException).ToString();
+                                    record.Status = JobStatus.Failed;
+                                }
+                                else
+                                {
+                                    record.Status = JobStatus.Succeeded;
+                                }
+                            });
+                    });
             }
         }
 
@@ -201,6 +218,29 @@ namespace Tasty.Jobs
         /// </summary>
         private void TimeoutJobs()
         {
+            var timedOutIds = (from r in this.runningJobs
+                               where r.IsRunning && DateTime.UtcNow.Subtract(r.Started).TotalMilliseconds > r.Job.Timeout
+                               select r.JobId).ToArray();
+
+            if (timedOutIds.Length > 0)
+            {
+                JobStore.Current.TimingOutJobs(
+                    timedOutIds, 
+                    delegate(IEnumerable<JobRecord> records)
+                    {
+                        JobStore.Current.UpdateJobs(
+                            records, 
+                            delegate(JobRecord record)
+                            {
+                                JobRun run = this.runningJobs.Where(j => j.JobId == record.Id.Value).FirstOrDefault();
+                                run.Abort();
+                                this.runningJobs.Remove(run);
+
+                                record.Status = JobStatus.TimedOut;
+                                record.FinishDate = DateTime.UtcNow;
+                            });
+                    });
+            }
         }
 
         #endregion

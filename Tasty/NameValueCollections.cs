@@ -15,7 +15,7 @@ namespace Tasty
     public static class NameValueCollections
     {
         /// <summary>
-        /// Adds the given key/value pair to the collection and then returns the modified collection.
+        /// Adds the given key/value pair to a copy of the collection and then returns the new collection.
         /// </summary>
         /// <param name="collection">The collection to add the key/value pair to.</param>
         /// <param name="key">The key to add.</param>
@@ -23,20 +23,24 @@ namespace Tasty
         /// <returns>The modified collection.</returns>
         public static NameValueCollection With(this NameValueCollection collection, string key, string value)
         {
-            collection.Add(key, value);
-            return collection;
+            NameValueCollection copy = new NameValueCollection(collection);
+            copy.Add(key, value);
+
+            return copy;
         }
 
         /// <summary>
-        /// Removes the given key from the collection and then returns the modified collection.
+        /// Removes the given key from a copy of the collection and then returns the new collection.
         /// </summary>
         /// <param name="collection">The collection to remove the key from.</param>
         /// <param name="key">The key to remove.</param>
         /// <returns>The modified collection.</returns>
         public static NameValueCollection Without(this NameValueCollection collection, string key)
         {
-            collection.Remove(key);
-            return collection;
+            NameValueCollection copy = new NameValueCollection(collection);
+            copy.Remove(key);
+
+            return copy;
         }
     }
 }

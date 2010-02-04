@@ -20,7 +20,7 @@ namespace Tasty.Test
     {
         private static string accessKeyId = ConfigurationManager.AppSettings["S3AccessKeyId"];
         private static string secretAccessKeyId = ConfigurationManager.AppSettings["S3SecretAccessKeyId"];
-        private static string bucketName = ConfigurationManager.AppSettings["TestS3BucketName"];
+        private static string bucketName = ConfigurationManager.AppSettings["S3BucketName"];
         private static AmazonS3 s3Client;
 
         static S3PublisherTests()

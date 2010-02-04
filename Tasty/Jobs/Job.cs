@@ -29,36 +29,6 @@ namespace Tasty.Jobs
 
         #endregion
 
-        #region Private Fields
-
-        private static readonly object configuredStoreLocker = new object();
-        private static IJobStore configuredStore;
-
-        #endregion
-
-        #region Public Static Properties
-
-        /// <summary>
-        /// Gets the currently configured <see cref="IJobStore"/> to use for persistent job data.
-        /// </summary>
-        public static IJobStore ConfiguredStore
-        {
-            get
-            {
-                lock (configuredStoreLocker)
-                {
-                    if (configuredStore == null)
-                    {
-                        configuredStore = (IJobStore)Activator.CreateInstance(Type.GetType(TastySettings.Section.Jobs.Store.JobStoreType));
-                    }
-
-                    return configuredStore;
-                }
-            }
-        }
-
-        #endregion
-
         #region Public Instance Properties
 
         /// <summary>
@@ -87,7 +57,7 @@ namespace Tasty.Jobs
         /// <returns>The job record that was persisted.</returns>
         public virtual JobRecord Enqueue()
         {
-            return ConfiguredStore.CreateJob(new JobRecord()
+            return JobStore.Current.CreateJob(new JobRecord()
             {
                 Data = this.Serialize(),
                 JobType = GetType(),

@@ -24,7 +24,7 @@ namespace Tasty.Configuration
         }
 
         /// <summary>
-        /// Gets any metadata configured for job configuredStore.
+        /// Gets any metadata configured for job currentStore.
         /// </summary>
         [ConfigurationProperty("metadata", IsRequired = false)]
         public KeyValueConfigurationCollection Metadata

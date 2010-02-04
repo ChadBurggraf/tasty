@@ -57,10 +57,10 @@ namespace Tasty.Configuration
         /// <summary>
         /// Gets the configured <see cref="Tasty.Jobs.IJobStore"/> implementation to use for persisting job data.
         /// </summary>
-        [ConfigurationProperty("configuredStore", IsRequired = false)]
+        [ConfigurationProperty("store", IsRequired = false)]
         public JobStoreElement Store
         {
-            get { return (JobStoreElement)(this["configuredStore"] ?? (this["configuredStore"] = new JobStoreElement())); }
+            get { return (JobStoreElement)(this["store"] ?? (this["store"] = new JobStoreElement())); }
         }
     }
 }

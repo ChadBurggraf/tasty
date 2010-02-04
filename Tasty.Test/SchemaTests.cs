@@ -16,16 +16,15 @@ namespace Tasty.Test
         [TestMethod]
         public void Schema_CreateDatabase()
         {
-            SchemaUpgradeService.DropDatabase(Bootstrapper.TestCreateDropDatabaseConnectionString, Bootstrapper.TestDatabaseName, Bootstrapper.TestDatabaseUserName);
-            SchemaUpgradeService.CreateDatabase(Bootstrapper.TestCreateDropDatabaseConnectionString, Bootstrapper.TestDatabaseName, Bootstrapper.TestDatabaseFilesPath, Bootstrapper.TestDatabaseUserName, Bootstrapper.TestDatabaseUserPassword);
-
+            SchemaUpgradeService.DropDatabase(Bootstrapper.CreateDropConnectionString, Bootstrapper.DatabaseName, Bootstrapper.DatabaseUserName);
+            SchemaUpgradeService.CreateDatabase(Bootstrapper.CreateDropConnectionString, Bootstrapper.DatabaseName, Bootstrapper.DatabaseFilesPath, Bootstrapper.DatabaseUserName, Bootstrapper.DatabaseUserPassword);
         }
 
         [TestMethod]
         public void Schema_DropDatabase()
         {
-            SchemaUpgradeService.CreateDatabase(Bootstrapper.TestCreateDropDatabaseConnectionString, Bootstrapper.TestDatabaseName, Bootstrapper.TestDatabaseFilesPath, Bootstrapper.TestDatabaseUserName, Bootstrapper.TestDatabaseUserPassword);
-            SchemaUpgradeService.DropDatabase(Bootstrapper.TestCreateDropDatabaseConnectionString, Bootstrapper.TestDatabaseName, Bootstrapper.TestDatabaseUserName);
+            SchemaUpgradeService.CreateDatabase(Bootstrapper.CreateDropConnectionString, Bootstrapper.DatabaseName, Bootstrapper.DatabaseFilesPath, Bootstrapper.DatabaseUserName, Bootstrapper.DatabaseUserPassword);
+            SchemaUpgradeService.DropDatabase(Bootstrapper.CreateDropConnectionString, Bootstrapper.DatabaseName, Bootstrapper.DatabaseUserName);
         }
     }
 }

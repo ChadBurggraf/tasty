@@ -37,12 +37,32 @@ namespace Tasty.Jobs
         /// Opens a new transaction, then calls the delegate to perform any work. The transaction
         /// is committed when the delegate returns.
         /// </summary>
-        /// <param name="dequeueing">The function to call with the dequeued job collection.</param>
         /// <param name="runsAvailable">The maximum number of job job runs currently available, as determined by
         /// the <see cref="Tasty.Configuration.JobsElement.MaximumConcurrency"/> - the number of currently running jobs.</param>
+        /// <param name="dequeueing">The function to call with the dequeued job collection.</param>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "I'd be happy to learn of an alternative spelling.")]
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
-        void DequeueJobs(Action<IEnumerable<JobRecord>> dequeueing, int runsAvailable);
+        void DequeueingJobs(int runsAvailable, Action<IEnumerable<JobRecord>> dequeueing);
+
+        /// <summary>
+        /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>
+        /// and can be marked as finished. Opens a new transaction, then calls the delegate to perform any work. 
+        /// The transaction is committed when the delegate returns.
+        /// </summary>
+        /// <param name="ids">A collection of currently running job IDs.</param>
+        /// <param name="finishing">The function to call with the finishing job collection.</param>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
+        void FinishingJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> finishing);
+
+        /// <summary>
+        /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>
+        /// and can be timed out. Opens a new transaction, then calls the delegate to perform any work.
+        /// The transaction is committed when the delegate returns.
+        /// </summary>
+        /// <param name="ids">A collection of currently running job IDs.</param>
+        /// <param name="timingOut">The function to call with the timing-out job collection.</param>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
+        void TimingOutJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> timingOut);
 
         /// <summary>
         /// Updates a collection of jobs. Opens a new transaction, then calls the delegate to perform

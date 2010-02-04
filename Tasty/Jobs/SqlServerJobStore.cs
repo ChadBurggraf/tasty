@@ -144,6 +144,43 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Gets a single job record with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the job record to get.</param>
+        /// <returns>The job record with the given ID, or null if none was found.</returns>
+        public JobRecord GetJob(int id)
+        {
+            if (id < 1)
+            {
+                throw new ArgumentException("id must be greater than 0.", "id");
+            }
+
+            this.EnsureConnectionString();
+
+            const string Sql = "SELECT TOP 1 * FROM [TastyJob] WHERE [Id] = @Id";
+
+            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = Sql;
+                    command.Parameters.Add(new SqlParameter("@Id", id));
+
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    {
+                        DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
+                        adapter.Fill(results);
+
+                        return JobStore.CreateRecordCollection(results).FirstOrDefault();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>
         /// and can be timed out. Opens a new transaction, then calls the delegate to perform any work.
         /// The transaction is committed when the delegate returns.

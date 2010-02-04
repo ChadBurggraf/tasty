@@ -71,6 +71,19 @@ namespace Tasty.Jobs
         #region Public Instance Properties
 
         /// <summary>
+        /// Gets the number of jobs currently being executed by the runner.
+        /// This number may reflect jobs that have finished but have yet to
+        /// be flushed.
+        /// </summary>
+        public int ExecutingJobCount
+        {
+            get
+            {
+                return this.runningJobs.Count;
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the runner is currently running.
         /// </summary>
         public bool IsRunning { get; private set; }
@@ -125,7 +138,6 @@ namespace Tasty.Jobs
 
                                 record.Status = JobStatus.Canceled;
                                 record.FinishDate = run.Finished;
-
                             });
                     });
             }
@@ -136,9 +148,11 @@ namespace Tasty.Jobs
         /// </summary>
         private void DequeueJobs()
         {
-            if (TastySettings.Section.Jobs.MaximumConcurrency < this.runningJobs.Count)
+            if (this.runningJobs.Count < TastySettings.Section.Jobs.MaximumConcurrency)
             {
-                JobStore.Current.DequeueingJobs(TastySettings.Section.Jobs.MaximumConcurrency - this.runningJobs.Count, delegate(IEnumerable<JobRecord> records)
+                JobStore.Current.DequeueingJobs(
+                    TastySettings.Section.Jobs.MaximumConcurrency - this.runningJobs.Count, 
+                    delegate(IEnumerable<JobRecord> records)
                     {
                         JobStore.Current.UpdateJobs(
                             records,
@@ -201,11 +215,12 @@ namespace Tasty.Jobs
         {
             while (true)
             {
+                this.CancelJobs();
+                this.FinishJobs();
+                this.TimeoutJobs();
+
                 if (this.IsRunning)
                 {
-                    this.CancelJobs();
-                    this.FinishJobs();
-                    this.TimeoutJobs();
                     this.DequeueJobs();
                 }
 

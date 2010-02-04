@@ -55,6 +55,13 @@ namespace Tasty.Jobs
         void FinishingJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> finishing);
 
         /// <summary>
+        /// Gets a single job record with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the job record to get.</param>
+        /// <returns>The job record with the given ID, or null if none was found.</returns>
+        JobRecord GetJob(int id);
+
+        /// <summary>
         /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>
         /// and can be timed out. Opens a new transaction, then calls the delegate to perform any work.
         /// The transaction is committed when the delegate returns.

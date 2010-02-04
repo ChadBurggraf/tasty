@@ -48,5 +48,11 @@ namespace Tasty.Test
                 }
             }
         }
+
+        public static void DropTestDatabase()
+        {
+            SchemaUpgradeService.CreateDatabase(CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword);
+            SchemaUpgradeService.DropDatabase(CreateDropConnectionString, DatabaseName, DatabaseUserName);
+        }
     }
 }

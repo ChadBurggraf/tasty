@@ -11,8 +11,8 @@ namespace Tasty.Test
     [TestClass]
     public class SqlServerJobStoreTests
     {
-        [TestInitialize]
-        public void TestInitialize()
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext testContext)
         {
             Bootstrapper.CreateTestDatabase();
         }
@@ -63,7 +63,7 @@ namespace Tasty.Test
             record1.FinishDate = record1.StartDate = DateTime.UtcNow;
             JobStore.Current.UpdateJobs(new JobRecord[] { record1 }, null);
 
-            JobStore.Current.DequeueingJobs(TastySettings.Section.Jobs.MaximumConcurrency, delegate(IEnumerable<JobRecord> records)
+            JobStore.Current.DequeueingJobs(100, delegate(IEnumerable<JobRecord> records)
             {
                 Assert.AreEqual(0, records.Where(r => r.Id == record1.Id).Count());
                 Assert.AreEqual(1, records.Where(r => r.Id == record2.Id).Count());
@@ -139,7 +139,7 @@ namespace Tasty.Test
             record.StartDate = DateTime.UtcNow.AddDays(-1);
 
             JobStore.Current.UpdateJobs(new JobRecord[] { record }, null);
-            JobStore.Current.DequeueingJobs(TastySettings.Section.Jobs.MaximumConcurrency, delegate(IEnumerable<JobRecord> records)
+            JobStore.Current.DequeueingJobs(100, delegate(IEnumerable<JobRecord> records)
             {
                 var updated = records.Where(r => r.Id == record.Id).FirstOrDefault();
 

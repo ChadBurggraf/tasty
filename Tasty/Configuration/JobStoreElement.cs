@@ -15,12 +15,13 @@ namespace Tasty.Configuration
     public class JobStoreElement : ConfigurationElement
     {
         /// <summary>
-        /// Gets the type of the <see cref="Tasty.Jobs.IJobStore"/> implementation to use when persisting jobs.
+        /// Gets or sets the type of the <see cref="Tasty.Jobs.IJobStore"/> implementation to use when persisting jobs.
         /// </summary>
         [ConfigurationProperty("type", IsRequired = false, DefaultValue = "Tasty.Jobs.SqlServerJobStore, Tasty")]
         public string JobStoreType
         {
             get { return (string)this["type"]; }
+            set { this["type"] = value; }
         }
 
         /// <summary>

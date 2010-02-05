@@ -85,7 +85,7 @@ namespace Tasty.Console
         /// <param name="message">The message to write.</param>
         protected virtual void BadArgument(string message)
         {
-            BadArgument(message, null);
+            this.BadArgument(message, null);
         }
 
         /// <summary>
@@ -96,8 +96,8 @@ namespace Tasty.Console
         /// <param name="args">Any formatting arguments to use when formatting the message.</param>
         protected virtual void BadArgument(string format, params object[] args)
         {
-            StandardError.Write("tastyc {0}: ", ArgumentName);
-            StandardError.WriteLine(format, args);
+            this.StandardError.Write("tasty {0}: ", this.ArgumentName);
+            this.StandardError.WriteLine(format, args);
         }
 
         /// <summary>
@@ -106,8 +106,8 @@ namespace Tasty.Console
         /// <param name="options">The option set to use when generating the help message.</param>
         protected virtual void Help(OptionSet options)
         {
-            StandardOut.WriteLine("Arguments:");
-            options.WriteOptionDescriptions(StandardOut);
+            this.StandardOut.WriteLine("Arguments:");
+            options.WriteOptionDescriptions(this.StandardOut);
         }
 
         /// <summary>
@@ -127,10 +127,10 @@ namespace Tasty.Console
         /// <param name="ex">The parsing exception that was thrown.</param>
         protected virtual void ParseError(OptionSet options, OptionException ex)
         {
-            StandardError.Write("tastyc {0}: ", ArgumentName);
-            StandardError.WriteLine(ex.Message);
-            StandardError.WriteLine();
-            options.WriteOptionDescriptions(StandardError);
+            this.StandardError.Write("tasty {0}: ", this.ArgumentName);
+            this.StandardError.WriteLine(ex.Message);
+            this.StandardError.WriteLine();
+            options.WriteOptionDescriptions(this.StandardError);
             return;
         }
     }

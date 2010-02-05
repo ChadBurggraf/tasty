@@ -30,6 +30,14 @@ namespace Tasty.Jobs
         JobRecord Enqueue();
 
         /// <summary>
+        /// Enqueues the job for execution on a certin date and for a specific schedule.
+        /// </summary>
+        /// <param name="queueDate">The date to queue the job for execution on.</param>
+        /// <param name="scheduleName">The name of the schedule to queue the job for, or null if not applicable.</param>
+        /// <returns>The job record that was persisted.</returns>
+        JobRecord Enqueue(DateTime queueDate, string scheduleName);
+
+        /// <summary>
         /// Executes the job.
         /// </summary>
         void Execute();

@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Tasty</RootNamespace>
-    <AssemblyName>Tasty</AssemblyName>
+    <AssemblyName>tasty</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
@@ -23,7 +23,7 @@
     <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\Tasty.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\tasty.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Tasty.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\tasty.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AWSSDK, Version=1.0.3.0, Culture=neutral, PublicKeyToken=498aea76c1205a29, processorArchitecture=MSIL">
@@ -109,6 +109,8 @@
     <Compile Include="Jobs\JobRunner.cs" />
     <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="Jobs\JobStore.cs" />
+    <Compile Include="Jobs\ScheduledJob.cs" />
+    <Compile Include="Jobs\ScheduledJobRecord.cs" />
     <Compile Include="Jobs\SqlServerJobStore.cs" />
     <Compile Include="NameValueCollections.cs" />
     <Compile Include="Primitives.cs" />

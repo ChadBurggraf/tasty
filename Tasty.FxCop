@@ -21,8 +21,8 @@
   <IgnoreGeneratedCode>False</IgnoreGeneratedCode>
  </ProjectOptions>
  <Targets>
-  <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/tastyc.exe" Analyze="True" AnalyzeAllChildren="True" />
-  <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/tasty.exe" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/Tasty/bin/Debug/tasty.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
  <Rules>
   <RuleFiles>
@@ -43,7 +43,7 @@
   <Namespaces>
    <Namespace Name="Tasty">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-01-25 23:11:01Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-02-05 04:19:04Z">
       <Issue>
        <Item>Tasty</Item>
       </Issue>
@@ -52,7 +52,7 @@
    </Namespace>
    <Namespace Name="Tasty.Http">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-01-29 03:52:15Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-02-05 04:19:04Z">
       <Issue>
        <Item>Tasty.Http</Item>
       </Issue>
@@ -61,7 +61,7 @@
    </Namespace>
    <Namespace Name="Tasty.Web">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-01-28 05:49:31Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-02-05 04:19:04Z">
       <Issue>
        <Item>Tasty.Web</Item>
       </Issue>
@@ -70,49 +70,28 @@
    </Namespace>
   </Namespaces>
   <Targets>
-   <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll">
+   <Target Name="$(ProjectDir)/Tasty/bin/Debug/tasty.dll">
     <Modules>
      <Module Name="tasty.dll">
       <Namespaces>
        <Namespace Name="Tasty.Jobs">
         <Types>
-         <Type Name="JobRun">
-          <Members>
-           <Member Name="#ExecutionException">
-            <Accessors>
-             <Accessor Name="#get_ExecutionException()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2010-02-04 00:22:24Z">
-                <Issue>
-                 <Item>'JobRun.ExecutionException.get()'</Item>
-                </Issue>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-           <Member Name="#Started">
-            <Accessors>
-             <Accessor Name="#get_Started()">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2010-02-04 00:22:24Z">
-                <Issue>
-                 <Item>'JobRun.Started.get()'</Item>
-                </Issue>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="JobRunner">
           <Members>
-           <Member Name="#TimeoutJobs()">
+           <Member Name="#BootScheduledJobs()">
             <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2010-02-04 00:22:24Z" FixCategory="NonBreaking">
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2010-02-05 06:35:41Z" FixCategory="NonBreaking">
               <Issue>
-               <Item>'JobRunner.TimeoutJobs()'</Item>
+               <Item>'JobRunner.BootScheduledJobs()'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#EnqueueScheduledJobs()">
+            <Messages>
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2010-02-05 06:35:41Z" FixCategory="NonBreaking">
+              <Issue>
+               <Item>'JobRunner.EnqueueScheduledJobs()'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -129,9 +108,6 @@
   <Rules>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
-   </Rule>
-   <Rule TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811">
-    <Resolution Name="Default">{0} appears to have no upstream public or protected callers.</Resolution>
    </Rule>
    <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
     <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>

@@ -127,7 +127,7 @@ namespace Tasty.Console
         /// <param name="options">The option set to use when generating the help message.</param>
         protected override void Help(OptionSet options)
         {
-            StandardOut.WriteLine("Usage: tastyc sql-install -d:INPUT_DIRECTORY -o:OUTPUT_FILE [OPTIONS]+");
+            StandardOut.WriteLine("Usage: tasty sql-install -d:INPUT_DIRECTORY -o:OUTPUT_FILE [OPTIONS]+");
             StandardOut.WriteLine("Generates a SQL install script by concatenating versioned script files in the given directory.");
             StandardOut.WriteLine();
 

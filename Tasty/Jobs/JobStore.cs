@@ -10,6 +10,7 @@ namespace Tasty.Jobs
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using Tasty.Configuration;
 
@@ -88,6 +89,7 @@ namespace Tasty.Jobs
         /// <param name="record">The <see cref="JobRecord"/> to parameterize.</param>
         /// <param name="command">The <see cref="DbCommand"/> to add <see cref="DbParameter"/>s to.</param>
         /// <returns>The parameterized <see cref="DbCommand"/>.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "I'm both too lazy and too unfamiliar with ADO.NET to figure out how to infer the parameter type from the command type right now. TODO. Happy?")]
         public static TCommand ParameterizeRecord<TCommand, TParameter>(JobRecord record, TCommand command)
             where TCommand : DbCommand
             where TParameter : DbParameter, new()

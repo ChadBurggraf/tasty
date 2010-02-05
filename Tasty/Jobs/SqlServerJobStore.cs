@@ -52,7 +52,7 @@ namespace Tasty.Jobs
         /// <param name="canceling">The function to call with the canceling job collection.</param>
         public void CancelingJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> canceling)
         {
-            DelegatedSetSelect(JobStatus.Canceling, ids, canceling);
+            this.DelegatedSetSelect(JobStatus.Canceling, ids, canceling);
         }
 
         /// <summary>
@@ -87,9 +87,9 @@ namespace Tasty.Jobs
         /// Opens a new transaction, then calls the delegate to perform any work. The transaction
         /// is committed when the delegate returns.
         /// </summary>
-        /// <param name="dequeueing">The function to call with the dequeued job collection.</param>
         /// <param name="runsAvailable">The maximum number of job job runs currently available, as determined by
         /// the <see cref="Tasty.Configuration.JobsElement.MaximumConcurrency"/> - the number of currently running jobs.</param>
+        /// <param name="dequeueing">The function to call with the dequeued job collection.</param>
         public void DequeueingJobs(int runsAvailable, Action<IEnumerable<JobRecord>> dequeueing)
         {
             if (runsAvailable < 1)
@@ -140,7 +140,7 @@ namespace Tasty.Jobs
         /// <param name="finishing">The function to call with the finishing job collection.</param>
         public void FinishingJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> finishing)
         {
-            DelegatedSetSelect(JobStatus.Started, ids, finishing);
+            this.DelegatedSetSelect(JobStatus.Started, ids, finishing);
         }
 
         /// <summary>
@@ -181,6 +181,52 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Gets the single most recently queued job for each schedule/job type in the given schedule collection.
+        /// </summary>
+        /// <param name="schedules">The schedule collection to get queued scheduled jobs for.</param>
+        /// <returns>A collection of queued scheduled jobs.</returns>
+        public IEnumerable<ScheduledJobRecord> GetLatestScheduledJobs(IEnumerable<JobScheduleElement> schedules)
+        {
+            EnsureConnectionString();
+
+            const string Sql = 
+                @"SELECT * FROM (
+	                SELECT *, RANK() OVER (PARTITION BY [Type],[ScheduleName] ORDER BY [QueueDate] DESC) AS [Rank]
+	                FROM [TastyJob]
+	                WHERE
+		                [ScheduleName] IS NOT NULL
+                ) t WHERE [Rank] = 1";
+
+            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandType = CommandType.Text;
+                    command.CommandText = Sql;
+
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    {
+                        DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
+                        adapter.Fill(results);
+
+                        return (from s in schedules
+                                join r in JobStore.CreateRecordCollection(results) on s.Name equals r.ScheduleName
+                                where (
+                                    from sj in s.ScheduledJobs
+                                    select sj.JobType).Contains(r.JobType.AssemblyQualifiedName)
+                                select new ScheduledJobRecord()
+                                {
+                                    Record = r,
+                                    Schedule = s
+                                }).ToArray();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>
         /// and can be timed out. Opens a new transaction, then calls the delegate to perform any work.
         /// The transaction is committed when the delegate returns.
@@ -189,7 +235,7 @@ namespace Tasty.Jobs
         /// <param name="timingOut">The function to call with the timing-out job collection.</param>
         public void TimingOutJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> timingOut)
         {
-            DelegatedSetSelect(JobStatus.Started, ids, timingOut);
+            this.DelegatedSetSelect(JobStatus.Started, ids, timingOut);
         }
 
         /// <summary>

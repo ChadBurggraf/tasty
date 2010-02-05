@@ -26,7 +26,7 @@ namespace Tasty.Test
             new JobRecord()
             {
                 Data = Guid.NewGuid().ToString(),
-                JobType = typeof(JobRunnerQuickJob)
+                JobType = typeof(TestQuickJob)
             }.ToJob();
         }
 
@@ -44,7 +44,7 @@ namespace Tasty.Test
         {
             JobRunner.Instance.Start();
 
-            var id = new JobRunnerSlowJob().Enqueue().Id.Value;
+            var id = new TestSlowJob().Enqueue().Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
             var record = JobStore.Current.GetJob(id);
@@ -60,7 +60,7 @@ namespace Tasty.Test
         {
             JobRunner.Instance.Start();
 
-            var id = new JobRunnerSlowJob().Enqueue().Id.Value;
+            var id = new TestSlowJob().Enqueue().Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
             Assert.AreEqual(JobStatus.Started, JobStore.Current.GetJob(id).Status);
@@ -71,7 +71,7 @@ namespace Tasty.Test
         {
             JobRunner.Instance.Start();
 
-            var id = new JobRunnerQuickJob().Enqueue().Id.Value;
+            var id = new TestQuickJob().Enqueue().Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 3);
 
             Assert.AreEqual(JobStatus.Succeeded, JobStore.Current.GetJob(id).Status);
@@ -82,59 +82,10 @@ namespace Tasty.Test
         {
             JobRunner.Instance.Start();
 
-            var id = new JobRunnerTimeoutJob().Enqueue().Id.Value;
+            var id = new TestTimeoutJob().Enqueue().Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 3);
 
             Assert.AreEqual(JobStatus.TimedOut, JobStore.Current.GetJob(id).Status);
-        }
-    }
-
-    [DataContract(Namespace = Job.XmlNamespace)]
-    internal class JobRunnerQuickJob : Job
-    {
-        public override string Name
-        {
-            get { return "Job Runner Quick Job"; }
-        }
-
-        public override void Execute()
-        {
-        }
-    }
-
-    [DataContract(Namespace = Job.XmlNamespace)]
-    internal class JobRunnerSlowJob : Job
-    {
-        public override string Name
-        {
-            get { return "Job Runner Slow Job"; }
-        }
-
-        public override void Execute()
-        {
-            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 10);
-        }
-    }
-
-    [DataContract(Namespace = Job.XmlNamespace)]
-    internal class JobRunnerTimeoutJob : Job
-    {
-        public override string Name
-        {
-            get { return "Job Runner Timeout Job"; }
-        }
-
-        public override long Timeout
-        {
-            get
-            {
-                return TastySettings.Section.Jobs.Heartbeat;
-            }
-        }
-
-        public override void Execute()
-        {
-            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 10);
         }
     }
 }

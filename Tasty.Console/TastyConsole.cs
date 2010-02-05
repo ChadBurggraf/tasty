@@ -13,7 +13,7 @@ namespace Tasty.Console
     using NDesk.Options;
 
     /// <summary>
-    /// The main execution handler for the tastyc console application.
+    /// The main execution handler for tasty.exe.
     /// </summary>
     public static class TastyConsole
     {
@@ -49,9 +49,9 @@ namespace Tasty.Console
             }
             catch (OptionException ex)
             {
-                System.Console.Error.Write("tastyc: ");
+                System.Console.Error.Write("tasty: ");
                 System.Console.Error.WriteLine(ex.Message);
-                System.Console.Error.WriteLine("Try 'tastyc --help' for more information.");
+                System.Console.Error.WriteLine("Try 'tasty --help' for more information.");
                 return;
             }
 
@@ -79,8 +79,8 @@ namespace Tasty.Console
         /// <param name="output">The output stream to write the help message to.</param>
         private static void Help(OptionSet options, TextWriter output)
         {
-            output.WriteLine("Usage: tastyc command [COMMAND_ARGUMENTS]+");
-            output.WriteLine("Executes one of the available Tasty.dll command actions.");
+            output.WriteLine("Usage: tasty command [COMMAND_ARGUMENTS]+");
+            output.WriteLine("Executes one of the available tasty.dll command actions.");
             output.WriteLine();
             output.WriteLine("Commands:");
             output.WriteLine("  sql-install                a SQL install script generator.");

@@ -24,7 +24,7 @@ namespace Tasty.Configuration
         /// </summary>
         public virtual new bool IsReadOnly
         {
-            get { return true; }
+            get { return false; }
         }
 
         #endregion
@@ -37,7 +37,7 @@ namespace Tasty.Configuration
         /// <param name="item">The item to add.</param>
         public virtual void Add(T item)
         {
-            throw new NotSupportedException();
+            BaseAdd(item);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Tasty.Configuration
         /// </summary>
         public virtual void Clear()
         {
-            throw new NotSupportedException();
+            BaseClear();
         }
 
         /// <summary>
@@ -84,7 +84,10 @@ namespace Tasty.Configuration
         /// <returns>True if the item was found and removed, false otherwise.</returns>
         public virtual bool Remove(T item)
         {
-            throw new NotSupportedException();
+            bool exists = Contains(item);
+            BaseRemove(GetElementKey(item));
+
+            return exists;
         }
 
         #endregion

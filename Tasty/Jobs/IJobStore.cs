@@ -9,6 +9,7 @@ namespace Tasty.Jobs
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using Tasty.Configuration;
 
     /// <summary>
     /// Interface definition for persistent job stores.
@@ -60,6 +61,13 @@ namespace Tasty.Jobs
         /// <param name="id">The ID of the job record to get.</param>
         /// <returns>The job record with the given ID, or null if none was found.</returns>
         JobRecord GetJob(int id);
+
+        /// <summary>
+        /// Gets the single most recently queued job for each schedule/job type in the given schedule collection.
+        /// </summary>
+        /// <param name="schedules">The schedule collection to get queued scheduled jobs for.</param>
+        /// <returns>A collection of queued scheduled jobs.</returns>
+        IEnumerable<ScheduledJobRecord> GetLatestScheduledJobs(IEnumerable<JobScheduleElement> schedules);
 
         /// <summary>
         /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>

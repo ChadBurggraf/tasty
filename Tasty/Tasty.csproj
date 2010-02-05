@@ -95,6 +95,7 @@
     <Compile Include="Configuration\JobStoreElement.cs" />
     <Compile Include="Configuration\TastyConfigurationElementCollection.cs" />
     <Compile Include="Configuration\TastySettings.cs" />
+    <Compile Include="Configuration\UrlTokensElement.cs" />
     <Compile Include="ExceptionXElement.cs" />
     <Compile Include="Files.cs" />
     <Compile Include="Http\HttpRedirectModule.cs" />
@@ -115,9 +116,15 @@
     <Compile Include="NameValueCollections.cs" />
     <Compile Include="Primitives.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Web\IUrlToken.cs" />
+    <Compile Include="Web\IUrlTokenStore.cs" />
+    <Compile Include="Web\IUrlTokenUrlProvider.cs" />
     <Compile Include="Web\QueryString.cs" />
     <Compile Include="Web\Uris.cs" />
     <Compile Include="Web\MimeType.cs" />
+    <Compile Include="Web\UrlToken.cs" />
+    <Compile Include="Web\UrlTokenRecord.cs" />
+    <Compile Include="Web\UrlTokenStore.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Build\Sql\CreateDatabase.sql" />

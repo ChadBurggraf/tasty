@@ -41,5 +41,14 @@ namespace Tasty.Configuration
         {
             get { return (HttpElement)(this["http"] ?? (this["http"] = new HttpElement())); }
         }
+
+        /// <summary>
+        /// Gets the URL tokens configuration element.
+        /// </summary>
+        [ConfigurationProperty("urlTokens", IsRequired = false)]
+        public UrlTokensElement UrlTokens
+        {
+            get { return (UrlTokensElement)(this["urlTokens"] ?? (this["urlTokens"] = new UrlTokensElement())); }
+        }
     }
 }

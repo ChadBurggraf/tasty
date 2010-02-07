@@ -50,5 +50,39 @@ namespace Tasty.Configuration
         {
             get { return (UrlTokensElement)(this["urlTokens"] ?? (this["urlTokens"] = new UrlTokensElement())); }
         }
+
+        /// <summary>
+        /// Gets a connection string value from the connection string name identified in the given
+        /// configured metadata collection.
+        /// </summary>
+        /// <param name="metadata">The metadata configuration collection containing the connection string name.</param>
+        /// <returns>The connection string value, or null if not found.</returns>
+        public static string GetConnectionStringFromMetadata(KeyValueConfigurationCollection metadata)
+        {
+            KeyValueConfigurationElement keyValueElement = metadata["ConnectionStringName"];
+            string name = keyValueElement != null ? keyValueElement.Value : "LocalSqlServer";
+            string connectionString = null;
+
+            if (!String.IsNullOrEmpty(name))
+            {
+                ConnectionStringSettings connectionStringSettings = ConfigurationManager.ConnectionStrings[name];
+
+                if (connectionStringSettings != null)
+                {
+                    connectionString = connectionStringSettings.ConnectionString;
+                }
+                else
+                {
+                    var appSetting = ConfigurationManager.AppSettings[name];
+
+                    if (!String.IsNullOrEmpty(appSetting))
+                    {
+                        connectionString = appSetting;
+                    }
+                }
+            }
+
+            return connectionString;
+        }
     }
 }

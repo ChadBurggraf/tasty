@@ -14,6 +14,11 @@ namespace Tasty.Web
     public interface IUrlTokenStore
     {
         /// <summary>
+        /// Cleans all expired token records from the store.
+        /// </summary>
+        void CleanExpiredUrlTokens();
+
+        /// <summary>
         /// Creates a new URL token record.
         /// </summary>
         /// <param name="record">The URL token record to create.</param>

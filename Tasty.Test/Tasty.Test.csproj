@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="HttpCacheUrlTokenStoreTests.cs" />
     <Compile Include="HttpTests.cs" />
     <Compile Include="JobRunnerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -67,7 +68,10 @@
     <Compile Include="ScheduledJobTests.cs" />
     <Compile Include="SqlDateTimeAssert.cs" />
     <Compile Include="SqlServerJobStoreTests.cs" />
+    <Compile Include="SqlServerUrlTokenStoreTests.cs" />
     <Compile Include="TestJobs.cs" />
+    <Compile Include="TestUrlTokens.cs" />
+    <Compile Include="UrlTokenTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tasty\Tasty.csproj">

@@ -27,7 +27,7 @@ namespace Tasty.Jobs
         /// </summary>
         public SqlServerJobStore()
         {
-            this.ConnectionString = ConfiguredConnectionString();
+            this.ConnectionString = TastySettings.GetConnectionStringFromMetadata(TastySettings.Section.Jobs.Store.Metadata);
         }
 
         #endregion
@@ -187,7 +187,7 @@ namespace Tasty.Jobs
         /// <returns>A collection of queued scheduled jobs.</returns>
         public IEnumerable<ScheduledJobRecord> GetLatestScheduledJobs(IEnumerable<JobScheduleElement> schedules)
         {
-            EnsureConnectionString();
+            this.EnsureConnectionString();
 
             const string Sql = 
                 @"SELECT * FROM (
@@ -288,38 +288,6 @@ namespace Tasty.Jobs
         #region Private Static Methods
 
         /// <summary>
-        /// Gets the currently configured connection string value.
-        /// </summary>
-        /// <returns>The currently configured connection string value.</returns>
-        private static string ConfiguredConnectionString()
-        {
-            KeyValueConfigurationElement keyValueElement = TastySettings.Section.Jobs.Store.Metadata["ConnectionStringName"];
-            string name = keyValueElement != null ? keyValueElement.Value : "LocalSqlServer";
-            string connectionString = null;
-
-            if (!String.IsNullOrEmpty(name))
-            {
-                ConnectionStringSettings connectionStringSettings = ConfigurationManager.ConnectionStrings[name];
-
-                if (connectionStringSettings != null)
-                {
-                    connectionString = connectionStringSettings.ConnectionString;
-                }
-                else
-                {
-                    var appSetting = ConfigurationManager.AppSettings[name];
-
-                    if (!String.IsNullOrEmpty(appSetting))
-                    {
-                        connectionString = appSetting;
-                    }
-                }
-            }
-
-            return connectionString;
-        }
-
-        /// <summary>
         /// Creates a new <see cref="SqlCommand"/> for inserting the given <see cref="JobRecord"/> into the database.
         /// </summary>
         /// <param name="record">The record to create the command for.</param>
@@ -413,11 +381,11 @@ namespace Tasty.Jobs
 
                 if (!String.IsNullOrEmpty(connectionStringName))
                 {
-                    message = String.Format(CultureInfo.InvariantCulture, "You've specified that the job currentStore should use the connection string named \"{0}\", but there is either no connection string configured with that name or it is empty.", connectionStringName);
+                    message = String.Format(CultureInfo.InvariantCulture, "You've specified that the current job store should use the connection string named \"{0}\", but there is either no connection string configured with that name or it is empty.", connectionStringName);
                 }
                 else
                 {
-                    message = "Please configure the name of the connection string to use for the Tasty.Jobs.SqlServerJobStore under /configuration/tasty/jobs/currentStore[type=\"Tasty.Jobs.SqlServerJobStore, Tasty\"]/metadata/add[key=\"ConnectionStringName\"].";
+                    message = "Please configure the name of the connection string to use for the Tasty.Jobs.SqlServerJobStore under /configuration/tasty/jobs/store[type=\"Tasty.Jobs.SqlServerJobStore, Tasty\"]/metadata/add[key=\"ConnectionStringName\"].";
                 }
 
                 throw new InvalidOperationException(message);

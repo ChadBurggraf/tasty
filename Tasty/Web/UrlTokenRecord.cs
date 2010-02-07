@@ -15,7 +15,7 @@ namespace Tasty.Web
     public sealed class UrlTokenRecord
     {
         /// <summary>
-        /// Initializes a new instance of the JobRecord class.
+        /// Initializes a new instance of the UrlTokenRecord class.
         /// </summary>
         public UrlTokenRecord()
         {

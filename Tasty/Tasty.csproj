@@ -116,10 +116,13 @@
     <Compile Include="NameValueCollections.cs" />
     <Compile Include="Primitives.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Web\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\IUrlToken.cs" />
     <Compile Include="Web\IUrlTokenStore.cs" />
     <Compile Include="Web\IUrlTokenUrlProvider.cs" />
     <Compile Include="Web\QueryString.cs" />
+    <Compile Include="Web\QueryStringUrlTokenUrlProvider.cs" />
+    <Compile Include="Web\SqlServerUrlTokenStore.cs" />
     <Compile Include="Web\Uris.cs" />
     <Compile Include="Web\MimeType.cs" />
     <Compile Include="Web\UrlToken.cs" />
@@ -134,9 +137,10 @@
     <EmbeddedResource Include="Build\Sql\DropLogin.sql" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Jobs\Sql\TastyJobs-SqlServersql.sql" />
+    <EmbeddedResource Include="Jobs\Sql\TastyJobs-SqlServer.sql" />
     <EmbeddedResource Include="Build\Sql\DatabaseExists.sql" />
     <None Include="Tasty.snk" />
+    <EmbeddedResource Include="Web\Sql\TastyUrlTokens-SqlServer.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

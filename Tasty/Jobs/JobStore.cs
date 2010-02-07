@@ -74,9 +74,9 @@ namespace Tasty.Jobs
                        Data = (string)row["Data"],
                        Status = (JobStatus)Enum.Parse(typeof(JobStatus), (string)row["Status"]),
                        Exception = (row["Exception"] != DBNull.Value) ? (string)row["Exception"] : null,
-                       QueueDate = (DateTime)row["QueueDate"],
-                       StartDate = (DateTime?)(row["StartDate"] != DBNull.Value ? row["StartDate"] : null),
-                       FinishDate = (DateTime?)(row["FinishDate"] != DBNull.Value ? row["FinishDate"] : null),
+                       QueueDate = new DateTime(((DateTime)row["QueueDate"]).Ticks, DateTimeKind.Utc),
+                       StartDate = (DateTime?)(row["StartDate"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["StartDate"]).Ticks, DateTimeKind.Utc) : null),
+                       FinishDate = (DateTime?)(row["FinishDate"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["FinishDate"]).Ticks, DateTimeKind.Utc) : null),
                        ScheduleName = (row["ScheduleName"] != DBNull.Value) ? (string)row["ScheduleName"] : null
                    };
         }

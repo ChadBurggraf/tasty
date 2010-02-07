@@ -113,12 +113,12 @@ namespace Tasty.Jobs
 
         #endregion
 
-        #region Private Instance Methods
+        #region Private Static Methods
 
         /// <summary>
         /// Boots up the configured scheduled jobs by enqueuing all of them for their next scheduled run date.
         /// </summary>
-        private void BootScheduledJobs()
+        private static void BootScheduledJobs()
         {
             foreach (var schedule in TastySettings.Section.Jobs.Schedules)
             {
@@ -135,6 +135,42 @@ namespace Tasty.Jobs
                 }
             }
         }
+
+        /// <summary>
+        /// Re-enqueues any scheduled jobs whose next execution date has arrived.
+        /// </summary>
+        private static void EnqueueScheduledJobs()
+        {
+            DateTime now = DateTime.UtcNow;
+
+            foreach (var latest in JobStore.Current.GetLatestScheduledJobs(TastySettings.Section.Jobs.Schedules))
+            {
+                if (latest.Record.QueueDate < now)
+                {
+                    DateTime nextDate = ScheduledJob.GetNextExecuteDate(latest.Schedule, now);
+
+                    if (nextDate < now)
+                    {
+                        try
+                        {
+                            var config = (from sj in latest.Schedule.ScheduledJobs
+                                          where sj.JobType == latest.Record.JobType.AssemblyQualifiedName
+                                          select sj).FirstOrDefault();
+
+                            IJob job = ScheduledJob.CreateFromConfiguration(config);
+                            job.Enqueue(nextDate, latest.Schedule.Name);
+                        }
+                        catch (ConfigurationErrorsException)
+                        {
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Private Instance Methods
 
         /// <summary>
         /// Cancels any jobs marked as <see cref="JobStatus.Canceling"/>.
@@ -209,38 +245,6 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Re-enqueues any scheduled jobs whose next execution date has arrived.
-        /// </summary>
-        private void EnqueueScheduledJobs()
-        {
-            DateTime now = DateTime.UtcNow;
-
-            foreach(var latest in JobStore.Current.GetLatestScheduledJobs(TastySettings.Section.Jobs.Schedules)) 
-            {
-                if (latest.Record.QueueDate < now)
-                {
-                    DateTime nextDate = ScheduledJob.GetNextExecuteDate(latest.Schedule, now);
-
-                    if (nextDate < now)
-                    {
-                        try
-                        {
-                            var config = (from sj in latest.Schedule.ScheduledJobs
-                                          where sj.JobType == latest.Record.JobType.AssemblyQualifiedName
-                                          select sj).FirstOrDefault();
-                            
-                            IJob job = ScheduledJob.CreateFromConfiguration(config);
-                            job.Enqueue(nextDate, latest.Schedule.Name);
-                        }
-                        catch (ConfigurationErrorsException)
-                        {
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Finishes any jobs that have completed by updating their records in the job store.
         /// </summary>
         private void FinishJobs()
@@ -283,7 +287,7 @@ namespace Tasty.Jobs
         /// </summary>
         private void SmiteThee()
         {
-            this.BootScheduledJobs();
+            BootScheduledJobs();
 
             while (true)
             {
@@ -293,7 +297,7 @@ namespace Tasty.Jobs
 
                 if (this.IsRunning)
                 {
-                    this.EnqueueScheduledJobs();
+                    EnqueueScheduledJobs();
                     this.DequeueJobs();
                 }
 

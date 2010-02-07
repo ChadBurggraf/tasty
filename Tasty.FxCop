@@ -59,58 +59,10 @@
      </Message>
     </Messages>
    </Namespace>
-   <Namespace Name="Tasty.Web">
-    <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-02-05 04:19:04Z">
-      <Issue>
-       <Item>Tasty.Web</Item>
-      </Issue>
-     </Message>
-    </Messages>
-   </Namespace>
   </Namespaces>
-  <Targets>
-   <Target Name="$(ProjectDir)/Tasty/bin/Debug/tasty.dll">
-    <Modules>
-     <Module Name="tasty.dll">
-      <Namespaces>
-       <Namespace Name="Tasty.Jobs">
-        <Types>
-         <Type Name="JobRunner">
-          <Members>
-           <Member Name="#BootScheduledJobs()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2010-02-05 06:35:41Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'JobRunner.BootScheduledJobs()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#EnqueueScheduledJobs()">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2010-02-05 06:35:41Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'JobRunner.EnqueueScheduledJobs()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-        </Types>
-       </Namespace>
-      </Namespaces>
-     </Module>
-    </Modules>
-   </Target>
-  </Targets>
   <Rules>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
-   </Rule>
-   <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
-    <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

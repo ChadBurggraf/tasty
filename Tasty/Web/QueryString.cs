@@ -17,7 +17,7 @@ namespace Tasty.Web
     /// </summary>
     public class QueryString
     {
-        #region Member Variables
+        #region Private Fields
 
         private NameValueCollection innerCollection;
         private ReadOnlyCollection<string> keys;
@@ -63,19 +63,33 @@ namespace Tasty.Web
         {
             get
             {
-                return this.innerCollection[key];
+                return this.Get(key);
             }
 
             set
             {
-                this.innerCollection[key] = value;
-                this.keys = null;
+                this.Set(key, value);
             }
         }
 
         #endregion
 
         #region Public Static Methods
+
+        /// <summary>
+        /// Parses a <see cref="QueryString"/> from the given <see cref="Uri"/>.
+        /// </summary>
+        /// <param name="uri">The <see cref="Uri"/> to the query of.</param>
+        /// <returns>The parsed <see cref="QueryString"/> object.</returns>
+        public static QueryString FromUrl(Uri uri)
+        {
+            if (uri == null)
+            {
+                throw new ArgumentNullException("uri", "uri must have a value.");
+            }
+
+            return Parse(uri.Query);
+        }
 
         /// <summary>
         /// Parses the given query string into a <see cref="QueryString"/> instance.
@@ -127,6 +141,16 @@ namespace Tasty.Web
         {
             this.innerCollection.Add(key, value);
             this.keys = null;
+        }
+
+        /// <summary>
+        /// Gets the value for the specified key.
+        /// </summary>
+        /// <param name="key">The key to get the value for.</param>
+        /// <returns>The key's value.</returns>
+        public string Get(string key)
+        {
+            return this.innerCollection[key];
         }
 
         /// <summary>

@@ -57,7 +57,7 @@ namespace Tasty.Jobs
         /// <returns>The job record that was persisted.</returns>
         public virtual JobRecord Enqueue()
         {
-            return Enqueue(DateTime.UtcNow, null);
+            return this.Enqueue(DateTime.UtcNow, null);
         }
 
         /// <summary>

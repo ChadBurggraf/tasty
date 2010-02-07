@@ -30,7 +30,11 @@ namespace Tasty.Web
 
         #region Public Instance Properties
 
-
+        /// <summary>
+        /// Gets the number of hours from creation the URL token expires in.
+        /// </summary>
+        [IgnoreDataMember]
+        public abstract int ExpiryHours { get; }
 
         #endregion
 
@@ -63,6 +67,53 @@ namespace Tasty.Web
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Creates a URL that identifies this instance by persisting
+        /// this instance to the currently configured <see cref="IUrlTokenStore"/> and
+        /// using the given <see cref="IUrlTokenUrlProvider"/> to generate a <see cref="Uri"/>.
+        /// </summary>
+        /// <param name="urlProvider">The <see cref="IUrlTokenUrlProvider"/> to use when generating the <see cref="Uri"/>.</param>
+        /// <returns>A <see cref="Uri"/> that identifies this instance.</returns>
+        public Uri ToUrl(IUrlTokenUrlProvider urlProvider)
+        {
+            return this.ToUrl(urlProvider, UrlTokenStore.Current);
+        }
+
+        /// <summary>
+        /// Creates a URL that identifies this instance by persisting
+        /// this instance to the given <see cref="IUrlTokenStore"/> and
+        /// using the given <see cref="IUrlTokenUrlProvider"/> to generate
+        /// a <see cref="Uri"/>.
+        /// </summary>
+        /// <param name="urlProvider">The <see cref="IUrlTokenUrlProvider"/> to use when generating the <see cref="Uri"/>.</param>
+        /// <param name="tokenStore">The <see cref="IUrlTokenStore"/> to use when persisting the token's data.</param>
+        /// <returns>A <see cref="Uri"/> that identifies this instance.</returns>
+        public virtual Uri ToUrl(IUrlTokenUrlProvider urlProvider, IUrlTokenStore tokenStore)
+        {
+            if (urlProvider == null)
+            {
+                throw new ArgumentNullException("urlProvider", "urlProvider must have a value.");
+            }
+
+            if (tokenStore == null)
+            {
+                throw new ArgumentNullException("tokenStore", "tokenStore must have a value.");
+            }
+
+            string key = this.GenerateKey();
+
+            tokenStore.CreateUrlToken(new UrlTokenRecord()
+            {
+                Created = DateTime.UtcNow,
+                Data = this.Serialize(),
+                Expires = DateTime.UtcNow.AddHours(this.ExpiryHours),
+                Key = key,
+                TokenType = this.GetType()
+            });
+
+            return urlProvider.UrlWithKey(key);
         }
 
         #endregion

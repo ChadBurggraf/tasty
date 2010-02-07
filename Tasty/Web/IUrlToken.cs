@@ -29,5 +29,25 @@ namespace Tasty.Web
         /// </summary>
         /// <returns>The serialized URL token data.</returns>
         string Serialize();
+
+        /// <summary>
+        /// Creates a URL that identifies this instance by persisting
+        /// this instance to the currently configured <see cref="IUrlTokenStore"/> and
+        /// using the given <see cref="IUrlTokenUrlProvider"/> to generate a <see cref="Uri"/>.
+        /// </summary>
+        /// <param name="urlProvider">The <see cref="IUrlTokenUrlProvider"/> to use when generating the <see cref="Uri"/>.</param>
+        /// <returns>A <see cref="Uri"/> that identifies this instance.</returns>
+        Uri ToUrl(IUrlTokenUrlProvider urlProvider);
+
+        /// <summary>
+        /// Creates a URL that identifies this instance by persisting
+        /// this instance to the given <see cref="IUrlTokenStore"/> and
+        /// using the given <see cref="IUrlTokenUrlProvider"/> to generate
+        /// a <see cref="Uri"/>.
+        /// </summary>
+        /// <param name="urlProvider">The <see cref="IUrlTokenUrlProvider"/> to use when generating the <see cref="Uri"/>.</param>
+        /// <param name="tokenStore">The <see cref="IUrlTokenStore"/> to use when persisting the token's data.</param>
+        /// <returns>A <see cref="Uri"/> that identifies this instance.</returns>
+        Uri ToUrl(IUrlTokenUrlProvider urlProvider, IUrlTokenStore tokenStore);
     }
 }

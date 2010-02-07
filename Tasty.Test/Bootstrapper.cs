@@ -8,6 +8,7 @@ using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tasty.Build;
 using Tasty.Jobs;
+using Tasty.Web;
 
 namespace Tasty.Test
 {
@@ -39,21 +40,8 @@ namespace Tasty.Test
             SchemaUpgradeService.DropDatabase(CreateDropConnectionString, DatabaseName, DatabaseUserName);
             SchemaUpgradeService.CreateDatabase(CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword);
 
-            var jobStoreAssembly = Assembly.GetAssembly(typeof(IJobStore));
-
-            using (Stream stream = jobStoreAssembly.GetManifestResourceStream("Tasty.Jobs.Sql.TastyJobs-SqlServersql.sql"))
-            {
-                using (StreamReader sr = new StreamReader(stream))
-                {
-                    var commands = new SchemaUpgradeCommandSet(sr.ReadToEnd(), jobStoreAssembly.GetName().Version, true);
-
-                    using (SqlConnection connection = new SqlConnection(ConnectionString))
-                    {
-                        connection.Open();
-                        SchemaUpgradeService.ExecuteCommandSet(commands, connection);
-                    }
-                }
-            }
+            RunEmbeddedSql(Assembly.GetAssembly(typeof(IJobStore)), "Tasty.Jobs.Sql.TastyJobs-SqlServer.sql");
+            RunEmbeddedSql(Assembly.GetAssembly(typeof(IUrlTokenStore)), "Tasty.Web.Sql.TastyUrlTokens-SqlServer.sql");
         }
 
         private static void DropTestDatabase()
@@ -67,6 +55,23 @@ namespace Tasty.Test
             if (!SchemaUpgradeService.DatabaseExists(CreateDropConnectionString, DatabaseName))
             {
                 CreateTestDatabase();
+            }
+        }
+
+        private static void RunEmbeddedSql(Assembly assembly, string name)
+        {
+            using (Stream stream = assembly.GetManifestResourceStream(name))
+            {
+                using (StreamReader sr = new StreamReader(stream))
+                {
+                    var commands = new SchemaUpgradeCommandSet(sr.ReadToEnd(), assembly.GetName().Version, true);
+
+                    using (SqlConnection connection = new SqlConnection(ConnectionString))
+                    {
+                        connection.Open();
+                        SchemaUpgradeService.ExecuteCommandSet(commands, connection);
+                    }
+                }
             }
         }
     }

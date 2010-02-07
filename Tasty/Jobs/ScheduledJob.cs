@@ -92,6 +92,11 @@ namespace Tasty.Jobs
         /// <returns>The schedule's next execution date.</returns>
         public static DateTime GetNextExecuteDate(JobScheduleElement config, DateTime now)
         {
+            if (now.Kind != DateTimeKind.Utc)
+            {
+                throw new ArgumentException("now must be in UTC.", "now");
+            }
+
             DateTime startOn = config.StartOn.ToUniversalTime();
 
             if (now < startOn)

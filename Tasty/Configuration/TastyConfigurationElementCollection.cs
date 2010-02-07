@@ -84,7 +84,7 @@ namespace Tasty.Configuration
         /// <returns>True if the item was found and removed, false otherwise.</returns>
         public virtual bool Remove(T item)
         {
-            bool exists = Contains(item);
+            bool exists = this.Contains(item);
             BaseRemove(GetElementKey(item));
 
             return exists;

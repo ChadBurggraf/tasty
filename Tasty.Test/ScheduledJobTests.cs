@@ -42,7 +42,7 @@ namespace Tasty.Test
             // This all needs to be more thorough, but I'm feeling lazy and I'm pretty confident it works.
             //
 
-            DateTime now = DateTime.Now;
+            DateTime now = DateTime.UtcNow;
             DateTime nowPlusOneHour = now.AddHours(1);
             DateTime nowPlusOneWeek = now.AddDays(7);
             DateTime nowMinusOneWeek = now.AddDays(-7);

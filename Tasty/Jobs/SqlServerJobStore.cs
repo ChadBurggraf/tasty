@@ -181,11 +181,10 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Gets the single most recently queued job for each schedule/job type in the given schedule collection.
+        /// Gets the single most recently queued job for each unique schedule name in the system.
         /// </summary>
-        /// <param name="schedules">The schedule collection to get queued scheduled jobs for.</param>
         /// <returns>A collection of queued scheduled jobs.</returns>
-        public IEnumerable<ScheduledJobRecord> GetLatestScheduledJobs(IEnumerable<JobScheduleElement> schedules)
+        public IEnumerable<JobRecord> GetLatestScheduledJobs()
         {
             this.EnsureConnectionString();
 
@@ -211,16 +210,7 @@ namespace Tasty.Jobs
                         DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
                         adapter.Fill(results);
 
-                        return (from s in schedules
-                                join r in JobStore.CreateRecordCollection(results) on s.Name equals r.ScheduleName
-                                where (
-                                    from sj in s.ScheduledJobs
-                                    select sj.JobType).Contains(r.JobType.AssemblyQualifiedName)
-                                select new ScheduledJobRecord()
-                                {
-                                    Record = r,
-                                    Schedule = s
-                                }).ToArray();
+                        return JobStore.CreateRecordCollection(results);
                     }
                 }
             }

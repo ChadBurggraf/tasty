@@ -38,7 +38,7 @@ namespace Tasty.Jobs
         /// </summary>
         /// <param name="config">The configuration to create the job from.</param>
         /// <returns>The created job.</returns>
-        /// <exception cref="ConfigurationErrorsException">The configuration does not identiy a valid type or the type identified does not implement <see cref="IJob"/>.</exception>
+        /// <exception cref="ConfigurationErrorsException">The configuration does not identify a valid type or the type identified does not implement <see cref="IJob"/>.</exception>
         public static IJob CreateFromConfiguration(JobScheduledJobElement config)
         {
             IJob job = null;

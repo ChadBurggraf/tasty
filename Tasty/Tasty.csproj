@@ -111,7 +111,6 @@
     <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="Jobs\JobStore.cs" />
     <Compile Include="Jobs\ScheduledJob.cs" />
-    <Compile Include="Jobs\ScheduledJobRecord.cs" />
     <Compile Include="Jobs\SqlServerJobStore.cs" />
     <Compile Include="NameValueCollections.cs" />
     <Compile Include="Primitives.cs" />

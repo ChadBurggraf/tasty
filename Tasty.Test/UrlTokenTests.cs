@@ -12,9 +12,20 @@ namespace Tasty.Test
     public class UrlTokenTests
     {
         [TestMethod]
-        public void UrlTokens_CurrentTokenStore()
+        public void UrlToken_CurrentTokenStore()
         {
             Assert.IsNotNull(UrlTokenStore.Current);
+        }
+
+        [TestMethod]
+        public void UrlToken_ToUrl()
+        {
+            TestIdUrlToken source = new TestIdUrlToken();
+            Uri uri = source.ToUrl(new QueryStringUrlTokenUrlProvider() { QueryStringKey = "tc", Url = new Uri("http://tastycodes.com/") });
+            IUrlToken result = UrlToken.FromUrl(uri, new QueryStringUrlTokenUrlProvider() { QueryStringKey = "tc" });
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(source.Id, ((TestIdUrlToken)result).Id);
         }
 
         internal static void Store_CreateUrlToken(IUrlTokenStore store)

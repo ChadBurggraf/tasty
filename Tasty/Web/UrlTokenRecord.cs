@@ -7,6 +7,9 @@
 namespace Tasty.Web
 {
     using System;
+    using System.IO;
+    using System.Runtime.Serialization;
+    using System.Xml;
 
     /// <summary>
     /// Represents a URL token record in persistent storage.
@@ -61,5 +64,32 @@ namespace Tasty.Web
         /// Gets or sets <see cref="IUrlToken"/> implementor that the token is persisted for.
         /// </summary>
         public Type TokenType { get; set; }
+
+        /// <summary>
+        /// Converts this instance's <see cref="TokenType"/> and <see cref="Data"/> properties into an <see cref="IUrlToken"/> object.
+        /// </summary>
+        /// <returns>An <see cref="IUrlToken"/> object.</returns>
+        public IUrlToken ToUrlToken()
+        {
+            if (this.TokenType == null)
+            {
+                throw new InvalidOperationException("TokenType must have a value in order to convert this instance's Data property into an IUrlToken object.");
+            }
+
+            if (String.IsNullOrEmpty(this.Data))
+            {
+                throw new InvalidOperationException("Data must have a value to de-serialize an IUrlToken object from.");
+            }
+
+            DataContractSerializer serializer = new DataContractSerializer(this.TokenType);
+
+            using (StringReader sr = new StringReader(this.Data))
+            {
+                using (XmlReader xr = new XmlTextReader(sr))
+                {
+                    return (IUrlToken)serializer.ReadObject(xr);
+                }
+            }
+        }
     }
 }

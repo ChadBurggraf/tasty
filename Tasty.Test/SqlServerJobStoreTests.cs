@@ -168,12 +168,12 @@ namespace Tasty.Test
 
             var timeoutC1 = CreateSucceeded(new TestTimeoutJob(), DateTime.Parse("2/3/10"), "C").Id.Value;
 
-            var latest = Store.GetLatestScheduledJobs(schedules);
+            var latest = Store.GetLatestScheduledJobs();
 
-            Assert.AreEqual(3, latest.Count());
-            Assert.AreEqual(1, latest.Where(r => r.Record.Id == idA3).Count());
-            Assert.AreEqual(1, latest.Where(r => r.Record.Id == slowA2).Count());
-            Assert.AreEqual(1, latest.Where(r => r.Record.Id == slowB2).Count());
+            Assert.AreEqual(idA3, latest.Where(r => r.ScheduleName == "A" && r.JobType == typeof(TestIdJob)).FirstOrDefault().Id);
+            Assert.AreEqual(slowA2, latest.Where(r => r.ScheduleName == "A" && r.JobType == typeof(TestSlowJob)).FirstOrDefault().Id);
+            Assert.AreEqual(slowB2, latest.Where(r => r.ScheduleName == "B").FirstOrDefault().Id);
+            Assert.AreEqual(timeoutC1, latest.Where(r => r.ScheduleName == "C").FirstOrDefault().Id);
         }
 
         [TestMethod]

@@ -63,11 +63,11 @@ namespace Tasty.Jobs
         JobRecord GetJob(int id);
 
         /// <summary>
-        /// Gets the single most recently queued job for each schedule/job type in the given schedule collection.
+        /// Gets the single most recently queued job for each unique schedule name in the system.
         /// </summary>
-        /// <param name="schedules">The schedule collection to get queued scheduled jobs for.</param>
         /// <returns>A collection of queued scheduled jobs.</returns>
-        IEnumerable<ScheduledJobRecord> GetLatestScheduledJobs(IEnumerable<JobScheduleElement> schedules);
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Property use is discouraged for performance reasons.")]
+        IEnumerable<JobRecord> GetLatestScheduledJobs();
 
         /// <summary>
         /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>

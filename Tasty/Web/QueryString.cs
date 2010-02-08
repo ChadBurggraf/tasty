@@ -102,6 +102,11 @@ namespace Tasty.Web
 
             if (!String.IsNullOrEmpty(query))
             {
+                if (query.StartsWith("?", StringComparison.Ordinal))
+                {
+                    query = query.Substring(1);
+                }
+
                 string[] parts = query.Split(new char[] { '&' }, StringSplitOptions.RemoveEmptyEntries);
 
                 foreach (string part in parts)

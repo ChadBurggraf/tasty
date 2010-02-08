@@ -38,6 +38,63 @@ namespace Tasty.Web
 
         #endregion
 
+        #region Public Static Methods
+
+        /// <summary>
+        /// Loads and creates the <see cref="IUrlToken"/> from the given <see cref="Uri"/> using the given
+        /// <see cref="IUrlTokenUrlProvider"/> and <see cref="IUrlTokenStore"/>.
+        /// </summary>
+        /// <param name="uri">The <see cref="Uri"/> to load the token for.</param>
+        /// <param name="urlProvider">The <see cref="IUrlTokenUrlProvider"/> to use when extracting the token key from the <see cref="Uri"/>.</param>
+        /// <returns>An <see cref="IUrlToken"/> object, or null if none was found.</returns>
+        public static IUrlToken FromUrl(Uri uri, IUrlTokenUrlProvider urlProvider)
+        {
+            return FromUrl(uri, urlProvider, UrlTokenStore.Current);
+        }
+
+        /// <summary>
+        /// Loads and creates the <see cref="IUrlToken"/> from the given <see cref="Uri"/> using the given
+        /// <see cref="IUrlTokenUrlProvider"/> and <see cref="IUrlTokenStore"/>.
+        /// </summary>
+        /// <param name="uri">The <see cref="Uri"/> to load the token for.</param>
+        /// <param name="urlProvider">The <see cref="IUrlTokenUrlProvider"/> to use when extracting the token key from the <see cref="Uri"/>.</param>
+        /// <param name="tokenStore">The <see cref="IUrlTokenStore"/> to load data from.</param>
+        /// <returns>An <see cref="IUrlToken"/> object, or null if none was found.</returns>
+        public static IUrlToken FromUrl(Uri uri, IUrlTokenUrlProvider urlProvider, IUrlTokenStore tokenStore)
+        {
+            if (uri == null)
+            {
+                throw new ArgumentNullException("uri", "uri must have a value.");
+            }
+
+            if (urlProvider == null)
+            {
+                throw new ArgumentNullException("urlProvider", "urlProvider must have a value.");
+            }
+
+            if (tokenStore == null)
+            {
+                throw new ArgumentNullException("tokenStore", "tokenStore must have a value.");
+            }
+
+            IUrlToken token = null;
+            string key = urlProvider.SeparateKey(uri);
+
+            if (!String.IsNullOrEmpty(key))
+            {
+                UrlTokenRecord record = tokenStore.GetUrlToken(key);
+
+                if (record != null)
+                {
+                    token = record.ToUrlToken();
+                }
+            }
+
+            return token;
+        }
+
+        #endregion
+
         #region Public Instance Methods
 
         /// <summary>

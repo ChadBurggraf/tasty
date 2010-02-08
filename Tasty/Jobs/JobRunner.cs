@@ -116,52 +116,34 @@ namespace Tasty.Jobs
         #region Private Static Methods
 
         /// <summary>
-        /// Boots up the configured scheduled jobs by enqueuing all of them for their next scheduled run date.
-        /// </summary>
-        private static void BootScheduledJobs()
-        {
-            foreach (var schedule in TastySettings.Section.Jobs.Schedules)
-            {
-                foreach (var scheduledJob in schedule.ScheduledJobs)
-                {
-                    try
-                    {
-                        IJob job = ScheduledJob.CreateFromConfiguration(scheduledJob);
-                        job.Enqueue(ScheduledJob.GetNextExecuteDate(schedule, DateTime.UtcNow), schedule.Name);
-                    }
-                    catch (ConfigurationErrorsException)
-                    {
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Re-enqueues any scheduled jobs whose next execution date has arrived.
+        /// Enqueues any scheduled jobs that are either new to the system or
+        /// need to be re-enqueued due to their next scheduled run date arriving.
         /// </summary>
         private static void EnqueueScheduledJobs()
         {
             DateTime now = DateTime.UtcNow;
+            var records = JobStore.Current.GetLatestScheduledJobs().ToArray();
 
-            foreach (var latest in JobStore.Current.GetLatestScheduledJobs(TastySettings.Section.Jobs.Schedules))
+            foreach (var schedule in TastySettings.Section.Jobs.Schedules)
             {
-                if (latest.Record.QueueDate < now)
-                {
-                    DateTime nextDate = ScheduledJob.GetNextExecuteDate(latest.Schedule, now);
+                DateTime next = ScheduledJob.GetNextExecuteDate(schedule, now);
 
-                    if (nextDate < now)
+                foreach (var scheduledJob in schedule.ScheduledJobs)
+                {
+                    var last = (from r in records
+                                where r.JobType.AssemblyQualifiedName == scheduledJob.JobType && r.ScheduleName == schedule.Name
+                                select r).FirstOrDefault();
+
+                    if (last == null || last.QueueDate < next)
                     {
                         try
                         {
-                            var config = (from sj in latest.Schedule.ScheduledJobs
-                                          where sj.JobType == latest.Record.JobType.AssemblyQualifiedName
-                                          select sj).FirstOrDefault();
-
-                            IJob job = ScheduledJob.CreateFromConfiguration(config);
-                            job.Enqueue(nextDate, latest.Schedule.Name);
+                            IJob job = ScheduledJob.CreateFromConfiguration(scheduledJob);
+                            job.Enqueue(next, schedule.Name);
                         }
                         catch (ConfigurationErrorsException)
                         {
+                            // TODO: Something should be done with this.
                         }
                     }
                 }
@@ -287,8 +269,6 @@ namespace Tasty.Jobs
         /// </summary>
         private void SmiteThee()
         {
-            BootScheduledJobs();
-
             while (true)
             {
                 this.CancelJobs();

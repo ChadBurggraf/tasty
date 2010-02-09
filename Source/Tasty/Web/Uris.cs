@@ -35,13 +35,15 @@ namespace Tasty.Web
         /// <summary>
         /// Appens the given path to the URI's path.
         /// </summary>
-        /// <param name="builder">The URI to append the path to.</param>
+        /// <param name="uri">The URI to append the path to.</param>
         /// <param name="path">The path to append.</param>
-        /// <returns>A URI builder with the path appended.</returns>
-        public static UriBuilder AppendPath(this UriBuilder builder, string path)
+        /// <returns>A URI with the path appended.</returns>
+        public static Uri AppendPath(this Uri uri, string path)
         {
+            UriBuilder builder = new UriBuilder(uri);
             builder.Path = Combine(builder.Path, path);
-            return builder;
+
+            return builder.Uri;
         }
 
         /// <summary>

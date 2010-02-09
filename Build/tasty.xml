@@ -1888,13 +1888,13 @@
             <param name="value">The query string value to add.</param>
             <returns>The updated URL.</returns>
         </member>
-        <member name="M:Tasty.Web.Uris.AppendPath(System.UriBuilder,System.String)">
+        <member name="M:Tasty.Web.Uris.AppendPath(System.Uri,System.String)">
             <summary>
             Appens the given path to the URI's path.
             </summary>
-            <param name="builder">The URI to append the path to.</param>
+            <param name="uri">The URI to append the path to.</param>
             <param name="path">The path to append.</param>
-            <returns>A URI builder with the path appended.</returns>
+            <returns>A URI with the path appended.</returns>
         </member>
         <member name="M:Tasty.Web.Uris.Combine(System.String,System.String)">
             <summary>

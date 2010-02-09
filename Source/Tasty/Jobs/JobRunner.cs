@@ -148,7 +148,7 @@ namespace Tasty.Jobs
                 foreach (var scheduledJob in schedule.ScheduledJobs)
                 {
                     var last = (from r in records
-                                where r.JobType.AssemblyQualifiedName == scheduledJob.JobType && r.ScheduleName == schedule.Name
+                                where r.JobType.AssemblyQualifiedName.StartsWith(scheduledJob.JobType, StringComparison.OrdinalIgnoreCase) && r.ScheduleName == schedule.Name
                                 select r).FirstOrDefault();
 
                     if (last == null || last.QueueDate < next)

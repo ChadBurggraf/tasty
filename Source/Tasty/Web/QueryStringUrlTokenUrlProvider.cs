@@ -9,9 +9,11 @@ namespace Tasty.Web
     using System;
 
     /// <summary>
-    /// Implements <see cref="IUrlTokenUrlProvider"/> for URL tokens in the query string.
+    /// Extends <see cref="UrlTokenUrlProvider{TToken}"/> for URL tokens in the query string.
     /// </summary>
-    public class QueryStringUrlTokenUrlProvider : IUrlTokenUrlProvider
+    /// <typeparam name="TToken">The <see cref="IUrlToken"/> type to provide URLs for.</typeparam>
+    public class QueryStringUrlTokenUrlProvider<TToken> : UrlTokenUrlProvider<TToken>
+        where TToken : IUrlToken
     {
         /// <summary>
         /// Gets or sets the key to use for the URL token in the query string.
@@ -24,12 +26,12 @@ namespace Tasty.Web
         public Uri Url { get; set; }
 
         /// <summary>
-        /// Separates a <see cref="IUrlToken"/> key out of the given URL.
-        /// Should return null or empty if no valid key could be found.
+        /// Parses a <see cref="Uri"/> into a <see cref="IUrlToken"/>.
         /// </summary>
-        /// <param name="uri">The URL to separate the key from.</param>
-        /// <returns>The <see cref="IUrlToken"/> key, or null or empty if none was found.</returns>
-        public string SeparateKey(Uri uri)
+        /// <param name="uri">The <see cref="Uri"/> to parse.</param>
+        /// <param name="tokenStore">The <see cref="IUrlTokenStore"/> to use when loading token data.</param>
+        /// <returns>The <see cref="IUrlToken"/> identified by the given <see cref="Uri"/>.</returns>
+        public override TToken TokenFromUrl(Uri uri, IUrlTokenStore tokenStore)
         {
             if (String.IsNullOrEmpty(this.QueryStringKey))
             {
@@ -41,16 +43,29 @@ namespace Tasty.Web
                 throw new ArgumentNullException("uri", "uri cannot be null.");
             }
 
-            return QueryString.FromUrl(uri)[this.QueryStringKey];
+            TToken token = default(TToken);
+            string key = QueryString.FromUrl(uri)[this.QueryStringKey];
+
+            if (!String.IsNullOrEmpty(key))
+            {
+                UrlTokenRecord record = tokenStore.GetUrlToken(key);
+
+                if (record != null)
+                {
+                    token = (TToken)record.ToUrlToken();
+                }
+            }
+
+            return token;
         }
 
         /// <summary>
-        /// Creates a new <see cref="Uri"/> with the given <see cref="IUrlToken"/> key embedded 
-        /// (e.g., as a query string parameter).
+        /// Generates a <see cref="Uri"/> from the given <see cref="IUrlToken"/>.
         /// </summary>
-        /// <param name="key">The <see cref="IUrlToken"/> key to create the <see cref="Uri"/> with.</param>
-        /// <returns>A <see cref="Uri"/> with the given <see cref="IUrlToken"/> key embedded.</returns>
-        public Uri UrlWithKey(string key)
+        /// <param name="token">The <see cref="IUrlToken"/> to generate the <see cref="Uri"/> from.</param>
+        /// <param name="tokenStore">The <see cref="IUrlTokenStore"/> to use when saving token data.</param>
+        /// <returns>The generated <see cref="Uri"/>.</returns>
+        public override Uri UrlFromToken(TToken token, IUrlTokenStore tokenStore)
         {
             if (String.IsNullOrEmpty(this.QueryStringKey))
             {
@@ -61,6 +76,17 @@ namespace Tasty.Web
             {
                 throw new InvalidOperationException("Url must be set to a value.");
             }
+
+            string key = token.GenerateKey();
+
+            tokenStore.CreateUrlToken(new UrlTokenRecord()
+            {
+                Created = DateTime.UtcNow,
+                Data = token.Serialize(),
+                Expires = DateTime.UtcNow.AddHours(token.ExpiryHours),
+                Key = key,
+                TokenType = token.GetType()
+            });
 
             return this.Url.SetQueryValue(this.QueryStringKey, key);
         }

@@ -41,8 +41,7 @@ namespace Tasty.Jobs
             }
 
             this.runningJobs = new List<JobRun>();
-            this.god = new Thread(this.SmiteThee);
-            this.god.Start();
+            this.IsGreen = true;
         }
 
         #endregion
@@ -86,6 +85,13 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Gets a value indicating whether the runner has never been started
+        /// since the application context was created. Returns true if it has
+        /// never been started, returns fals if it has been started at least once.
+        /// </summary>
+        public bool IsGreen { get; private set; }
+
+        /// <summary>
         /// Gets a value indicating whether the runner is currently running.
         /// </summary>
         public bool IsRunning { get; private set; }
@@ -95,11 +101,22 @@ namespace Tasty.Jobs
         #region Public Instance Methods
 
         /// <summary>
-        /// Starts the running if it is not already running.
+        /// Starts the runner if it is not already running.
         /// </summary>
         public void Start()
         {
-            this.IsRunning = true;
+            lock (this)
+            {
+                this.IsRunning = true;
+
+                if (this.IsGreen)
+                {
+                    this.IsGreen = false;
+
+                    this.god = new Thread(this.SmiteThee);
+                    this.god.Start();
+                }
+            }
         }
 
         /// <summary>

@@ -42,6 +42,7 @@ namespace Tasty.Web
         {
             UriBuilder builder = new UriBuilder(uri);
             builder.Path = Combine(builder.Path, path);
+
             return builder.Uri;
         }
 

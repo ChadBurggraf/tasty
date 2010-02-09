@@ -1208,7 +1208,7 @@
         </member>
         <member name="M:Tasty.Jobs.JobRunner.Start">
             <summary>
-            Starts the running if it is not already running.
+            Starts the runner if it is not already running.
             </summary>
         </member>
         <member name="M:Tasty.Jobs.JobRunner.Stop">
@@ -1260,10 +1260,34 @@
             be flushed.
             </summary>
         </member>
+        <member name="P:Tasty.Jobs.JobRunner.IsGreen">
+            <summary>
+            Gets a value indicating whether the runner has never been started
+            since the application context was created. Returns true if it has
+            never been started, returns fals if it has been started at least once.
+            </summary>
+        </member>
         <member name="P:Tasty.Jobs.JobRunner.IsRunning">
             <summary>
             Gets a value indicating whether the runner is currently running.
             </summary>
+        </member>
+        <member name="T:Tasty.Jobs.JobsInProcessModule">
+            <summary>
+            Implements <see cref="T:System.Web.IHttpModule"/> to ensure that the <see cref="T:Tasty.Jobs.JobRunner"/>
+            instance is started by the current <see cref="T:System.Web.HttpApplication"/>.
+            </summary>
+        </member>
+        <member name="M:Tasty.Jobs.JobsInProcessModule.Dispose">
+            <summary>
+            Disposes of any unmanaged resources held by the module.
+            </summary>
+        </member>
+        <member name="M:Tasty.Jobs.JobsInProcessModule.Init(System.Web.HttpApplication)">
+            <summary>
+            Initializes the module for the given application context.
+            </summary>
+            <param name="context">The application context to initialize the module for.</param>
         </member>
         <member name="T:Tasty.Jobs.JobStatus">
             <summary>
@@ -1545,53 +1569,6 @@
             <param name="dateTime">The DateTime object to convert.</param>
             <returns>A string representing the date in ISO 8601 format with unsaf path characters removed.</returns>
         </member>
-        <member name="T:Tasty.Web.EmptyUrlTokenUrlProvider">
-            <summary>
-            Implements <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> for non-tokenized URLs.
-            </summary>
-        </member>
-        <member name="T:Tasty.Web.IUrlTokenUrlProvider">
-            <summary>
-            Interface definition for URL providers for <see cref="T:Tasty.Web.IUrlToken"/>s.
-            </summary>
-        </member>
-        <member name="M:Tasty.Web.IUrlTokenUrlProvider.SeparateKey(System.Uri)">
-            <summary>
-            Separates a <see cref="T:Tasty.Web.IUrlToken"/> key out of the given URL.
-            Should return null or empty if no valid key could be found.
-            </summary>
-            <param name="uri">The URL to separate the key from.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> key, or null or empty if none was found.</returns>
-        </member>
-        <member name="M:Tasty.Web.IUrlTokenUrlProvider.UrlWithKey(System.String)">
-            <summary>
-            Creates a new <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded 
-            (e.g., as a query string parameter).
-            </summary>
-            <param name="key">The <see cref="T:Tasty.Web.IUrlToken"/> key to create the <see cref="T:System.Uri"/> with.</param>
-            <returns>A <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded.</returns>
-        </member>
-        <member name="M:Tasty.Web.EmptyUrlTokenUrlProvider.SeparateKey(System.Uri)">
-            <summary>
-            Separates a <see cref="T:Tasty.Web.IUrlToken"/> key out of the given URL.
-            Should return null or empty if no valid key could be found.
-            </summary>
-            <param name="uri">The URL to separate the key from.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> key, or null or empty if none was found.</returns>
-        </member>
-        <member name="M:Tasty.Web.EmptyUrlTokenUrlProvider.UrlWithKey(System.String)">
-            <summary>
-            Creates a new <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded 
-            (e.g., as a query string parameter).
-            </summary>
-            <param name="key">The <see cref="T:Tasty.Web.IUrlToken"/> key to create the <see cref="T:System.Uri"/> with.</param>
-            <returns>A <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded.</returns>
-        </member>
-        <member name="P:Tasty.Web.EmptyUrlTokenUrlProvider.Url">
-            <summary>
-            Gets or sets the URL to use when generating a URL with a URL token.
-            </summary>
-        </member>
         <member name="T:Tasty.Web.HttpCacheUrlTokenStore">
             <summary>
             Implements <see cref="T:Tasty.Web.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.IUrlToken"/>s
@@ -1670,30 +1647,48 @@
             </summary>
             <returns>The serialized URL token data.</returns>
         </member>
-        <member name="M:Tasty.Web.IUrlToken.ToUrl(Tasty.Web.IUrlTokenUrlProvider)">
-            <summary>
-            Creates a URL that identifies this instance by persisting
-            this instance to the currently configured <see cref="T:Tasty.Web.IUrlTokenStore"/> and
-            using the given <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to generate a <see cref="T:System.Uri"/>.
-            </summary>
-            <param name="urlProvider">The <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to use when generating the <see cref="T:System.Uri"/>.</param>
-            <returns>A <see cref="T:System.Uri"/> that identifies this instance.</returns>
-        </member>
-        <member name="M:Tasty.Web.IUrlToken.ToUrl(Tasty.Web.IUrlTokenUrlProvider,Tasty.Web.IUrlTokenStore)">
-            <summary>
-            Creates a URL that identifies this instance by persisting
-            this instance to the given <see cref="T:Tasty.Web.IUrlTokenStore"/> and
-            using the given <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to generate
-            a <see cref="T:System.Uri"/>.
-            </summary>
-            <param name="urlProvider">The <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to use when generating the <see cref="T:System.Uri"/>.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when persisting the token's data.</param>
-            <returns>A <see cref="T:System.Uri"/> that identifies this instance.</returns>
-        </member>
         <member name="P:Tasty.Web.IUrlToken.ExpiryHours">
             <summary>
             Gets the number of hours from creation the URL token expires in.
             </summary>
+        </member>
+        <member name="T:Tasty.Web.IUrlTokenUrlProvider`1">
+            <summary>
+            Interface definition for URL providers for <see cref="T:Tasty.Web.IUrlToken"/>s.
+            </summary>
+            <typeparam name="TToken">The type of <see cref="T:Tasty.Web.IUrlToken"/> to provide URLs for.</typeparam>
+        </member>
+        <member name="M:Tasty.Web.IUrlTokenUrlProvider`1.TokenFromUrl(System.Uri)">
+            <summary>
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokenStore.Current"/>
+            <see cref="T:Tasty.Web.IUrlTokenStore"/>.
+            </summary>
+            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
+            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.IUrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.IUrlTokenStore)">
+            <summary>
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/>.
+            </summary>
+            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when loading token data.</param>
+            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.IUrlTokenUrlProvider`1.UrlFromToken(`0)">
+            <summary>
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokenStore.Current"/>
+            <see cref="T:Tasty.Web.IUrlTokenStore"/>.
+            </summary>
+            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <returns>The generated <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.IUrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.IUrlTokenStore)">
+            <summary>
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/>.
+            </summary>
+            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when saving token data.</param>
+            <returns>The generated <see cref="T:System.Uri"/>.</returns>
         </member>
         <member name="T:Tasty.Web.QueryString">
             <summary>
@@ -1764,33 +1759,72 @@
             <param name="key">The key to get or set the value for.</param>
             <returns>The key's value.</returns>
         </member>
-        <member name="T:Tasty.Web.QueryStringUrlTokenUrlProvider">
+        <member name="T:Tasty.Web.QueryStringUrlTokenUrlProvider`1">
             <summary>
-            Implements <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> for URL tokens in the query string.
+            Extends <see cref="T:Tasty.Web.UrlTokenUrlProvider`1"/> for URL tokens in the query string.
             </summary>
+            <typeparam name="TToken">The <see cref="T:Tasty.Web.IUrlToken"/> type to provide URLs for.</typeparam>
         </member>
-        <member name="M:Tasty.Web.QueryStringUrlTokenUrlProvider.SeparateKey(System.Uri)">
+        <member name="T:Tasty.Web.UrlTokenUrlProvider`1">
             <summary>
-            Separates a <see cref="T:Tasty.Web.IUrlToken"/> key out of the given URL.
-            Should return null or empty if no valid key could be found.
+            Base <see cref="T:Tasty.Web.IUrlTokenUrlProvider`1"/> implementation.
             </summary>
-            <param name="uri">The URL to separate the key from.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> key, or null or empty if none was found.</returns>
+            <typeparam name="TToken">The <see cref="T:Tasty.Web.IUrlToken"/> type to provide URLs for.</typeparam>
         </member>
-        <member name="M:Tasty.Web.QueryStringUrlTokenUrlProvider.UrlWithKey(System.String)">
+        <member name="M:Tasty.Web.UrlTokenUrlProvider`1.TokenFromUrl(System.Uri)">
             <summary>
-            Creates a new <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded 
-            (e.g., as a query string parameter).
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokenStore.Current"/>
+            <see cref="T:Tasty.Web.IUrlTokenStore"/>.
             </summary>
-            <param name="key">The <see cref="T:Tasty.Web.IUrlToken"/> key to create the <see cref="T:System.Uri"/> with.</param>
-            <returns>A <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded.</returns>
+            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
+            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
         </member>
-        <member name="P:Tasty.Web.QueryStringUrlTokenUrlProvider.QueryStringKey">
+        <member name="M:Tasty.Web.UrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.IUrlTokenStore)">
+            <summary>
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/>.
+            </summary>
+            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when loading token data.</param>
+            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.UrlTokenUrlProvider`1.UrlFromToken(`0)">
+            <summary>
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokenStore.Current"/>
+            <see cref="T:Tasty.Web.IUrlTokenStore"/>.
+            </summary>
+            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <returns>The generated <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.UrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.IUrlTokenStore)">
+            <summary>
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/>.
+            </summary>
+            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when saving token data.</param>
+            <returns>The generated <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.QueryStringUrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.IUrlTokenStore)">
+            <summary>
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/>.
+            </summary>
+            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when loading token data.</param>
+            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.QueryStringUrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.IUrlTokenStore)">
+            <summary>
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/>.
+            </summary>
+            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when saving token data.</param>
+            <returns>The generated <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="P:Tasty.Web.QueryStringUrlTokenUrlProvider`1.QueryStringKey">
             <summary>
             Gets or sets the key to use for the URL token in the query string.
             </summary>
         </member>
-        <member name="P:Tasty.Web.QueryStringUrlTokenUrlProvider.Url">
+        <member name="P:Tasty.Web.QueryStringUrlTokenUrlProvider`1.Url">
             <summary>
             Gets or sets the URL to use when generating a URL with a URL token.
             </summary>
@@ -2000,25 +2034,6 @@
             Gets the XML namespace used during token serialization.
             </summary>
         </member>
-        <member name="M:Tasty.Web.UrlToken.FromUrl(System.Uri,Tasty.Web.IUrlTokenUrlProvider)">
-            <summary>
-            Loads and creates the <see cref="T:Tasty.Web.IUrlToken"/> from the given <see cref="T:System.Uri"/> using the given
-            <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> and <see cref="T:Tasty.Web.IUrlTokenStore"/>.
-            </summary>
-            <param name="uri">The <see cref="T:System.Uri"/> to load the token for.</param>
-            <param name="urlProvider">The <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to use when extracting the token key from the <see cref="T:System.Uri"/>.</param>
-            <returns>An <see cref="T:Tasty.Web.IUrlToken"/> object, or null if none was found.</returns>
-        </member>
-        <member name="M:Tasty.Web.UrlToken.FromUrl(System.Uri,Tasty.Web.IUrlTokenUrlProvider,Tasty.Web.IUrlTokenStore)">
-            <summary>
-            Loads and creates the <see cref="T:Tasty.Web.IUrlToken"/> from the given <see cref="T:System.Uri"/> using the given
-            <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> and <see cref="T:Tasty.Web.IUrlTokenStore"/>.
-            </summary>
-            <param name="uri">The <see cref="T:System.Uri"/> to load the token for.</param>
-            <param name="urlProvider">The <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to use when extracting the token key from the <see cref="T:System.Uri"/>.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to load data from.</param>
-            <returns>An <see cref="T:Tasty.Web.IUrlToken"/> object, or null if none was found.</returns>
-        </member>
         <member name="M:Tasty.Web.UrlToken.GenerateKey">
             <summary>
             Generates a new unique key that can be used to identify the URL token.
@@ -2030,26 +2045,6 @@
             Serializes the URL token for storage.
             </summary>
             <returns>The serialized URL token data.</returns>
-        </member>
-        <member name="M:Tasty.Web.UrlToken.ToUrl(Tasty.Web.IUrlTokenUrlProvider)">
-            <summary>
-            Creates a URL that identifies this instance by persisting
-            this instance to the currently configured <see cref="T:Tasty.Web.IUrlTokenStore"/> and
-            using the given <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to generate a <see cref="T:System.Uri"/>.
-            </summary>
-            <param name="urlProvider">The <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to use when generating the <see cref="T:System.Uri"/>.</param>
-            <returns>A <see cref="T:System.Uri"/> that identifies this instance.</returns>
-        </member>
-        <member name="M:Tasty.Web.UrlToken.ToUrl(Tasty.Web.IUrlTokenUrlProvider,Tasty.Web.IUrlTokenStore)">
-            <summary>
-            Creates a URL that identifies this instance by persisting
-            this instance to the given <see cref="T:Tasty.Web.IUrlTokenStore"/> and
-            using the given <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to generate
-            a <see cref="T:System.Uri"/>.
-            </summary>
-            <param name="urlProvider">The <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> to use when generating the <see cref="T:System.Uri"/>.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when persisting the token's data.</param>
-            <returns>A <see cref="T:System.Uri"/> that identifies this instance.</returns>
         </member>
         <member name="P:Tasty.Web.UrlToken.ExpiryHours">
             <summary>

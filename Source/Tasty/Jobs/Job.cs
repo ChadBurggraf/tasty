@@ -66,7 +66,7 @@ namespace Tasty.Jobs
         /// <param name="queueDate">The date to queue the job for execution on.</param>
         /// <param name="scheduleName">The name of the schedule to queue the job for, or null if not applicable.</param>
         /// <returns>The job record that was persisted.</returns>
-        public JobRecord Enqueue(DateTime queueDate, string scheduleName)
+        public virtual JobRecord Enqueue(DateTime queueDate, string scheduleName)
         {
             return JobStore.Current.CreateJob(new JobRecord()
             {

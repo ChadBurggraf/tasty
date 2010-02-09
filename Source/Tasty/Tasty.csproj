@@ -108,6 +108,7 @@
     <Compile Include="Jobs\JobRecord.cs" />
     <Compile Include="Jobs\JobRun.cs" />
     <Compile Include="Jobs\JobRunner.cs" />
+    <Compile Include="Jobs\JobsInProcessModule.cs" />
     <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="Jobs\JobStore.cs" />
     <Compile Include="Jobs\ScheduledJob.cs" />
@@ -115,7 +116,6 @@
     <Compile Include="NameValueCollections.cs" />
     <Compile Include="Primitives.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Web\EmptyUrlTokenUrlProvider.cs" />
     <Compile Include="Web\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\IUrlToken.cs" />
     <Compile Include="Web\IUrlTokenStore.cs" />
@@ -128,6 +128,7 @@
     <Compile Include="Web\UrlToken.cs" />
     <Compile Include="Web\UrlTokenRecord.cs" />
     <Compile Include="Web\UrlTokenStore.cs" />
+    <Compile Include="Web\UrlTokenUrlProvider.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Build\Sql\CreateDatabase.sql" />

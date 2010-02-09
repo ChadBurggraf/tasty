@@ -18,14 +18,16 @@ namespace Tasty.Test
         }
 
         [TestMethod]
-        public void UrlToken_ToUrl()
+        public void UrlToken_QueryStringUrlTokenUrlProvider()
         {
             TestIdUrlToken source = new TestIdUrlToken();
-            Uri uri = source.ToUrl(new QueryStringUrlTokenUrlProvider() { QueryStringKey = "tc", Url = new Uri("http://tastycodes.com/") });
-            IUrlToken result = UrlToken.FromUrl(uri, new QueryStringUrlTokenUrlProvider() { QueryStringKey = "tc" });
+            var provider = new QueryStringUrlTokenUrlProvider<TestIdUrlToken>() { QueryStringKey = "tc", Url = new Uri("http://tastycodes.com/") };
+            Uri url = provider.UrlFromToken(source);
+
+            TestIdUrlToken result = provider.TokenFromUrl(url);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(source.Id, ((TestIdUrlToken)result).Id);
+            Assert.AreEqual(source.Id, result.Id);
         }
 
         internal static void Store_CreateUrlToken(IUrlTokenStore store)

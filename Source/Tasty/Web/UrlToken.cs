@@ -84,7 +84,7 @@ namespace Tasty.Web
             {
                 UrlTokenRecord record = tokenStore.GetUrlToken(key);
 
-                if (record != null)
+                if (record != null && DateTime.UtcNow < record.Expires)
                 {
                     token = record.ToUrlToken();
                 }

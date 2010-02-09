@@ -2,9 +2,11 @@
 <Project ToolsVersion="3.5" DefaultTargets="Publish" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration>Release</Configuration>
+    <ConsoleKeyfile>Tasty.Console\Tasty.Console.snk</ConsoleKeyfile>
     <ConsoleProject>Tasty.Console\Tasty.Console.csproj</ConsoleProject>
     <ConsoleProjectOutputPath>Tasty.Console\bin\Release\</ConsoleProjectOutputPath>
     <ILMergePath>C:\Program Files\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
+    <LibraryKeyfile>Tasty\Tasty.snk</LibraryKeyfile>
     <LibraryProject>Tasty\Tasty.csproj</LibraryProject>
     <LibraryProjectOutputPath>Tasty\bin\Release\</LibraryProjectOutputPath>
     <PublishPath>..\Build\</PublishPath>
@@ -20,8 +22,8 @@
     <MSBuild Projects="$(ConsoleProject)" Properties="Configuration=$(Configuration)"/>
   </Target>
   <Target Name="Publish" DependsOnTargets="Build">
-    <Exec Command='"$(ILMergePath)" /ndebug /out:$(PublishPath)tasty.dll $(LibraryProjectOutputPath)tasty.dll $(LibraryProjectOutputPath)AWSSDK.dll $(LibraryProjectOutputPath)Ionic.Zlib.dll'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /out:$(PublishPath)tasty.exe $(ConsoleProjectOutputPath)tasty.exe $(ConsoleProjectOutputPath)tasty.dll $(ConsoleProjectOutputPath)AWSSDK.dll $(ConsoleProjectOutputPath)Ionic.Zlib.dll $(ConsoleProjectOutputPath)NDesk.Options.dll'/>
+    <Exec Command='"$(ILMergePath)" /keyfile:$(LibraryKeyfile) /ndebug /out:$(PublishPath)tasty.dll $(LibraryProjectOutputPath)tasty.dll $(LibraryProjectOutputPath)AWSSDK.dll $(LibraryProjectOutputPath)Ionic.Zlib.dll'/>
+    <Exec Command='"$(ILMergePath)" /keyfile:$(ConsoleKeyfile) /ndebug /out:$(PublishPath)tasty.exe $(ConsoleProjectOutputPath)tasty.exe $(ConsoleProjectOutputPath)tasty.dll $(ConsoleProjectOutputPath)AWSSDK.dll $(ConsoleProjectOutputPath)Ionic.Zlib.dll $(ConsoleProjectOutputPath)NDesk.Options.dll'/>
     <Copy SourceFiles="$(LibraryProjectOutputPath)tasty.xml" DestinationFiles="$(PublishPath)tasty.xml"/>
   </Target>
 </Project>

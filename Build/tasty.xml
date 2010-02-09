@@ -1545,6 +1545,53 @@
             <param name="dateTime">The DateTime object to convert.</param>
             <returns>A string representing the date in ISO 8601 format with unsaf path characters removed.</returns>
         </member>
+        <member name="T:Tasty.Web.EmptyUrlTokenUrlProvider">
+            <summary>
+            Implements <see cref="T:Tasty.Web.IUrlTokenUrlProvider"/> for non-tokenized URLs.
+            </summary>
+        </member>
+        <member name="T:Tasty.Web.IUrlTokenUrlProvider">
+            <summary>
+            Interface definition for URL providers for <see cref="T:Tasty.Web.IUrlToken"/>s.
+            </summary>
+        </member>
+        <member name="M:Tasty.Web.IUrlTokenUrlProvider.SeparateKey(System.Uri)">
+            <summary>
+            Separates a <see cref="T:Tasty.Web.IUrlToken"/> key out of the given URL.
+            Should return null or empty if no valid key could be found.
+            </summary>
+            <param name="uri">The URL to separate the key from.</param>
+            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> key, or null or empty if none was found.</returns>
+        </member>
+        <member name="M:Tasty.Web.IUrlTokenUrlProvider.UrlWithKey(System.String)">
+            <summary>
+            Creates a new <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded 
+            (e.g., as a query string parameter).
+            </summary>
+            <param name="key">The <see cref="T:Tasty.Web.IUrlToken"/> key to create the <see cref="T:System.Uri"/> with.</param>
+            <returns>A <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded.</returns>
+        </member>
+        <member name="M:Tasty.Web.EmptyUrlTokenUrlProvider.SeparateKey(System.Uri)">
+            <summary>
+            Separates a <see cref="T:Tasty.Web.IUrlToken"/> key out of the given URL.
+            Should return null or empty if no valid key could be found.
+            </summary>
+            <param name="uri">The URL to separate the key from.</param>
+            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> key, or null or empty if none was found.</returns>
+        </member>
+        <member name="M:Tasty.Web.EmptyUrlTokenUrlProvider.UrlWithKey(System.String)">
+            <summary>
+            Creates a new <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded 
+            (e.g., as a query string parameter).
+            </summary>
+            <param name="key">The <see cref="T:Tasty.Web.IUrlToken"/> key to create the <see cref="T:System.Uri"/> with.</param>
+            <returns>A <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded.</returns>
+        </member>
+        <member name="P:Tasty.Web.EmptyUrlTokenUrlProvider.Url">
+            <summary>
+            Gets or sets the URL to use when generating a URL with a URL token.
+            </summary>
+        </member>
         <member name="T:Tasty.Web.HttpCacheUrlTokenStore">
             <summary>
             Implements <see cref="T:Tasty.Web.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.IUrlToken"/>s
@@ -1647,27 +1694,6 @@
             <summary>
             Gets the number of hours from creation the URL token expires in.
             </summary>
-        </member>
-        <member name="T:Tasty.Web.IUrlTokenUrlProvider">
-            <summary>
-            Interface definition for URL providers for <see cref="T:Tasty.Web.IUrlToken"/>s.
-            </summary>
-        </member>
-        <member name="M:Tasty.Web.IUrlTokenUrlProvider.SeparateKey(System.Uri)">
-            <summary>
-            Separates a <see cref="T:Tasty.Web.IUrlToken"/> key out of the given URL.
-            Should return null or empty if no valid key could be found.
-            </summary>
-            <param name="uri">The URL to separate the key from.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> key, or null or empty if none was found.</returns>
-        </member>
-        <member name="M:Tasty.Web.IUrlTokenUrlProvider.UrlWithKey(System.String)">
-            <summary>
-            Creates a new <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded 
-            (e.g., as a query string parameter).
-            </summary>
-            <param name="key">The <see cref="T:Tasty.Web.IUrlToken"/> key to create the <see cref="T:System.Uri"/> with.</param>
-            <returns>A <see cref="T:System.Uri"/> with the given <see cref="T:Tasty.Web.IUrlToken"/> key embedded.</returns>
         </member>
         <member name="T:Tasty.Web.QueryString">
             <summary>
@@ -1828,13 +1854,13 @@
             <param name="value">The query string value to add.</param>
             <returns>The updated URL.</returns>
         </member>
-        <member name="M:Tasty.Web.Uris.AppendPath(System.UriBuilder,System.String)">
+        <member name="M:Tasty.Web.Uris.AppendPath(System.Uri,System.String)">
             <summary>
             Appens the given path to the URI's path.
             </summary>
-            <param name="builder">The URI to append the path to.</param>
+            <param name="uri">The URI to append the path to.</param>
             <param name="path">The path to append.</param>
-            <returns>A URI builder with the path appended.</returns>
+            <returns>A URI with the path appended.</returns>
         </member>
         <member name="M:Tasty.Web.Uris.Combine(System.String,System.String)">
             <summary>

@@ -1529,6 +1529,15 @@
             Provides extensions and helpers for primitive and built-in types.
             </summary>
         </member>
+        <member name="M:Tasty.Primitives.CopyProperties(System.Object,System.Object)">
+            <summary>
+            Copies any same-named property values from the source object to the destination object.
+            Each destination property must be of a type that is assignable from the type
+            of the corresponding source property.
+            </summary>
+            <param name="source">The source object to copy properties from.</param>
+            <param name="destination">The destination object to copy properties to.</param>
+        </member>
         <member name="M:Tasty.Primitives.FromHex(System.String)">
             <summary>
             Converts the given hex string to an array of bytes.

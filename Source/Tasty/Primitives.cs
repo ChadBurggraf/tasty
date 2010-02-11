@@ -9,6 +9,7 @@ namespace Tasty
     using System;
     using System.Globalization;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
 
@@ -17,6 +18,47 @@ namespace Tasty
     /// </summary>
     public static class Primitives
     {
+        /// <summary>
+        /// Copies any same-named property values from the source object to the destination object.
+        /// Each destination property must be of a type that is assignable from the type
+        /// of the corresponding source property.
+        /// </summary>
+        /// <param name="source">The source object to copy properties from.</param>
+        /// <param name="destination">The destination object to copy properties to.</param>
+        public static void CopyProperties(this object source, object destination)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source", "source must have a value.");
+            }
+
+            if (destination == null)
+            {
+                throw new ArgumentNullException("destination", "destination must have a value.");
+            }
+
+            var props = from s in source.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                        join d in destination.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public) on s.Name equals d.Name
+                        select new
+                        {
+                            SourceProp = s,
+                            DestProp = d
+                        };
+
+            foreach (var prop in props)
+            {
+                if (prop.DestProp.CanWrite && prop.SourceProp.CanRead)
+                {
+                    object value = prop.SourceProp.GetValue(source, null);
+
+                    if (prop.DestProp.PropertyType.IsAssignableFrom(prop.SourceProp.PropertyType))
+                    {
+                        prop.DestProp.SetValue(destination, value, null);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Converts the given hex string to an array of bytes.
         /// </summary>

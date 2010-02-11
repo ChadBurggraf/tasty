@@ -18,7 +18,7 @@ namespace Tasty.Web
     /// </summary>
     public class HttpCacheUrlTokenStore : IUrlTokenStore
     {
-        #region Private Fields
+        #region Fields
 
         private const string CacheKey = "Tasty.Web.HttpCacheUrlTokenStore";
         private static readonly object locker = new object();
@@ -97,14 +97,14 @@ namespace Tasty.Web
 
         #endregion
 
-        #region Private Static Methods
+        #region Protected Static Methods
 
         /// <summary>
         /// Gets the storage dictionary from the current <see cref="HttpRuntime.Cache"/>,
         /// creating it if it doesn't exist.
         /// </summary>
         /// <returns>The storage dictionary.</returns>
-        private static IDictionary<string, UrlTokenRecord> GetDictionary()
+        protected static IDictionary<string, UrlTokenRecord> GetDictionary()
         {
             IDictionary<string, UrlTokenRecord> dict = HttpRuntime.Cache[CacheKey] as IDictionary<string, UrlTokenRecord>;
 
@@ -122,7 +122,7 @@ namespace Tasty.Web
         /// Before saving, the dictionary is cleaned of any expired records.
         /// </summary>
         /// <param name="dictionary">The dictionary to save.</param>
-        private static void SaveDictionary(IDictionary<string, UrlTokenRecord> dictionary)
+        protected static void SaveDictionary(IDictionary<string, UrlTokenRecord> dictionary)
         {
             HttpRuntime.Cache.Insert(
                 CacheKey,

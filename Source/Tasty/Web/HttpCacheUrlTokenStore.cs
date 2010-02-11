@@ -30,7 +30,7 @@ namespace Tasty.Web
         /// <summary>
         /// Cleans all expired token records from the store.
         /// </summary>
-        public void CleanExpiredUrlTokens()
+        public virtual void CleanExpiredUrlTokens()
         {
             lock (locker)
             {
@@ -53,7 +53,7 @@ namespace Tasty.Web
         /// Creates a new URL token record.
         /// </summary>
         /// <param name="record">The URL token record to create.</param>
-        public void CreateUrlToken(UrlTokenRecord record)
+        public virtual void CreateUrlToken(UrlTokenRecord record)
         {
             if (record == null)
             {
@@ -80,7 +80,7 @@ namespace Tasty.Web
         /// </summary>
         /// <param name="key">The key of the record to get.</param>
         /// <returns>The URL token record identified by the given key.</returns>
-        public UrlTokenRecord GetUrlToken(string key)
+        public virtual UrlTokenRecord GetUrlToken(string key)
         {
             lock (locker)
             {

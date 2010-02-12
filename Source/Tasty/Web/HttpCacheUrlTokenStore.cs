@@ -18,10 +18,35 @@ namespace Tasty.Web
     /// </summary>
     public class HttpCacheUrlTokenStore : IUrlTokenStore
     {
-        #region Private Fields
+        #region Fields
 
         private const string CacheKey = "Tasty.Web.HttpCacheUrlTokenStore";
         private static readonly object locker = new object();
+
+        #endregion
+
+        #region Protected Static Properties
+
+        /// <summary>
+        /// Gets the storage dictionary from the current <see cref="HttpRuntime.Cache"/>,
+        /// creating it if it doesn't exist.
+        /// </summary>
+        /// <returns>The storage dictionary.</returns>
+        protected static IDictionary<string, UrlTokenRecord> Dictionary
+        {
+            get
+            {
+                IDictionary<string, UrlTokenRecord> dict = HttpRuntime.Cache[CacheKey] as IDictionary<string, UrlTokenRecord>;
+
+                if (dict == null)
+                {
+                    dict = new Dictionary<string, UrlTokenRecord>();
+                    SaveDictionary(dict);
+                }
+
+                return dict;
+            }
+        }
 
         #endregion
 
@@ -30,11 +55,11 @@ namespace Tasty.Web
         /// <summary>
         /// Cleans all expired token records from the store.
         /// </summary>
-        public void CleanExpiredUrlTokens()
+        public virtual void CleanExpiredUrlTokens()
         {
             lock (locker)
             {
-                IDictionary<string, UrlTokenRecord> dictionary = GetDictionary();
+                IDictionary<string, UrlTokenRecord> dictionary = Dictionary;
 
                 var expired = (from kv in dictionary
                                where kv.Value.Expires < DateTime.UtcNow
@@ -53,7 +78,7 @@ namespace Tasty.Web
         /// Creates a new URL token record.
         /// </summary>
         /// <param name="record">The URL token record to create.</param>
-        public void CreateUrlToken(UrlTokenRecord record)
+        public virtual void CreateUrlToken(UrlTokenRecord record)
         {
             if (record == null)
             {
@@ -67,7 +92,7 @@ namespace Tasty.Web
 
             lock (locker)
             {
-                IDictionary<string, UrlTokenRecord> dict = GetDictionary();
+                IDictionary<string, UrlTokenRecord> dict = Dictionary;
                 dict[record.Key] = new UrlTokenRecord(record);
                 SaveDictionary(dict);
             }
@@ -80,11 +105,11 @@ namespace Tasty.Web
         /// </summary>
         /// <param name="key">The key of the record to get.</param>
         /// <returns>The URL token record identified by the given key.</returns>
-        public UrlTokenRecord GetUrlToken(string key)
+        public virtual UrlTokenRecord GetUrlToken(string key)
         {
             lock (locker)
             {
-                IDictionary<string, UrlTokenRecord> dict = GetDictionary();
+                IDictionary<string, UrlTokenRecord> dict = Dictionary;
 
                 if (dict.ContainsKey(key))
                 {
@@ -97,32 +122,14 @@ namespace Tasty.Web
 
         #endregion
 
-        #region Private Static Methods
-
-        /// <summary>
-        /// Gets the storage dictionary from the current <see cref="HttpRuntime.Cache"/>,
-        /// creating it if it doesn't exist.
-        /// </summary>
-        /// <returns>The storage dictionary.</returns>
-        private static IDictionary<string, UrlTokenRecord> GetDictionary()
-        {
-            IDictionary<string, UrlTokenRecord> dict = HttpRuntime.Cache[CacheKey] as IDictionary<string, UrlTokenRecord>;
-
-            if (dict == null)
-            {
-                dict = new Dictionary<string, UrlTokenRecord>();
-                SaveDictionary(dict);
-            }
-
-            return dict;
-        }
+        #region Protected Static Methods
 
         /// <summary>
         /// Saves the updated storage dictionary to the current <see cref="HttpRuntime.Cache"/>.
         /// Before saving, the dictionary is cleaned of any expired records.
         /// </summary>
         /// <param name="dictionary">The dictionary to save.</param>
-        private static void SaveDictionary(IDictionary<string, UrlTokenRecord> dictionary)
+        protected static void SaveDictionary(IDictionary<string, UrlTokenRecord> dictionary)
         {
             HttpRuntime.Cache.Insert(
                 CacheKey,

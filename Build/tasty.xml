@@ -1689,6 +1689,15 @@
             Provides extensions and helpers for primitive and built-in types.
             </summary>
         </member>
+        <member name="M:Tasty.Primitives.CopyProperties(System.Object,System.Object)">
+            <summary>
+            Copies any same-named property values from the source object to the destination object.
+            Each destination property must be of a type that is assignable from the type
+            of the corresponding source property.
+            </summary>
+            <param name="source">The source object to copy properties from.</param>
+            <param name="destination">The destination object to copy properties to.</param>
+        </member>
         <member name="M:Tasty.Primitives.FromHex(System.String)">
             <summary>
             Converts the given hex string to an array of bytes.
@@ -1776,19 +1785,19 @@
             <param name="key">The key of the record to get.</param>
             <returns>The URL token record identified by the given key.</returns>
         </member>
-        <member name="M:Tasty.Web.HttpCacheUrlTokenStore.GetDictionary">
-            <summary>
-            Gets the storage dictionary from the current <see cref="P:System.Web.HttpRuntime.Cache"/>,
-            creating it if it doesn't exist.
-            </summary>
-            <returns>The storage dictionary.</returns>
-        </member>
         <member name="M:Tasty.Web.HttpCacheUrlTokenStore.SaveDictionary(System.Collections.Generic.IDictionary{System.String,Tasty.Web.UrlTokenRecord})">
             <summary>
             Saves the updated storage dictionary to the current <see cref="P:System.Web.HttpRuntime.Cache"/>.
             Before saving, the dictionary is cleaned of any expired records.
             </summary>
             <param name="dictionary">The dictionary to save.</param>
+        </member>
+        <member name="P:Tasty.Web.HttpCacheUrlTokenStore.Dictionary">
+            <summary>
+            Gets the storage dictionary from the current <see cref="P:System.Web.HttpRuntime.Cache"/>,
+            creating it if it doesn't exist.
+            </summary>
+            <returns>The storage dictionary.</returns>
         </member>
         <member name="T:Tasty.Web.IUrlToken">
             <summary>

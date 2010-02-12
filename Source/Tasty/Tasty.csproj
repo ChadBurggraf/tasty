@@ -47,6 +47,14 @@
     <Reference Include="Microsoft.Build.Utilities.v3.5">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Mono.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dependencies\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Npgsql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dependencies\Npgsql.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core">
@@ -111,7 +119,9 @@
     <Compile Include="Jobs\JobsInProcessModule.cs" />
     <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="Jobs\JobStore.cs" />
+    <Compile Include="Jobs\PostgresJobStore.cs" />
     <Compile Include="Jobs\ScheduledJob.cs" />
+    <Compile Include="Jobs\SqlJobStore.cs" />
     <Compile Include="Jobs\SqlServerJobStore.cs" />
     <Compile Include="NameValueCollections.cs" />
     <Compile Include="Primitives.cs" />
@@ -120,9 +130,11 @@
     <Compile Include="Web\IUrlToken.cs" />
     <Compile Include="Web\IUrlTokenStore.cs" />
     <Compile Include="Web\IUrlTokenUrlProvider.cs" />
+    <Compile Include="Web\PostgresUrlTokenStore.cs" />
     <Compile Include="Web\QueryString.cs" />
     <Compile Include="Web\QueryStringUrlTokenUrlProvider.cs" />
     <Compile Include="Web\SqlServerUrlTokenStore.cs" />
+    <Compile Include="Web\SqlUrlTokenStore.cs" />
     <Compile Include="Web\Uris.cs" />
     <Compile Include="Web\MimeType.cs" />
     <Compile Include="Web\UrlToken.cs" />
@@ -143,7 +155,9 @@
     <EmbeddedResource Include="Web\Sql\TastyUrlTokens-SqlServer.sql" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Jobs\Sql\TastyJobs-Postgres.sql" />
     <None Include="Tasty.snk" />
+    <EmbeddedResource Include="Web\Sql\TastyUrlTokens-Postgres.sql" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

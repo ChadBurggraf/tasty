@@ -1335,24 +1335,6 @@
             currently in use.
             </summary>
         </member>
-        <member name="M:Tasty.Jobs.JobStore.CreateRecordCollection(System.Data.DataTable)">
-            <summary>
-            Gets the given result set as a collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.
-            Assumes the result set has the expected schema definition.
-            </summary>
-            <param name="resultSet">The result set to convert into a collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.</param>
-            <returns>A collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.</returns>
-        </member>
-        <member name="M:Tasty.Jobs.JobStore.ParameterizeRecord``2(Tasty.Jobs.JobRecord,``0)">
-            <summary>
-            Parameterizes the given <see cref="T:Tasty.Jobs.JobRecord"/> into the given <see cref="T:System.Data.Common.DbCommand"/> object.
-            </summary>
-            <typeparam name="TCommand">The type of <see cref="T:System.Data.Common.DbCommand"/> to parameterize the record for.</typeparam>
-            <typeparam name="TParameter">The type of <see cref="T:System.Data.Common.DbParameter"/> to use with the given <see cref="T:System.Data.Common.DbCommand"/> type.</typeparam>
-            <param name="record">The <see cref="T:Tasty.Jobs.JobRecord"/> to parameterize.</param>
-            <param name="command">The <see cref="T:System.Data.Common.DbCommand"/> to add <see cref="T:System.Data.Common.DbParameter"/>s to.</param>
-            <returns>The parameterized <see cref="T:System.Data.Common.DbCommand"/>.</returns>
-        </member>
         <member name="P:Tasty.Jobs.JobStore.Current">
             <summary>
             Gets or sets the current <see cref="T:Tasty.Jobs.IJobStore"/> implementation in use.
@@ -1364,6 +1346,200 @@
             the configuration. Setting it later could cause persistence errors if any
             currently-executing jobs try to persist their update data to the new store.
             </remarks>
+        </member>
+        <member name="T:Tasty.Jobs.PostgresJobStore">
+            <summary>
+            Implements <see cref="T:Tasty.Jobs.IJobStore"/> for Postgres.
+            </summary>
+        </member>
+        <member name="T:Tasty.Jobs.SqlJobStore">
+            <summary>
+            Base class for <see cref="T:Tasty.Jobs.IJobStore"/> implementors that use a connection string to connect to a database.
+            </summary>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.#ctor">
+            <summary>
+            Initializes a new instance of the SqlJobStore class.
+            </summary>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the SqlJobStore class.
+            </summary>
+            <param name="connectionString">The connection string to use when connecting to the database.</param>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.CancelingJobs(System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
+            <summary>
+            Gets a collection of jobs that have been marked as <see cref="F:Tasty.Jobs.JobStatus.Canceling"/>.
+            Opens a new transaction, then calls the delegate to perform any work. The transaction
+            is committed when the delegate returns.
+            </summary>
+            <param name="ids">A collection of currently running job IDs.</param>
+            <param name="canceling">The function to call with the canceling job collection.</param>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.CreateJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Creates a new job record.
+            </summary>
+            <param name="record">The record to create.</param>
+            <returns>The created record.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.DequeueingJobs(System.Int32,System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
+            <summary>
+            Gets a collection of queued jobs that can be dequeued right now.
+            Opens a new transaction, then calls the delegate to perform any work. The transaction
+            is committed when the delegate returns.
+            </summary>
+            <param name="runsAvailable">The maximum number of job job runs currently available, as determined by
+            the <see cref="P:Tasty.Configuration.JobsElement.MaximumConcurrency"/> - the number of currently running jobs.</param>
+            <param name="dequeueing">The function to call with the dequeued job collection.</param>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.FinishingJobs(System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
+            <summary>
+            Gets a collection of jobs that have a status of <see cref="F:Tasty.Jobs.JobStatus.Started"/>.
+            Opens a new transaction, then calls the delegate to perform any work. The transaction
+            is committed when the delegate returns.
+            </summary>
+            <param name="ids">A collection of currently running job IDs.</param>
+            <param name="finishing">The function to call with the finishing job collection.</param>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.GetJob(System.Int32)">
+            <summary>
+            Gets a single job record with the given ID.
+            </summary>
+            <param name="id">The ID of the job record to get.</param>
+            <returns>The job record with the given ID, or null if none was found.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.GetLatestScheduledJobs">
+            <summary>
+            Gets the single most recently queued job for each unique schedule name in the system.
+            </summary>
+            <returns>A collection of queued scheduled jobs.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.TimingOutJobs(System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
+            <summary>
+            Gets a collection of jobs that have a status of <see cref="F:Tasty.Jobs.JobStatus.Started"/>
+            and can be timed out. Opens a new transaction, then calls the delegate to perform any work.
+            The transaction is committed when the delegate returns.
+            </summary>
+            <param name="ids">A collection of currently running job IDs.</param>
+            <param name="timingOut">The function to call with the timing-out job collection.</param>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.UpdateJobs(System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord},System.Action{Tasty.Jobs.JobRecord})">
+            <summary>
+            Updates a collection of jobs. Opens a new transaction, then calls the delegate to perform
+            any work on each record. The transaction is committed when all of the records have been iterated through.
+            </summary>
+            <param name="records">The records to update.</param>
+            <param name="updating">The function to call for each iteration, which should perform any updates necessary on the job record.</param>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.CreateRecordCollection(System.Data.DataTable)">
+            <summary>
+            Gets the given result set as a collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.
+            Assumes the result set has the expected schema definition.
+            </summary>
+            <param name="resultSet">The result set to convert into a collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.</param>
+            <returns>A collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.DelegatedSetSelect(Tasty.Jobs.JobStatus,System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
+            <summary>
+            Common delegated set select implementation (i.e., Canceling or Finishing).
+            </summary>
+            <param name="status">The <see cref="T:Tasty.Jobs.JobStatus"/> to filter the result set on.</param>
+            <param name="ids">The ID set to filter the result set on.</param>
+            <param name="delegating">The delegate action to perform with the result set.</param>
+        </member>
+        <member name="M:Tasty.Jobs.SqlJobStore.EnsureConnectionString">
+            <summary>
+            Ensures that a connection string is configured.
+            </summary>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="P:Tasty.Jobs.SqlJobStore.ConnectionString">
+            <summary>
+            Gets or sets the connection string to use when connecting to the database.
+            </summary>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.#ctor">
+            <summary>
+            Initializes a new instance of the PostgresJobStore class.
+            </summary>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the PostgresJobStore class.
+            </summary>
+            <param name="connectionString">The connection string to use when connecting to the database.</param>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.CreateJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Creates a new job record.
+            </summary>
+            <param name="record">The record to create.</param>
+            <returns>The created record.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.DequeueingJobs(System.Int32,System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
+            <summary>
+            Gets a collection of queued jobs that can be dequeued right now.
+            Opens a new transaction, then calls the delegate to perform any work. The transaction
+            is committed when the delegate returns.
+            </summary>
+            <param name="runsAvailable">The maximum number of job job runs currently available, as determined by
+            the <see cref="P:Tasty.Configuration.JobsElement.MaximumConcurrency"/> - the number of currently running jobs.</param>
+            <param name="dequeueing">The function to call with the dequeued job collection.</param>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.GetJob(System.Int32)">
+            <summary>
+            Gets a single job record with the given ID.
+            </summary>
+            <param name="id">The ID of the job record to get.</param>
+            <returns>The job record with the given ID, or null if none was found.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.GetLatestScheduledJobs">
+            <summary>
+            Gets the single most recently queued job for each unique schedule name in the system.
+            </summary>
+            <returns>A collection of queued scheduled jobs.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.UpdateJobs(System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord},System.Action{Tasty.Jobs.JobRecord})">
+            <summary>
+            Updates a collection of jobs. Opens a new transaction, then calls the delegate to perform
+            any work on each record. The transaction is committed when all of the records have been iterated through.
+            </summary>
+            <param name="records">The records to update.</param>
+            <param name="updating">The function to call for each iteration, which should perform any updates necessary on the job record.</param>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.CreateRecordCollection(System.Data.DataTable)">
+            <summary>
+            Gets the given result set as a collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.
+            Assumes the result set has the expected schema definition.
+            </summary>
+            <param name="resultSet">The result set to convert into a collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.</param>
+            <returns>A collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.DelegatedSetSelect(Tasty.Jobs.JobStatus,System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
+            <summary>
+            Common delegated set select implementation (i.e., Canceling or Finishing).
+            </summary>
+            <param name="status">The <see cref="T:Tasty.Jobs.JobStatus"/> to filter the result set on.</param>
+            <param name="ids">The ID set to filter the result set on.</param>
+            <param name="delegating">The delegate action to perform with the result set.</param>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.InsertCommand(Tasty.Jobs.JobRecord,Npgsql.NpgsqlConnection)">
+            <summary>
+            Creates a new <see cref="T:Npgsql.NpgsqlCommand"/> for inserting the given <see cref="T:Tasty.Jobs.JobRecord"/> into the database.
+            </summary>
+            <param name="record">The record to create the command for.</param>
+            <param name="connection">The connection to use when creating the command.</param>
+            <returns>A new INSERT <see cref="T:Npgsql.NpgsqlCommand"/>.</returns>
+        </member>
+        <member name="M:Tasty.Jobs.PostgresJobStore.ParameterizeRecord(Tasty.Jobs.JobRecord,Npgsql.NpgsqlCommand)">
+            <summary>
+            Parameterizes the given <see cref="T:Tasty.Jobs.JobRecord"/> into the given <see cref="T:Npgsql.NpgsqlCommand"/> object.
+            </summary>
+            <param name="record">The <see cref="T:Tasty.Jobs.JobRecord"/> to parameterize.</param>
+            <param name="command">The <see cref="T:Npgsql.NpgsqlCommand"/> to add <see cref="T:Npgsql.NpgsqlParameter"/>s to.</param>
+            <returns>The parameterized <see cref="T:Npgsql.NpgsqlCommand"/>.</returns>
         </member>
         <member name="T:Tasty.Jobs.ScheduledJob">
             <summary>
@@ -1403,14 +1579,11 @@
             Initializes a new instance of the SqlServerJobStore class.
             </summary>
         </member>
-        <member name="M:Tasty.Jobs.SqlServerJobStore.CancelingJobs(System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
+        <member name="M:Tasty.Jobs.SqlServerJobStore.#ctor(System.String)">
             <summary>
-            Gets a collection of jobs that have been marked as <see cref="F:Tasty.Jobs.JobStatus.Canceling"/>.
-            Opens a new transaction, then calls the delegate to perform any work. The transaction
-            is committed when the delegate returns.
+            Initializes a new instance of the SqlServerJobStore class.
             </summary>
-            <param name="ids">A collection of currently running job IDs.</param>
-            <param name="canceling">The function to call with the canceling job collection.</param>
+            <param name="connectionString">The connection string to use when connecting to the database.</param>
         </member>
         <member name="M:Tasty.Jobs.SqlServerJobStore.CreateJob(Tasty.Jobs.JobRecord)">
             <summary>
@@ -1429,15 +1602,6 @@
             the <see cref="P:Tasty.Configuration.JobsElement.MaximumConcurrency"/> - the number of currently running jobs.</param>
             <param name="dequeueing">The function to call with the dequeued job collection.</param>
         </member>
-        <member name="M:Tasty.Jobs.SqlServerJobStore.FinishingJobs(System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
-            <summary>
-            Gets a collection of jobs that have a status of <see cref="F:Tasty.Jobs.JobStatus.Started"/>.
-            Opens a new transaction, then calls the delegate to perform any work. The transaction
-            is committed when the delegate returns.
-            </summary>
-            <param name="ids">A collection of currently running job IDs.</param>
-            <param name="finishing">The function to call with the finishing job collection.</param>
-        </member>
         <member name="M:Tasty.Jobs.SqlServerJobStore.GetJob(System.Int32)">
             <summary>
             Gets a single job record with the given ID.
@@ -1451,15 +1615,6 @@
             </summary>
             <returns>A collection of queued scheduled jobs.</returns>
         </member>
-        <member name="M:Tasty.Jobs.SqlServerJobStore.TimingOutJobs(System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
-            <summary>
-            Gets a collection of jobs that have a status of <see cref="F:Tasty.Jobs.JobStatus.Started"/>
-            and can be timed out. Opens a new transaction, then calls the delegate to perform any work.
-            The transaction is committed when the delegate returns.
-            </summary>
-            <param name="ids">A collection of currently running job IDs.</param>
-            <param name="timingOut">The function to call with the timing-out job collection.</param>
-        </member>
         <member name="M:Tasty.Jobs.SqlServerJobStore.UpdateJobs(System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord},System.Action{Tasty.Jobs.JobRecord})">
             <summary>
             Updates a collection of jobs. Opens a new transaction, then calls the delegate to perform
@@ -1468,13 +1623,13 @@
             <param name="records">The records to update.</param>
             <param name="updating">The function to call for each iteration, which should perform any updates necessary on the job record.</param>
         </member>
-        <member name="M:Tasty.Jobs.SqlServerJobStore.InsertCommand(Tasty.Jobs.JobRecord,System.Data.SqlClient.SqlConnection)">
+        <member name="M:Tasty.Jobs.SqlServerJobStore.CreateRecordCollection(System.Data.DataTable)">
             <summary>
-            Creates a new <see cref="T:System.Data.SqlClient.SqlCommand"/> for inserting the given <see cref="T:Tasty.Jobs.JobRecord"/> into the database.
+            Gets the given result set as a collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.
+            Assumes the result set has the expected schema definition.
             </summary>
-            <param name="record">The record to create the command for.</param>
-            <param name="connection">The connection to use when creating the command.</param>
-            <returns>A new INSERT <see cref="T:System.Data.SqlClient.SqlCommand"/>.</returns>
+            <param name="resultSet">The result set to convert into a collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.</param>
+            <returns>A collection of <see cref="T:Tasty.Jobs.JobRecord"/>s.</returns>
         </member>
         <member name="M:Tasty.Jobs.SqlServerJobStore.DelegatedSetSelect(Tasty.Jobs.JobStatus,System.Collections.Generic.IEnumerable{System.Int32},System.Action{System.Collections.Generic.IEnumerable{Tasty.Jobs.JobRecord}})">
             <summary>
@@ -1484,16 +1639,21 @@
             <param name="ids">The ID set to filter the result set on.</param>
             <param name="delegating">The delegate action to perform with the result set.</param>
         </member>
-        <member name="M:Tasty.Jobs.SqlServerJobStore.EnsureConnectionString">
+        <member name="M:Tasty.Jobs.SqlServerJobStore.InsertCommand(Tasty.Jobs.JobRecord,System.Data.SqlClient.SqlConnection)">
             <summary>
-            Ensures that a connection string is configured.
+            Creates a new <see cref="T:System.Data.SqlClient.SqlCommand"/> for inserting the given <see cref="T:Tasty.Jobs.JobRecord"/> into the database.
             </summary>
-            <exception cref="T:System.InvalidOperationException"></exception>
+            <param name="record">The record to create the command for.</param>
+            <param name="connection">The connection to use when creating the command.</param>
+            <returns>A new INSERT <see cref="T:System.Data.SqlClient.SqlCommand"/>.</returns>
         </member>
-        <member name="P:Tasty.Jobs.SqlServerJobStore.ConnectionString">
+        <member name="M:Tasty.Jobs.SqlServerJobStore.ParameterizeRecord(Tasty.Jobs.JobRecord,System.Data.SqlClient.SqlCommand)">
             <summary>
-            Gets or sets the connection string to use when connecting to the database.
+            Parameterizes the given <see cref="T:Tasty.Jobs.JobRecord"/> into the given <see cref="T:System.Data.SqlClient.SqlCommand"/> object.
             </summary>
+            <param name="record">The <see cref="T:Tasty.Jobs.JobRecord"/> to parameterize.</param>
+            <param name="command">The <see cref="T:System.Data.SqlClient.SqlCommand"/> to add <see cref="T:System.Data.SqlClient.SqlParameter"/>s to.</param>
+            <returns>The parameterized <see cref="T:System.Data.SqlClient.SqlCommand"/>.</returns>
         </member>
         <member name="T:Tasty.NameValueCollections">
             <summary>
@@ -1690,6 +1850,67 @@
             <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when saving token data.</param>
             <returns>The generated <see cref="T:System.Uri"/>.</returns>
         </member>
+        <member name="T:Tasty.Web.PostgresUrlTokenStore">
+            <summary>
+            Implements <see cref="T:Tasty.Web.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.IUrlToken"/>s to PostgreSQL.
+            </summary>
+        </member>
+        <member name="T:Tasty.Web.SqlUrlTokenStore">
+            <summary>
+            Base class for <see cref="T:Tasty.Web.IUrlTokenStore"/> implementors that use a connection string to connect to a database.
+            </summary>
+        </member>
+        <member name="M:Tasty.Web.SqlUrlTokenStore.#ctor">
+            <summary>
+            Initializes a new instance of the SqlUrlTokenStore class.
+            </summary>
+        </member>
+        <member name="M:Tasty.Web.SqlUrlTokenStore.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the SqlUrlTokenStore class.
+            </summary>
+            <param name="connectionString">The connection string to use when connecting to the database.</param>
+        </member>
+        <member name="M:Tasty.Web.SqlUrlTokenStore.EnsureConnectionString">
+            <summary>
+            Ensures that a connection string is configured.
+            </summary>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="P:Tasty.Web.SqlUrlTokenStore.ConnectionString">
+            <summary>
+            Gets or sets the connection string to use when connecting to the database.
+            </summary>
+        </member>
+        <member name="M:Tasty.Web.PostgresUrlTokenStore.#ctor">
+            <summary>
+            Initializes a new instance of the PostgresUrlTokenStore class.
+            </summary>
+        </member>
+        <member name="M:Tasty.Web.PostgresUrlTokenStore.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the PostgresUrlTokenStore class.
+            </summary>
+            <param name="connectionString">The connection string to use when connecting to the database.</param>
+        </member>
+        <member name="M:Tasty.Web.PostgresUrlTokenStore.CleanExpiredUrlTokens">
+            <summary>
+            Cleans all expired token records from the store.
+            </summary>
+        </member>
+        <member name="M:Tasty.Web.PostgresUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokenRecord)">
+            <summary>
+            Creates a new URL token record.
+            </summary>
+            <param name="record">The URL token record to create.</param>
+        </member>
+        <member name="M:Tasty.Web.PostgresUrlTokenStore.GetUrlToken(System.String)">
+            <summary>
+            Gets a URL token record.
+            </summary>
+            <param name="key">The key of the record to get.</param>
+            <returns>The URL token record identified by the given key.</returns>
+        </member>
         <member name="T:Tasty.Web.QueryString">
             <summary>
             Represents a URL query string as a key/value collection.
@@ -1831,13 +2052,19 @@
         </member>
         <member name="T:Tasty.Web.SqlServerUrlTokenStore">
             <summary>
-            Implements <see cref="T:Tasty.Web.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.IUrlToken"/>s to the SQL Server.
+            Implements <see cref="T:Tasty.Web.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.IUrlToken"/>s to SQL Server.
             </summary>
         </member>
         <member name="M:Tasty.Web.SqlServerUrlTokenStore.#ctor">
             <summary>
             Initializes a new instance of the SqlServerUrlTokenStore class.
             </summary>
+        </member>
+        <member name="M:Tasty.Web.SqlServerUrlTokenStore.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the SqlServerUrlTokenStore class.
+            </summary>
+            <param name="connectionString">The connection string to use when connecting to the database.</param>
         </member>
         <member name="M:Tasty.Web.SqlServerUrlTokenStore.CleanExpiredUrlTokens">
             <summary>
@@ -1856,23 +2083,6 @@
             </summary>
             <param name="key">The key of the record to get.</param>
             <returns>The URL token record identified by the given key.</returns>
-        </member>
-        <member name="M:Tasty.Web.SqlServerUrlTokenStore.CleanExpiredUrlTokens(System.Data.SqlClient.SqlConnection)">
-            <summary>
-            Cleans all expired token records from the store.
-            </summary>
-            <param name="connection">The <see cref="T:System.Data.SqlClient.SqlConnection"/> to use when connecting to the database.</param>
-        </member>
-        <member name="M:Tasty.Web.SqlServerUrlTokenStore.EnsureConnectionString">
-            <summary>
-            Ensures that a connection string is configured.
-            </summary>
-            <exception cref="T:System.InvalidOperationException"></exception>
-        </member>
-        <member name="P:Tasty.Web.SqlServerUrlTokenStore.ConnectionString">
-            <summary>
-            Gets or sets the connection string to use when connecting to the database.
-            </summary>
         </member>
         <member name="T:Tasty.Web.Uris">
             <summary>
@@ -2111,16 +2321,6 @@
             </summary>
             <param name="resultSet">The result set to convert into a collection of <see cref="T:Tasty.Web.UrlTokenRecord"/>s.</param>
             <returns>A collection of <see cref="T:Tasty.Web.UrlTokenRecord"/>s.</returns>
-        </member>
-        <member name="M:Tasty.Web.UrlTokenStore.ParameterizeRecord``2(Tasty.Web.UrlTokenRecord,``0)">
-            <summary>
-            Parameterizes the given <see cref="T:Tasty.Web.UrlTokenRecord"/> into the given <see cref="T:System.Data.Common.DbCommand"/> object.
-            </summary>
-            <typeparam name="TCommand">The type of <see cref="T:System.Data.Common.DbCommand"/> to parameterize the record for.</typeparam>
-            <typeparam name="TParameter">The type of <see cref="T:System.Data.Common.DbParameter"/> to use with the given <see cref="T:System.Data.Common.DbCommand"/> type.</typeparam>
-            <param name="record">The <see cref="T:Tasty.Web.UrlTokenRecord"/> to parameterize.</param>
-            <param name="command">The <see cref="T:System.Data.Common.DbCommand"/> to add <see cref="T:System.Data.Common.DbParameter"/>s to.</param>
-            <returns>The parameterized <see cref="T:System.Data.Common.DbCommand"/>.</returns>
         </member>
         <member name="P:Tasty.Web.UrlTokenStore.Current">
             <summary>

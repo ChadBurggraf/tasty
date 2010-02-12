@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SqlServerJobStore.cs" company="Tasty Codes">
+// <copyright file="PostgresJobStore.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -10,31 +10,33 @@ namespace Tasty.Jobs
     using System.Collections.Generic;
     using System.Configuration;
     using System.Data;
-    using System.Data.SqlClient;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
-    using Tasty.Configuration;  
+    using Npgsql;
+    using Tasty.Configuration;
 
     /// <summary>
-    /// Implements <see cref="IJobStore"/> for SQL Server.
+    /// Implements <see cref="IJobStore"/> for Postgres.
     /// </summary>
-    public class SqlServerJobStore : SqlJobStore
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+    public class PostgresJobStore : SqlJobStore
     {
         #region Construction
 
         /// <summary>
-        /// Initializes a new instance of the SqlServerJobStore class.
+        /// Initializes a new instance of the PostgresJobStore class.
         /// </summary>
-        public SqlServerJobStore()
+        public PostgresJobStore()
             : this(TastySettings.GetConnectionStringFromMetadata(TastySettings.Section.Jobs.Store.Metadata))
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the SqlServerJobStore class.
+        /// Initializes a new instance of the PostgresJobStore class.
         /// </summary>
         /// <param name="connectionString">The connection string to use when connecting to the database.</param>
-        public SqlServerJobStore(string connectionString)
+        public PostgresJobStore(string connectionString)
         {
             this.ConnectionString = connectionString;
         }
@@ -52,18 +54,19 @@ namespace Tasty.Jobs
         {
             this.EnsureConnectionString();
 
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {
                 connection.Open();
 
-                using (SqlCommand command = InsertCommand(record, connection))
+                using (NpgsqlCommand command = InsertCommand(record, connection))
                 {
-                    SqlParameter id = new SqlParameter("@Id", SqlDbType.Int);
-                    id.Direction = ParameterDirection.Output;
-                    command.Parameters.Add(id);
-
-                    command.ExecuteNonQuery();
-                    record.Id = (int)id.Value;
+                    using (NpgsqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            record.Id = Convert.ToInt32(reader[0], CultureInfo.InvariantCulture);
+                        }
+                    }
                 }
             }
 
@@ -87,21 +90,21 @@ namespace Tasty.Jobs
 
             this.EnsureConnectionString();
 
-            const string Sql = "SELECT TOP {0} * FROM [TastyJob] WHERE [Status]='Queued' ORDER BY [QueueDate]";
+            const string Sql = "SELECT * FROM \"tasty_job\" WHERE \"status\"='Queued' ORDER BY \"queue_date\" LIMIT {0}";
 
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {
                 connection.Open();
-                SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted, "TastyDequeueJobs");
+                NpgsqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
 
                 try
                 {
-                    SqlCommand command = connection.CreateCommand();
+                    NpgsqlCommand command = connection.CreateCommand();
                     command.Transaction = transaction;
                     command.CommandType = CommandType.Text;
                     command.CommandText = String.Format(CultureInfo.InvariantCulture, Sql, runsAvailable);
 
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command))
                     {
                         DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
                         adapter.Fill(results);
@@ -133,19 +136,19 @@ namespace Tasty.Jobs
 
             this.EnsureConnectionString();
 
-            const string Sql = "SELECT TOP 1 * FROM [TastyJob] WHERE [Id] = @Id";
+            const string Sql = "SELECT * FROM \"tasty_job\" WHERE \"id\" = :id LIMIT 1";
 
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {
                 connection.Open();
 
-                using (SqlCommand command = connection.CreateCommand())
+                using (NpgsqlCommand command = connection.CreateCommand())
                 {
                     command.CommandType = CommandType.Text;
                     command.CommandText = Sql;
-                    command.Parameters.Add(new SqlParameter("@Id", id));
+                    command.Parameters.Add(new NpgsqlParameter(":id", id));
 
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command))
                     {
                         DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
                         adapter.Fill(results);
@@ -164,24 +167,24 @@ namespace Tasty.Jobs
         {
             this.EnsureConnectionString();
 
-            const string Sql = 
+            const string Sql =
                 @"SELECT * FROM (
-	                SELECT *, RANK() OVER (PARTITION BY [Type],[ScheduleName] ORDER BY [QueueDate] DESC) AS [Rank]
-	                FROM [TastyJob]
+	                SELECT *, rank() OVER (PARTITION BY ""type"", ""schedule_name"" ORDER BY ""queue_date"" DESC)
+	                FROM ""tasty_job""
 	                WHERE
-		                [ScheduleName] IS NOT NULL
-                ) t WHERE [Rank] = 1";
+		                ""schedule_name"" IS NOT NULL
+                ) AS t WHERE ""rank"" = 1";
 
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {
                 connection.Open();
 
-                using (SqlCommand command = connection.CreateCommand())
+                using (NpgsqlCommand command = connection.CreateCommand())
                 {
                     command.CommandType = CommandType.Text;
                     command.CommandText = Sql;
 
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command))
                     {
                         DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
                         adapter.Fill(results);
@@ -202,12 +205,12 @@ namespace Tasty.Jobs
         {
             this.EnsureConnectionString();
 
-            const string Sql = "UPDATE [TastyJob] SET [Name]=@Name,[Type]=@Type,[Data]=@Data,[Status]=@Status,[Exception]=@Exception,[QueueDate]=@QueueDate,[StartDate]=@StartDate,[FinishDate]=@FinishDate,[ScheduleName]=@ScheduleName WHERE [Id]=@Id";
-            
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            const string Sql = "UPDATE \"tasty_job\" SET \"name\"=:name,\"type\"=:type,\"data\"=:data,\"status\"=:status,\"exception\"=:exception,\"queue_date\"=:queue_date,\"start_date\"=:start_date,\"finish_date\"=:finish_date,\"schedule_name\"=:schedule_name WHERE \"id\"=:id";
+
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {
                 connection.Open();
-                SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted, "TastyUpdateJobs");
+                NpgsqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
 
                 try
                 {
@@ -218,12 +221,12 @@ namespace Tasty.Jobs
                             updating(record);
                         }
 
-                        SqlCommand command = connection.CreateCommand();
+                        NpgsqlCommand command = connection.CreateCommand();
                         command.Transaction = transaction;
                         command.CommandType = CommandType.Text;
                         command.CommandText = Sql;
 
-                        command.Parameters.Add(new SqlParameter("@Id", record.Id.Value));
+                        command.Parameters.Add(new NpgsqlParameter(":id", record.Id.Value));
                         ParameterizeRecord(record, command).ExecuteNonQuery();
                     }
 
@@ -252,16 +255,16 @@ namespace Tasty.Jobs
             return from DataRow row in resultSet.Rows
                    select new JobRecord()
                    {
-                       Id = (int)row["Id"],
-                       Name = (string)row["Name"],
-                       JobType = Type.GetType((string)row["Type"]),
-                       Data = (string)row["Data"],
-                       Status = (JobStatus)Enum.Parse(typeof(JobStatus), (string)row["Status"]),
-                       Exception = (row["Exception"] != DBNull.Value) ? (string)row["Exception"] : null,
-                       QueueDate = new DateTime(((DateTime)row["QueueDate"]).Ticks, DateTimeKind.Utc),
-                       StartDate = (DateTime?)(row["StartDate"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["StartDate"]).Ticks, DateTimeKind.Utc) : null),
-                       FinishDate = (DateTime?)(row["FinishDate"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["FinishDate"]).Ticks, DateTimeKind.Utc) : null),
-                       ScheduleName = (row["ScheduleName"] != DBNull.Value) ? (string)row["ScheduleName"] : null
+                       Id = (int)row["id"],
+                       Name = (string)row["name"],
+                       JobType = Type.GetType((string)row["type"]),
+                       Data = (string)row["data"],
+                       Status = (JobStatus)Enum.Parse(typeof(JobStatus), (string)row["status"]),
+                       Exception = (row["exception"] != DBNull.Value) ? (string)row["exception"] : null,
+                       QueueDate = new DateTime(((DateTime)row["queue_date"]).Ticks, DateTimeKind.Utc),
+                       StartDate = (DateTime?)(row["start_date"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["start_date"]).Ticks, DateTimeKind.Utc) : null),
+                       FinishDate = (DateTime?)(row["finish_date"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["finish_date"]).Ticks, DateTimeKind.Utc) : null),
+                       ScheduleName = (row["schedule_name"] != DBNull.Value) ? (string)row["schedule_name"] : null
                    };
         }
 
@@ -275,28 +278,27 @@ namespace Tasty.Jobs
         {
             this.EnsureConnectionString();
 
-            const string Sql = "SELECT * FROM [TastyJob] WHERE [Status]='{0}' AND [Id] IN ( {1} ) ORDER BY [QueueDate]";
+            const string Sql = "SELECT * FROM \"tasty_job\" WHERE \"status\"='{0}' AND \"id\" IN ( {1} ) ORDER BY \"queue_date\"";
 
             string[] jobIds = (from id in ids
                                select id.ToString(CultureInfo.InvariantCulture)).ToArray();
 
             if (jobIds.Length > 0)
             {
-                using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+                using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
                 {
                     connection.Open();
 
-                    string transactionName = String.Format(CultureInfo.InvariantCulture, "Tasty{0}Jobs", status);
-                    SqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted, transactionName);
+                    NpgsqlTransaction transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
 
                     try
                     {
-                        SqlCommand command = connection.CreateCommand();
+                        NpgsqlCommand command = connection.CreateCommand();
                         command.Transaction = transaction;
                         command.CommandType = CommandType.Text;
                         command.CommandText = String.Format(CultureInfo.InvariantCulture, Sql, status, String.Join(", ", jobIds));
 
-                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                        using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command))
                         {
                             DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
                             adapter.Fill(results);
@@ -324,16 +326,16 @@ namespace Tasty.Jobs
         #region Private Static Methods
 
         /// <summary>
-        /// Creates a new <see cref="SqlCommand"/> for inserting the given <see cref="JobRecord"/> into the database.
+        /// Creates a new <see cref="NpgsqlCommand"/> for inserting the given <see cref="JobRecord"/> into the database.
         /// </summary>
         /// <param name="record">The record to create the command for.</param>
         /// <param name="connection">The connection to use when creating the command.</param>
-        /// <returns>A new INSERT <see cref="SqlCommand"/>.</returns>
-        private static SqlCommand InsertCommand(JobRecord record, SqlConnection connection)
+        /// <returns>A new INSERT <see cref="NpgsqlCommand"/>.</returns>
+        private static NpgsqlCommand InsertCommand(JobRecord record, NpgsqlConnection connection)
         {
-            const string Sql = "INSERT INTO [TastyJob]([Name],[Type],[Data],[Status],[Exception],[QueueDate],[StartDate],[FinishDate],[ScheduleName]) VALUES(@Name,@Type,@Data,@Status,@Exception,@QueueDate,@StartDate,@FinishDate,@ScheduleName); SET @Id=SCOPE_IDENTITY()";
+            const string Sql = "INSERT INTO \"tasty_job\"(\"name\",\"type\",\"data\",\"status\",\"exception\",\"queue_date\",\"start_date\",\"finish_date\",\"schedule_name\") VALUES(:name,:type,:data,:status,:exception,:queue_date,:start_date,:finish_date,:schedule_name); SELECT currval('tasty_job_id_seq') AS \"id\";";
 
-            SqlCommand command = connection.CreateCommand();
+            NpgsqlCommand command = connection.CreateCommand();
             command.CommandType = CommandType.Text;
             command.CommandText = Sql;
 
@@ -341,19 +343,19 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Parameterizes the given <see cref="JobRecord"/> into the given <see cref="SqlCommand"/> object.
+        /// Parameterizes the given <see cref="JobRecord"/> into the given <see cref="NpgsqlCommand"/> object.
         /// </summary>
         /// <param name="record">The <see cref="JobRecord"/> to parameterize.</param>
-        /// <param name="command">The <see cref="SqlCommand"/> to add <see cref="SqlParameter"/>s to.</param>
-        /// <returns>The parameterized <see cref="SqlCommand"/>.</returns>
-        private static SqlCommand ParameterizeRecord(JobRecord record, SqlCommand command)
+        /// <param name="command">The <see cref="NpgsqlCommand"/> to add <see cref="NpgsqlParameter"/>s to.</param>
+        /// <returns>The parameterized <see cref="NpgsqlCommand"/>.</returns>
+        private static NpgsqlCommand ParameterizeRecord(JobRecord record, NpgsqlCommand command)
         {
-            command.Parameters.Add(new SqlParameter("@Name", record.Name));
-            command.Parameters.Add(new SqlParameter("@Type", record.JobType.AssemblyQualifiedName));
-            command.Parameters.Add(new SqlParameter("@Data", record.Data));
-            command.Parameters.Add(new SqlParameter("@Status", record.Status.ToString()));
+            command.Parameters.Add(new NpgsqlParameter(":name", record.Name));
+            command.Parameters.Add(new NpgsqlParameter(":type", record.JobType.AssemblyQualifiedName));
+            command.Parameters.Add(new NpgsqlParameter(":data", record.Data));
+            command.Parameters.Add(new NpgsqlParameter(":status", record.Status.ToString()));
 
-            var exception = new SqlParameter("@Exception", record.Exception);
+            var exception = new NpgsqlParameter(":exception", record.Exception);
 
             if (String.IsNullOrEmpty(record.Exception))
             {
@@ -361,9 +363,9 @@ namespace Tasty.Jobs
             }
 
             command.Parameters.Add(exception);
-            command.Parameters.Add(new SqlParameter("@QueueDate", record.QueueDate));
+            command.Parameters.Add(new NpgsqlParameter(":queue_date", record.QueueDate));
 
-            var startDate = new SqlParameter("@StartDate", record.StartDate);
+            var startDate = new NpgsqlParameter(":start_date", record.StartDate);
 
             if (record.StartDate == null)
             {
@@ -372,7 +374,7 @@ namespace Tasty.Jobs
 
             command.Parameters.Add(startDate);
 
-            var finishDate = new SqlParameter("@FinishDate", record.FinishDate);
+            var finishDate = new NpgsqlParameter(":finish_date", record.FinishDate);
 
             if (record.FinishDate == null)
             {
@@ -381,7 +383,7 @@ namespace Tasty.Jobs
 
             command.Parameters.Add(finishDate);
 
-            var scheduleName = new SqlParameter("@ScheduleName", record.ScheduleName);
+            var scheduleName = new NpgsqlParameter(":schedule_name", record.ScheduleName);
 
             if (String.IsNullOrEmpty(record.ScheduleName))
             {

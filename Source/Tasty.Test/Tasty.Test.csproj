@@ -63,6 +63,9 @@
     <Compile Include="HttpCacheUrlTokenStoreTests.cs" />
     <Compile Include="HttpTests.cs" />
     <Compile Include="JobRunnerTests.cs" />
+    <Compile Include="JobStoreTests.cs" />
+    <Compile Include="PostgresJobStoreTests.cs" />
+    <Compile Include="PostgresUrlTokenStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S3PublisherTests.cs" />
     <Compile Include="ScheduledJobTests.cs" />

@@ -19,7 +19,7 @@ namespace Tasty.Test
 
         static Bootstrapper()
         {
-            var cs = ConfigurationManager.ConnectionStrings["LocalSqlServer"].ConnectionString.SplitConnectionString();
+            var cs = ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString.SplitConnectionString();
 
             ConnectionString = cs.ToConnectionString();
             CreateDropConnectionString = cs.Without("initial catalog").ToConnectionString();
@@ -32,7 +32,7 @@ namespace Tasty.Test
         [AssemblyInitialize]
         public static void AssemblyInitialize(TestContext textContext)
         {
-            CreateTestDatabase();
+            //CreateTestDatabase();
         }
 
         private static void CreateTestDatabase()

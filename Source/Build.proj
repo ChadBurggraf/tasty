@@ -18,8 +18,8 @@
     <MSBuild Projects="$(ConsolePath)Tasty.Console.csproj" Properties="Configuration=$(Configuration)"/>
   </Target>
   <Target Name="Publish" DependsOnTargets="Build">
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryPath)Tasty.snk /out:$(PublishPath)tasty.dll $(LibraryPath)bin\Release\tasty.dll $(LibraryPath)bin\Release\AWSSDK.dll $(LibraryPath)bin\Release\Ionic.Zlib.dll'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsolePath)Tasty.Console.snk /out:$(PublishPath)tasty.exe $(ConsolePath)bin\Release\tasty.exe $(ConsolePath)bin\Release\tasty.dll $(ConsolePath)bin\Release\AWSSDK.dll $(ConsolePath)bin\Release\Ionic.Zlib.dll $(ConsolePath)bin\Release\NDesk.Options.dll'/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryPath)Tasty.snk /out:$(PublishPath)tasty.dll $(LibraryPath)bin\Release\tasty.dll $(LibraryPath)bin\Release\AWSSDK.dll $(LibraryPath)bin\Release\Ionic.Zlib.dll $(LibraryPath)bin\Release\Npgsql.dll $(LibraryPath)bin\Release\Mono.Security.dll'/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsolePath)Tasty.Console.snk /out:$(PublishPath)tasty.exe $(ConsolePath)bin\Release\tasty.exe $(ConsolePath)bin\Release\tasty.dll $(ConsolePath)bin\Release\AWSSDK.dll $(ConsolePath)bin\Release\Ionic.Zlib.dll $(LibraryPath)bin\Release\Npgsql.dll $(LibraryPath)bin\Release\Mono.Security.dll $(ConsolePath)bin\Release\NDesk.Options.dll'/>
     <Copy SourceFiles="$(LibraryPath)bin\Release\tasty.xml" DestinationFiles="$(PublishPath)tasty.xml"/>
   </Target>
 </Project>

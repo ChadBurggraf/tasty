@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SqlServerUrlTokenStore.cs" company="Tasty Codes">
+// <copyright file="PostgresUrlTokenStore.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -8,29 +8,31 @@ namespace Tasty.Web
 {
     using System;
     using System.Data;
-    using System.Data.SqlClient;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
+    using Npgsql;
     using Tasty.Configuration;
 
     /// <summary>
-    /// Implements <see cref="IUrlTokenStore"/> to persist <see cref="IUrlToken"/>s to SQL Server.
+    /// Implements <see cref="IUrlTokenStore"/> to persist <see cref="IUrlToken"/>s to PostgreSQL.
     /// </summary>
-    public class SqlServerUrlTokenStore : SqlUrlTokenStore, IUrlTokenStore
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+    public class PostgresUrlTokenStore : SqlUrlTokenStore, IUrlTokenStore
     {
         /// <summary>
-        /// Initializes a new instance of the SqlServerUrlTokenStore class.
+        /// Initializes a new instance of the PostgresUrlTokenStore class.
         /// </summary>
-        public SqlServerUrlTokenStore()
+        public PostgresUrlTokenStore()
             : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the SqlServerUrlTokenStore class.
+        /// Initializes a new instance of the PostgresUrlTokenStore class.
         /// </summary>
         /// <param name="connectionString">The connection string to use when connecting to the database.</param>
-        public SqlServerUrlTokenStore(string connectionString)
+        public PostgresUrlTokenStore(string connectionString)
             : base(connectionString)
         {
         }
@@ -42,17 +44,17 @@ namespace Tasty.Web
         {
             this.EnsureConnectionString();
 
-            const string Sql = "DELETE FROM [TastyUrlToken] WHERE [Expires] < @Now";
+            const string Sql = "DELETE FROM \"tasty_url_token\" WHERE \"expires\" < :now";
 
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {
                 connection.Open();
 
-                using (SqlCommand command = connection.CreateCommand())
+                using (NpgsqlCommand command = connection.CreateCommand())
                 {
                     command.CommandType = CommandType.Text;
                     command.CommandText = Sql;
-                    command.Parameters.Add(new SqlParameter("@Now", DateTime.UtcNow));
+                    command.Parameters.Add(new NpgsqlParameter(":now", DateTime.UtcNow));
 
                     command.ExecuteNonQuery();
                 }
@@ -67,22 +69,22 @@ namespace Tasty.Web
         {
             this.EnsureConnectionString();
 
-            const string Sql = "INSERT INTO [TastyUrlToken]([Key],[Type],[Data],[Created],[Expires]) VALUES(@Key,@Type,@Data,@Created,@Expires)";
+            const string Sql = "INSERT INTO \"tasty_url_token\"(\"key\",\"type\",\"data\",\"created\",\"expires\") VALUES(:key,:type,:data,:created,:expires)";
 
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {
                 connection.Open();
 
-                using (SqlCommand command = connection.CreateCommand())
+                using (NpgsqlCommand command = connection.CreateCommand())
                 {
                     command.CommandType = CommandType.Text;
                     command.CommandText = Sql;
 
-                    command.Parameters.Add(new SqlParameter("@Key", record.Key));
-                    command.Parameters.Add(new SqlParameter("@Type", record.TokenType.AssemblyQualifiedName));
-                    command.Parameters.Add(new SqlParameter("@Data", record.Data));
-                    command.Parameters.Add(new SqlParameter("@Created", record.Created));
-                    command.Parameters.Add(new SqlParameter("@Expires", record.Expires));
+                    command.Parameters.Add(new NpgsqlParameter(":key", record.Key));
+                    command.Parameters.Add(new NpgsqlParameter(":type", record.TokenType.AssemblyQualifiedName));
+                    command.Parameters.Add(new NpgsqlParameter(":data", record.Data));
+                    command.Parameters.Add(new NpgsqlParameter(":created", record.Created));
+                    command.Parameters.Add(new NpgsqlParameter(":expires", record.Expires));
 
                     command.ExecuteNonQuery();
                 }
@@ -103,19 +105,19 @@ namespace Tasty.Web
 
             this.EnsureConnectionString();
 
-            const string Sql = "SELECT * FROM [TastyUrlToken] WHERE [Key] = @Key";
+            const string Sql = "SELECT * FROM \"tasty_url_token\" WHERE \"key\" = :key";
 
-            using (SqlConnection connection = new SqlConnection(this.ConnectionString))
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {
                 connection.Open();
 
-                using (SqlCommand command = connection.CreateCommand())
+                using (NpgsqlCommand command = connection.CreateCommand())
                 {
                     command.CommandType = CommandType.Text;
                     command.CommandText = Sql;
-                    command.Parameters.Add(new SqlParameter("@Key", key));
+                    command.Parameters.Add(new NpgsqlParameter(":key", key));
 
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                    using (NpgsqlDataAdapter adapter = new NpgsqlDataAdapter(command))
                     {
                         DataTable results = new DataTable() { Locale = CultureInfo.InvariantCulture };
                         adapter.Fill(results);

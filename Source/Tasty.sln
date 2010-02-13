@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Test", "Tasty.Test\Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Console", "Tasty.Console\Tasty.Console.csproj", "{34565E03-092C-44D1-8F75-6AC7BD542A91}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.SqlServer", "Tasty.SqlServer\Tasty.SqlServer.csproj", "{C437CA7E-8233-44A5-B693-5829FA3888CA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{34565E03-092C-44D1-8F75-6AC7BD542A91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{34565E03-092C-44D1-8F75-6AC7BD542A91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{34565E03-092C-44D1-8F75-6AC7BD542A91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C437CA7E-8233-44A5-B693-5829FA3888CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C437CA7E-8233-44A5-B693-5829FA3888CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C437CA7E-8233-44A5-B693-5829FA3888CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C437CA7E-8233-44A5-B693-5829FA3888CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

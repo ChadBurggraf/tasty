@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Tasty.SqlServer</name>
+    </assembly>
+    <members>
+        <member name="T:Tasty.SqlServer.AssemblyImportScript">
+            <summary>
+            Provides access to the <see cref="N:Tasty.SqlServer"/> assembly import SQL script.
+            </summary>
+        </member>
+        <member name="M:Tasty.SqlServer.AssemblyImportScript.Get(System.String)">
+            <summary>
+            Gets the <see cref="N:Tasty.SqlServer"/> assembly import SQL script.
+            </summary>
+            <param name="systemAssembliesPath">The path to v3.5 reference assemblies on the SQL Server machine
+            (e.g., C:\Program Files\Reference Assemblies\Microsoft\Framework\v3.5).</param>
+            <returns>The <see cref="N:Tasty.SqlServer"/> import script.</returns>
+        </member>
+        <member name="T:Tasty.SqlServer.ClrFunctions">
+            <summary>
+            A collection of helper functions that can be imported to SQL Server.
+            </summary>
+        </member>
+        <member name="M:Tasty.SqlServer.ClrFunctions.StringSetContainsAny(System.String,System.String,System.String)">
+            <summary>
+            Gets a value indicating whether any of the values in a string set are equal to any
+            of the values in a second string set. The string sets are tokenized by the given separator,
+            which will default to the newline (\n) character if null or empty.
+            </summary>
+            <param name="referenceSet">The reference string set to check.</param>
+            <param name="askingSet">The asking string set to check.</param>
+            <param name="separator">The separator to use when splitting the strings into sets.</param>
+            <returns>True if any of the values are equal, false otherwise.</returns>
+        </member>
+    </members>
+</doc>

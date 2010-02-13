@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SolutionVersionInfo.cs" company="Tasty Codes">
+// <copyright file="AssemblyInfo.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -8,5 +8,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyVersion("0.3.4.0")]
-[assembly: AssemblyFileVersion("0.3.4.0")]
+[assembly: AssemblyTitle("Tasty Libraries SqlServer Functions")]
+[assembly: AssemblyDescription("Tasty Libraries SqlServer Functions")]
+[assembly: AssemblyProduct("Tasty Libraries")]
+[assembly: Guid("ac2a0470-3da1-4cb1-8605-54df334df274")]

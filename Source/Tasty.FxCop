@@ -22,6 +22,7 @@
  </ProjectOptions>
  <Targets>
   <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/tasty.exe" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/Tasty.SqlServer/bin/Debug/Tasty.SqlServer.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/Tasty/bin/Debug/tasty.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
  <Rules>

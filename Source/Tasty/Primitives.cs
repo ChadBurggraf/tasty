@@ -85,8 +85,24 @@ namespace Tasty
         /// <returns>The split string.</returns>
         public static string[] SplitAndTrim(this string value, char separator)
         {
-            return (from s in value.Split(new char[] { separator }, StringSplitOptions.RemoveEmptyEntries)
-                    select s.Trim()).ToArray();
+            return SplitAndTrim(value, new char[] { separator });
+        }
+
+        /// <summary>
+        /// Splits the given string on the given separator, removing any empty 
+        /// results and trimming whitespace around the rest of the results.
+        /// </summary>
+        /// <param name="value">The string value to split.</param>
+        /// <param name="separator">The string to split the string on.</param>
+        /// <returns>The split string.</returns>
+        public static string[] SplitAndTrim(this string value, string separator)
+        {
+            if (String.IsNullOrEmpty(separator))
+            {
+                throw new ArgumentNullException("separator", "separator must have a value.");
+            }
+
+            return SplitAndTrim(value, separator.ToCharArray());
         }
 
         /// <summary>
@@ -128,6 +144,24 @@ namespace Tasty
         public static string ToIso8601UtcPathSafeString(this DateTime dateTime)
         {
             return Regex.Replace(dateTime.ToIso8601UtcString(), @"[\.:]", "-");
+        }
+
+        /// <summary>
+        /// Splits the given string on the given separator characters, removing any empty 
+        /// results and trimming whitespace around the rest of the results.
+        /// </summary>
+        /// <param name="value">The string value to split.</param>
+        /// <param name="separator">The separator characters to split the string on.</param>
+        /// <returns>The split string.</returns>
+        private static string[] SplitAndTrim(string value, char[] separator)
+        {
+            if (separator == null || separator.Length == 0)
+            {
+                throw new ArgumentException("separator must have a value and be at least 1 element long.", "separator");
+            }
+
+            return (from s in (value ?? String.Empty).Split(separator, StringSplitOptions.RemoveEmptyEntries)
+                    select s.Trim()).ToArray();
         }
     }
 }

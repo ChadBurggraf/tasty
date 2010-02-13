@@ -1714,6 +1714,15 @@
             <param name="separator">The character to split the string on.</param>
             <returns>The split string.</returns>
         </member>
+        <member name="M:Tasty.Primitives.SplitAndTrim(System.String,System.String)">
+            <summary>
+            Splits the given string on the given separator, removing any empty 
+            results and trimming whitespace around the rest of the results.
+            </summary>
+            <param name="value">The string value to split.</param>
+            <param name="separator">The string to split the string on.</param>
+            <returns>The split string.</returns>
+        </member>
         <member name="M:Tasty.Primitives.ToHex(System.Byte[])">
             <summary>
             Converts the given byte array to a hex string.
@@ -1737,6 +1746,15 @@
             </summary>
             <param name="dateTime">The DateTime object to convert.</param>
             <returns>A string representing the date in ISO 8601 format with unsaf path characters removed.</returns>
+        </member>
+        <member name="M:Tasty.Primitives.SplitAndTrim(System.String,System.Char[])">
+            <summary>
+            Splits the given string on the given separator characters, removing any empty 
+            results and trimming whitespace around the rest of the results.
+            </summary>
+            <param name="value">The string value to split.</param>
+            <param name="separator">The separator characters to split the string on.</param>
+            <returns>The split string.</returns>
         </member>
         <member name="T:Tasty.Web.HttpCacheUrlTokenStore">
             <summary>

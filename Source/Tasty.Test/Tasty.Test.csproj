@@ -70,6 +70,7 @@
     <Compile Include="S3PublisherTests.cs" />
     <Compile Include="ScheduledJobTests.cs" />
     <Compile Include="SqlDateTimeAssert.cs" />
+    <Compile Include="SqlServerClrTests.cs" />
     <Compile Include="SqlServerJobStoreTests.cs" />
     <Compile Include="SqlServerUrlTokenStoreTests.cs" />
     <Compile Include="TestJobs.cs" />
@@ -78,6 +79,10 @@
     <Compile Include="UtilityTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Tasty.SqlServer\Tasty.SqlServer.csproj">
+      <Project>{C437CA7E-8233-44A5-B693-5829FA3888CA}</Project>
+      <Name>Tasty.SqlServer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tasty\Tasty.csproj">
       <Project>{2FA9607D-DC0D-4318-B13D-028C2BA3FF85}</Project>
       <Name>Tasty</Name>

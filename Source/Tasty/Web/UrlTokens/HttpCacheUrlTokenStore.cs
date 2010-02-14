@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Tasty.Web
+namespace Tasty.Web.UrlTokens
 {
     using System;
     using System.Collections.Generic;

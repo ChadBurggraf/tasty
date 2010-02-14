@@ -446,6 +446,16 @@
             Gets or sets the SQL script to run.
             </summary>
         </member>
+        <member name="T:Tasty.Configuration.GeocodeElement">
+            <summary>
+            Represents the geocode configuration element.
+            </summary>
+        </member>
+        <member name="P:Tasty.Configuration.GeocodeElement.ApiKey">
+            <summary>
+            Gets the API key to use in geocode requests.
+            </summary>
+        </member>
         <member name="T:Tasty.Configuration.HttpElement">
             <summary>
             Represents the HTTP configuration element.
@@ -721,6 +731,11 @@
             Gets the Tasty.dll configuration section.
             </summary>
         </member>
+        <member name="P:Tasty.Configuration.TastySettings.Geocode">
+            <summary>
+            Gets the geocode configuration element.
+            </summary>
+        </member>
         <member name="P:Tasty.Configuration.TastySettings.Jobs">
             <summary>
             Gets the jobs configuration element.
@@ -754,7 +769,7 @@
         </member>
         <member name="P:Tasty.Configuration.UrlTokensElement.UrlTokenStoreType">
             <summary>
-            Gets or sets the <see cref="T:Tasty.Web.IUrlTokenStore"/> implementation to use when persisting URL tokens.
+            Gets or sets the <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> implementation to use when persisting URL tokens.
             </summary>
         </member>
         <member name="T:Tasty.ExceptionXElement">
@@ -805,6 +820,525 @@
             <param name="stream">The stream to save and compute the hash of.</param>
             <param name="path">The path to save the stream's contents to.</param>
             <returns>The SHA1 hash of the given stream's file.</returns>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeAddressDetails">
+            <summary>
+            Represents address details in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeAddressDetails.Country">
+            <summary>
+            Gets or sets the country of the address.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeAddressDetails.Accuracy">
+            <summary>
+            Gets or sets the accuracy of the address compared to the geocode request.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeAdministrativeArea">
+            <summary>
+            Represetns an administrative area in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeAdministrativeArea.AdministrativeAreaName">
+            <summary>
+            Gets or sets the name of the administrative area.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeAdministrativeArea.SubAdministrativeArea">
+            <summary>
+            Gets or sets the sub-administraive area.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeCallResult">
+            <summary>
+            Represents the result of an encapsulated geocode request/response call.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeCallResult.Placemark">
+            <summary>
+            Gets or sets the placemark that was returned in the response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeCallResult.Status">
+            <summary>
+            Gets or sets the result status of the call.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeCallStatus">
+            <summary>
+            Defines the possible status results of an encapsulated geocode request/response call.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeCallStatus.Unsuccessful">
+            <summary>
+            Identifies that the call was unsuccessful due to an exception or bad status code.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeCallStatus.NotEnoughAccuracy">
+            <summary>
+            Identifies that the response didn't have enough accuracy.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeCallStatus.Successful">
+            <summary>
+            Identifies that the call was successful.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeCountry">
+            <summary>
+            Represents a country in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeCountry.CountryNameCode">
+            <summary>
+            Gets or sets the name code of the country.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeCountry.CountryName">
+            <summary>
+            Gets or sets the name of the country.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeCountry.AdministrativeArea">
+            <summary>
+            Gets or sets the administrative area in the country.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeException">
+            <summary>
+            Exception thrown when geocode requests fail.
+            </summary>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeException.#ctor">
+            <summary>
+            Initializes a new instance of the GeocodeException class.
+            </summary>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the GeocodeException class.
+            </summary>
+            <param name="message">A message describing the exception.</param>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the GeocodeException class.
+            </summary>
+            <param name="message">A message describing the exception.</param>
+            <param name="innerException">The inner exception that caused this exception to be thrown.</param>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeException.#ctor(Tasty.Geocode.GeocodeRequest,Tasty.Geocode.GeocodeResponse)">
+            <summary>
+            Initializes a new instance of the GeocodeException class.
+            </summary>
+            <param name="request">The request that caused the exception to be thrown.</param>
+            <param name="response">The response that caused the exception to be thrown.</param>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Initializes a new instance of the GeocodeException class.
+            </summary>
+            <param name="info">The SerializationInfo that holds object data about the exception.</param>
+            <param name="context">The StreamingContext that contains contextual information about the source or destination.</param>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeException.GetObjectData(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Sets the given SerializationInfo with data about the exception.
+            </summary>
+            <param name="info">The SerializationInfo that holds data about the exception.</param>
+            <param name="context">The StreamingContext that holds contextual information about the source or destination.</param>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeException.Address">
+            <summary>
+            Gets the address that caused the exception to be thrown.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeException.RequestUri">
+            <summary>
+            Gets the request URI that caused the exception to be thrown.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeException.ResponseName">
+            <summary>
+            Gets the name of the response that caused the exception to be thrown.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeException.ResponseStatusCode">
+            <summary>
+            Gets the response status code that caused the exception to be thrown.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeExtendedData">
+            <summary>
+            Represents extended data in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeExtendedData.LatLonBox">
+            <summary>
+            Gets or sets the latitude/longitude bounding box of the geocode response.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeLatLonBox">
+            <summary>
+            Represetns a latitude/longitude bounding box in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeLatLonBox.East">
+            <summary>
+            Gets or sets the eastern coordinate of the box.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeLatLonBox.North">
+            <summary>
+            Gets or sets the northern coordinate of the box.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeLatLonBox.South">
+            <summary>
+            Gets or sets the southern coordinate of the box.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeLatLonBox.West">
+            <summary>
+            Gets or sets the western corrdinate of the box.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeLocality">
+            <summary>
+            Represents a locality in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeLocality.LocalityName">
+            <summary>
+            Gets or sets the name of the locality.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeLocality.Thoroughfare">
+            <summary>
+            Gets or sets the thoroughfare of the locality.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeLocality.PostalCode">
+            <summary>
+            Gets or sets the postal code of the locality.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodePlacemark">
+            <summary>
+            Represents a placemark in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePlacemark.Address">
+            <summary>
+            Gets or sets the address string of the response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePlacemark.AddressDetails">
+            <summary>
+            Gets or sets the address details of the response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePlacemark.ExtendedData">
+            <summary>
+            Gets or sets the extended data of the response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePlacemark.Id">
+            <summary>
+            Gets or sets the response ID.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePlacemark.Point">
+            <summary>
+            Gets or sets the response's location point.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodePoint">
+            <summary>
+            Represents a point in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePoint.Coordinates">
+            <summary>
+            Gets or sets the point's coordinates.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePoint.Latitude">
+            <summary>
+            Gets the latitude value of the coordinates.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePoint.Longitude">
+            <summary>
+            Gets the longitude value of the coordinates.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodePostalCode">
+            <summary>
+            Represents a geocode postal code.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodePostalCode.PostalCodeNumber">
+            <summary>
+            Gets or sets the postal code number.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeRequest">
+            <summary>
+            Constructs and performs geocode requests.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeRequest.ServiceUri">
+            <summary>
+            Gets the URI of the geocode service.
+            </summary>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.#ctor(Tasty.Geocode.GeocodeRequestAddress)">
+            <summary>
+            Initializes a new instance of the GeocodeRequest class.
+            </summary>
+            <param name="address">The address to make the geocode request for.</param>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.#ctor(Tasty.Geocode.GeocodeRequestAddress,System.String)">
+            <summary>
+            Initializes a new instance of the GeocodeRequest class.
+            </summary>
+            <param name="address">The address to make the geocode request for.</param>
+            <param name="apiKey">The API key to use when making the request.</param>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.#ctor(Tasty.Web.QueryString)">
+            <summary>
+            Initializes a new instance of the GeocodeRequest class.
+            </summary>
+            <param name="query">The custom query to use when making the geocode request.</param>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.CreateRequestUri(Tasty.Geocode.GeocodeRequestAddress)">
+            <summary>
+            Creates a request URI to use in a geocode request for the given address.
+            Restricts the geocode request to the United States.
+            </summary>
+            <param name="address">The address to create a request URI for.</param>
+            <returns>A geocode service request URI.</returns>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.CreateRequestUri(Tasty.Geocode.GeocodeRequestAddress,System.String)">
+            <summary>
+            Creates a request URI to use in a geocode request for the given address.
+            Restricts the geocode request to the United States.
+            </summary>
+            <param name="address">The address to create a request URI for.</param>
+            <param name="apiKey">The API key to use when making the request.</param>
+            <returns>A geocode service request URI.</returns>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.CreateRequestUri(Tasty.Web.QueryString)">
+            <summary>
+            Creates a request URI to use in a geocode request with the given query.
+            </summary>
+            <param name="query">The query to create the request URI for.</param>
+            <returns>A geocode service request URI.</returns>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.Make(Tasty.Geocode.GeocodeRequestAddress)">
+            <summary>
+            Makes a geocode request with the given address.
+            </summary>
+            <param name="address">The address to make the request with.</param>
+            <returns>The result of the request.</returns>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.Make(Tasty.Geocode.GeocodeRequestAddress,System.String)">
+            <summary>
+            Makes a geocode request with the given address.
+            </summary>
+            <param name="address">The address to make the request with.</param>
+            <param name="apiKey">The API key to use when making the request.</param>
+            <returns>The result of the request.</returns>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.Make(Tasty.Geocode.GeocodeRequestAddress,System.String,System.Int32)">
+            <summary>
+            Makes a geocode request with the given address.
+            </summary>
+            <param name="address">The address to make the request with.</param>
+            <param name="apiKey">The API key to use when making the request.</param>
+            <param name="minimumAccuracy">The minimum accuracy requred for a successful response, or 0 if not applicable.</param>
+            <returns>The result of the request.</returns>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.GetResponse">
+            <summary>
+            Gets the response of the geocode request.
+            </summary>
+            <returns>A geocode response.</returns>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.GetResponseAsync(System.Action{Tasty.Geocode.GeocodeResponse})">
+            <summary>
+            Gets the response of the geocode request asynchronously.
+            </summary>
+            <param name="callback">An action to call when the asynchronous operation has completed.</param>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.DeserializeResponse(System.Net.WebResponse)">
+            <summary>
+            Deserializes a geocode JSON response into a GeocodeResponse instance.
+            </summary>
+            <param name="response">The web response to deserialize.</param>
+            <returns>A GeocodeResponse instance.</returns>
+            <exception cref="T:Tasty.Geocode.GeocodeException"></exception>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeRequest.Address">
+            <summary>
+            Gets the address being used to create a request by this instance.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeRequest.ApiKey">
+            <summary>
+            Gets the API key being used to make the request.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeRequest.RequestUri">
+            <summary>
+            Gets the request URI generated by this instance.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeRequestAddress">
+            <summary>
+            Represents an address to use in a <see cref="T:Tasty.Geocode.GeocodeRequest"/>.
+            </summary>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeRequestAddress.ToString">
+            <summary>
+            Gets the value of this instance as a string.
+            </summary>
+            <returns>A string representation of this instance.</returns>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeRequestAddress.Street">
+            <summary>
+            Gets or sets the street number of the address.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeRequestAddress.City">
+            <summary>
+            Gets or sets the city.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeRequestAddress.PostalCode">
+            <summary>
+            Gets or sets the postal code.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeRequestAddress.State">
+            <summary>
+            Gets or sets the state.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeResponse">
+            <summary>
+            Represents a response to a geocode request.
+            </summary>
+        </member>
+        <member name="M:Tasty.Geocode.GeocodeResponse.FromJson(System.String)">
+            <summary>
+            Deserializes a GeocodeResponse from a string of JSON.
+            </summary>
+            <param name="json">The JSON to deserialize the response from.</param>
+            <returns>A GeocodeResponse instance.</returns>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeResponse.Name">
+            <summary>
+            Gets or sets the name of the response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeResponse.Placemark">
+            <summary>
+            Gets or sets the placemarks returned by the response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeResponse.Status">
+            <summary>
+            Gets or sets the status of the response.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeResponseStatus">
+            <summary>
+            Represents a geocode response status.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeResponseStatus.Code">
+            <summary>
+            Gets or sets the status code of the response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeResponseStatus.Request">
+            <summary>
+            Gets or sets the type of request that generated the response.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeResposeStatusCode">
+            <summary>
+            Defines the possible <see cref="T:Tasty.Geocode.GeocodeResponseStatus"/> codes.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeResposeStatusCode.Unknown">
+            <summary>
+            Identifies an unknown status code in a response.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeResposeStatusCode.Success">
+            <summary>
+            Identifies a successful response.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeResposeStatusCode.ServerError">
+            <summary>
+            Identifies a server error.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeResposeStatusCode.MissingQuery">
+            <summary>
+            Identifies an error due to a missing query.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeResposeStatusCode.UnknownAddress">
+            <summary>
+            Identifies an error due to an unknown address.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeResposeStatusCode.UnavailableAddress">
+            <summary>
+            Identifies an error due to an unavailable address.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeResposeStatusCode.BadKey">
+            <summary>
+            Identifies an error due to a bad API key.
+            </summary>
+        </member>
+        <member name="F:Tasty.Geocode.GeocodeResposeStatusCode.TooManyQueries">
+            <summary>
+            Identifies an error due to too many requests.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeSubAdministrativeArea">
+            <summary>
+            Represetns a sub-administrative area in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeSubAdministrativeArea.SubAdministrativeAreaName">
+            <summary>
+            Gets or sets the name of the sub-adminsitrative area.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeSubAdministrativeArea.Locality">
+            <summary>
+            Gets or sets the locality of the sub-administrative area.
+            </summary>
+        </member>
+        <member name="T:Tasty.Geocode.GeocodeThoroughfare">
+            <summary>
+            Represents a throroughfare in a geocode response.
+            </summary>
+        </member>
+        <member name="P:Tasty.Geocode.GeocodeThoroughfare.ThoroughfareName">
+            <summary>
+            Gets or sets the name of the thoroughfare.
+            </summary>
         </member>
         <member name="T:Tasty.Http.HttpRedirectModule">
             <summary>
@@ -1756,182 +2290,182 @@
             <param name="separator">The separator characters to split the string on.</param>
             <returns>The split string.</returns>
         </member>
-        <member name="T:Tasty.Web.HttpCacheUrlTokenStore">
+        <member name="T:Tasty.Web.UrlTokens.HttpCacheUrlTokenStore">
             <summary>
-            Implements <see cref="T:Tasty.Web.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.IUrlToken"/>s
+            Implements <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>s
             to the current <see cref="P:System.Web.HttpRuntime.Cache"/>.
             </summary>
         </member>
-        <member name="T:Tasty.Web.IUrlTokenStore">
+        <member name="T:Tasty.Web.UrlTokens.IUrlTokenStore">
             <summary>
             Interface definition for persistent URL token stores.
             </summary>
         </member>
-        <member name="M:Tasty.Web.IUrlTokenStore.CleanExpiredUrlTokens">
+        <member name="M:Tasty.Web.UrlTokens.IUrlTokenStore.CleanExpiredUrlTokens">
             <summary>
             Cleans all expired token records from the store.
             </summary>
         </member>
-        <member name="M:Tasty.Web.IUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokenRecord)">
+        <member name="M:Tasty.Web.UrlTokens.IUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokens.UrlTokenRecord)">
             <summary>
             Creates a new URL token record.
             </summary>
             <param name="record">The URL token record to create.</param>
         </member>
-        <member name="M:Tasty.Web.IUrlTokenStore.GetUrlToken(System.String)">
+        <member name="M:Tasty.Web.UrlTokens.IUrlTokenStore.GetUrlToken(System.String)">
             <summary>
             Gets a URL token record.
             </summary>
             <param name="key">The key of the record to get.</param>
             <returns>The URL token record identified by the given key.</returns>
         </member>
-        <member name="M:Tasty.Web.HttpCacheUrlTokenStore.CleanExpiredUrlTokens">
+        <member name="M:Tasty.Web.UrlTokens.HttpCacheUrlTokenStore.CleanExpiredUrlTokens">
             <summary>
             Cleans all expired token records from the store.
             </summary>
         </member>
-        <member name="M:Tasty.Web.HttpCacheUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokenRecord)">
+        <member name="M:Tasty.Web.UrlTokens.HttpCacheUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokens.UrlTokenRecord)">
             <summary>
             Creates a new URL token record.
             </summary>
             <param name="record">The URL token record to create.</param>
         </member>
-        <member name="M:Tasty.Web.HttpCacheUrlTokenStore.GetUrlToken(System.String)">
+        <member name="M:Tasty.Web.UrlTokens.HttpCacheUrlTokenStore.GetUrlToken(System.String)">
             <summary>
             Gets a URL token record.
             </summary>
             <param name="key">The key of the record to get.</param>
             <returns>The URL token record identified by the given key.</returns>
         </member>
-        <member name="M:Tasty.Web.HttpCacheUrlTokenStore.SaveDictionary(System.Collections.Generic.IDictionary{System.String,Tasty.Web.UrlTokenRecord})">
+        <member name="M:Tasty.Web.UrlTokens.HttpCacheUrlTokenStore.SaveDictionary(System.Collections.Generic.IDictionary{System.String,Tasty.Web.UrlTokens.UrlTokenRecord})">
             <summary>
             Saves the updated storage dictionary to the current <see cref="P:System.Web.HttpRuntime.Cache"/>.
             Before saving, the dictionary is cleaned of any expired records.
             </summary>
             <param name="dictionary">The dictionary to save.</param>
         </member>
-        <member name="P:Tasty.Web.HttpCacheUrlTokenStore.Dictionary">
+        <member name="P:Tasty.Web.UrlTokens.HttpCacheUrlTokenStore.Dictionary">
             <summary>
             Gets the storage dictionary from the current <see cref="P:System.Web.HttpRuntime.Cache"/>,
             creating it if it doesn't exist.
             </summary>
             <returns>The storage dictionary.</returns>
         </member>
-        <member name="T:Tasty.Web.IUrlToken">
+        <member name="T:Tasty.Web.UrlTokens.IUrlToken">
             <summary>
             Defines the interface for URL tokens.
             </summary>
         </member>
-        <member name="M:Tasty.Web.IUrlToken.GenerateKey">
+        <member name="M:Tasty.Web.UrlTokens.IUrlToken.GenerateKey">
             <summary>
             Generates a new unique key that can be used to identify the URL token.
             </summary>
             <returns>A unique token identifier.</returns>
         </member>
-        <member name="M:Tasty.Web.IUrlToken.Serialize">
+        <member name="M:Tasty.Web.UrlTokens.IUrlToken.Serialize">
             <summary>
             Serializes the URL token for storage.
             </summary>
             <returns>The serialized URL token data.</returns>
         </member>
-        <member name="P:Tasty.Web.IUrlToken.ExpiryHours">
+        <member name="P:Tasty.Web.UrlTokens.IUrlToken.ExpiryHours">
             <summary>
             Gets the number of hours from creation the URL token expires in.
             </summary>
         </member>
-        <member name="T:Tasty.Web.IUrlTokenUrlProvider`1">
+        <member name="T:Tasty.Web.UrlTokens.IUrlTokenUrlProvider`1">
             <summary>
-            Interface definition for URL providers for <see cref="T:Tasty.Web.IUrlToken"/>s.
+            Interface definition for URL providers for <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>s.
             </summary>
-            <typeparam name="TToken">The type of <see cref="T:Tasty.Web.IUrlToken"/> to provide URLs for.</typeparam>
+            <typeparam name="TToken">The type of <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> to provide URLs for.</typeparam>
         </member>
-        <member name="M:Tasty.Web.IUrlTokenUrlProvider`1.TokenFromUrl(System.Uri)">
+        <member name="M:Tasty.Web.UrlTokens.IUrlTokenUrlProvider`1.TokenFromUrl(System.Uri)">
             <summary>
-            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokenStore.Current"/>
-            <see cref="T:Tasty.Web.IUrlTokenStore"/>.
-            </summary>
-            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
-        </member>
-        <member name="M:Tasty.Web.IUrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.IUrlTokenStore)">
-            <summary>
-            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/>.
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokens.UrlTokenStore.Current"/>
+            <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/>.
             </summary>
             <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when loading token data.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+            <returns>The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
         </member>
-        <member name="M:Tasty.Web.IUrlTokenUrlProvider`1.UrlFromToken(`0)">
+        <member name="M:Tasty.Web.UrlTokens.IUrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.UrlTokens.IUrlTokenStore)">
             <summary>
-            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokenStore.Current"/>
-            <see cref="T:Tasty.Web.IUrlTokenStore"/>.
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>.
             </summary>
-            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to use when loading token data.</param>
+            <returns>The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.UrlTokens.IUrlTokenUrlProvider`1.UrlFromToken(`0)">
+            <summary>
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokens.UrlTokenStore.Current"/>
+            <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/>.
+            </summary>
+            <param name="token">The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
             <returns>The generated <see cref="T:System.Uri"/>.</returns>
         </member>
-        <member name="M:Tasty.Web.IUrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.IUrlTokenStore)">
+        <member name="M:Tasty.Web.UrlTokens.IUrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.UrlTokens.IUrlTokenStore)">
             <summary>
-            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/>.
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>.
             </summary>
-            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when saving token data.</param>
+            <param name="token">The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to use when saving token data.</param>
             <returns>The generated <see cref="T:System.Uri"/>.</returns>
         </member>
-        <member name="T:Tasty.Web.PostgresUrlTokenStore">
+        <member name="T:Tasty.Web.UrlTokens.PostgresUrlTokenStore">
             <summary>
-            Implements <see cref="T:Tasty.Web.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.IUrlToken"/>s to PostgreSQL.
+            Implements <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>s to PostgreSQL.
             </summary>
         </member>
-        <member name="T:Tasty.Web.SqlUrlTokenStore">
+        <member name="T:Tasty.Web.UrlTokens.SqlUrlTokenStore">
             <summary>
-            Base class for <see cref="T:Tasty.Web.IUrlTokenStore"/> implementors that use a connection string to connect to a database.
+            Base class for <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> implementors that use a connection string to connect to a database.
             </summary>
         </member>
-        <member name="M:Tasty.Web.SqlUrlTokenStore.#ctor">
+        <member name="M:Tasty.Web.UrlTokens.SqlUrlTokenStore.#ctor">
             <summary>
             Initializes a new instance of the SqlUrlTokenStore class.
             </summary>
         </member>
-        <member name="M:Tasty.Web.SqlUrlTokenStore.#ctor(System.String)">
+        <member name="M:Tasty.Web.UrlTokens.SqlUrlTokenStore.#ctor(System.String)">
             <summary>
             Initializes a new instance of the SqlUrlTokenStore class.
             </summary>
             <param name="connectionString">The connection string to use when connecting to the database.</param>
         </member>
-        <member name="M:Tasty.Web.SqlUrlTokenStore.EnsureConnectionString">
+        <member name="M:Tasty.Web.UrlTokens.SqlUrlTokenStore.EnsureConnectionString">
             <summary>
             Ensures that a connection string is configured.
             </summary>
             <exception cref="T:System.InvalidOperationException"></exception>
         </member>
-        <member name="P:Tasty.Web.SqlUrlTokenStore.ConnectionString">
+        <member name="P:Tasty.Web.UrlTokens.SqlUrlTokenStore.ConnectionString">
             <summary>
             Gets or sets the connection string to use when connecting to the database.
             </summary>
         </member>
-        <member name="M:Tasty.Web.PostgresUrlTokenStore.#ctor">
+        <member name="M:Tasty.Web.UrlTokens.PostgresUrlTokenStore.#ctor">
             <summary>
             Initializes a new instance of the PostgresUrlTokenStore class.
             </summary>
         </member>
-        <member name="M:Tasty.Web.PostgresUrlTokenStore.#ctor(System.String)">
+        <member name="M:Tasty.Web.UrlTokens.PostgresUrlTokenStore.#ctor(System.String)">
             <summary>
             Initializes a new instance of the PostgresUrlTokenStore class.
             </summary>
             <param name="connectionString">The connection string to use when connecting to the database.</param>
         </member>
-        <member name="M:Tasty.Web.PostgresUrlTokenStore.CleanExpiredUrlTokens">
+        <member name="M:Tasty.Web.UrlTokens.PostgresUrlTokenStore.CleanExpiredUrlTokens">
             <summary>
             Cleans all expired token records from the store.
             </summary>
         </member>
-        <member name="M:Tasty.Web.PostgresUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokenRecord)">
+        <member name="M:Tasty.Web.UrlTokens.PostgresUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokens.UrlTokenRecord)">
             <summary>
             Creates a new URL token record.
             </summary>
             <param name="record">The URL token record to create.</param>
         </member>
-        <member name="M:Tasty.Web.PostgresUrlTokenStore.GetUrlToken(System.String)">
+        <member name="M:Tasty.Web.UrlTokens.PostgresUrlTokenStore.GetUrlToken(System.String)">
             <summary>
             Gets a URL token record.
             </summary>
@@ -2007,104 +2541,104 @@
             <param name="key">The key to get or set the value for.</param>
             <returns>The key's value.</returns>
         </member>
-        <member name="T:Tasty.Web.QueryStringUrlTokenUrlProvider`1">
+        <member name="T:Tasty.Web.UrlTokens.QueryStringUrlTokenUrlProvider`1">
             <summary>
-            Extends <see cref="T:Tasty.Web.UrlTokenUrlProvider`1"/> for URL tokens in the query string.
+            Extends <see cref="T:Tasty.Web.UrlTokens.UrlTokenUrlProvider`1"/> for URL tokens in the query string.
             </summary>
-            <typeparam name="TToken">The <see cref="T:Tasty.Web.IUrlToken"/> type to provide URLs for.</typeparam>
+            <typeparam name="TToken">The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> type to provide URLs for.</typeparam>
         </member>
-        <member name="T:Tasty.Web.UrlTokenUrlProvider`1">
+        <member name="T:Tasty.Web.UrlTokens.UrlTokenUrlProvider`1">
             <summary>
-            Base <see cref="T:Tasty.Web.IUrlTokenUrlProvider`1"/> implementation.
+            Base <see cref="T:Tasty.Web.UrlTokens.IUrlTokenUrlProvider`1"/> implementation.
             </summary>
-            <typeparam name="TToken">The <see cref="T:Tasty.Web.IUrlToken"/> type to provide URLs for.</typeparam>
+            <typeparam name="TToken">The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> type to provide URLs for.</typeparam>
         </member>
-        <member name="M:Tasty.Web.UrlTokenUrlProvider`1.TokenFromUrl(System.Uri)">
+        <member name="M:Tasty.Web.UrlTokens.UrlTokenUrlProvider`1.TokenFromUrl(System.Uri)">
             <summary>
-            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokenStore.Current"/>
-            <see cref="T:Tasty.Web.IUrlTokenStore"/>.
-            </summary>
-            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
-        </member>
-        <member name="M:Tasty.Web.UrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.IUrlTokenStore)">
-            <summary>
-            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/>.
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokens.UrlTokenStore.Current"/>
+            <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/>.
             </summary>
             <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when loading token data.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+            <returns>The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
         </member>
-        <member name="M:Tasty.Web.UrlTokenUrlProvider`1.UrlFromToken(`0)">
+        <member name="M:Tasty.Web.UrlTokens.UrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.UrlTokens.IUrlTokenStore)">
             <summary>
-            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokenStore.Current"/>
-            <see cref="T:Tasty.Web.IUrlTokenStore"/>.
-            </summary>
-            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
-            <returns>The generated <see cref="T:System.Uri"/>.</returns>
-        </member>
-        <member name="M:Tasty.Web.UrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.IUrlTokenStore)">
-            <summary>
-            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/>.
-            </summary>
-            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when saving token data.</param>
-            <returns>The generated <see cref="T:System.Uri"/>.</returns>
-        </member>
-        <member name="M:Tasty.Web.QueryStringUrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.IUrlTokenStore)">
-            <summary>
-            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.IUrlToken"/>.
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>.
             </summary>
             <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when loading token data.</param>
-            <returns>The <see cref="T:Tasty.Web.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to use when loading token data.</param>
+            <returns>The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
         </member>
-        <member name="M:Tasty.Web.QueryStringUrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.IUrlTokenStore)">
+        <member name="M:Tasty.Web.UrlTokens.UrlTokenUrlProvider`1.UrlFromToken(`0)">
             <summary>
-            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.IUrlToken"/>.
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> using the <see cref="P:Tasty.Web.UrlTokens.UrlTokenStore.Current"/>
+            <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/>.
             </summary>
-            <param name="token">The <see cref="T:Tasty.Web.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
-            <param name="tokenStore">The <see cref="T:Tasty.Web.IUrlTokenStore"/> to use when saving token data.</param>
+            <param name="token">The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
             <returns>The generated <see cref="T:System.Uri"/>.</returns>
         </member>
-        <member name="P:Tasty.Web.QueryStringUrlTokenUrlProvider`1.QueryStringKey">
+        <member name="M:Tasty.Web.UrlTokens.UrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.UrlTokens.IUrlTokenStore)">
+            <summary>
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>.
+            </summary>
+            <param name="token">The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to use when saving token data.</param>
+            <returns>The generated <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.UrlTokens.QueryStringUrlTokenUrlProvider`1.TokenFromUrl(System.Uri,Tasty.Web.UrlTokens.IUrlTokenStore)">
+            <summary>
+            Parses a <see cref="T:System.Uri"/> into a <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>.
+            </summary>
+            <param name="uri">The <see cref="T:System.Uri"/> to parse.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to use when loading token data.</param>
+            <returns>The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> identified by the given <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="M:Tasty.Web.UrlTokens.QueryStringUrlTokenUrlProvider`1.UrlFromToken(`0,Tasty.Web.UrlTokens.IUrlTokenStore)">
+            <summary>
+            Generates a <see cref="T:System.Uri"/> from the given <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>.
+            </summary>
+            <param name="token">The <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> to generate the <see cref="T:System.Uri"/> from.</param>
+            <param name="tokenStore">The <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to use when saving token data.</param>
+            <returns>The generated <see cref="T:System.Uri"/>.</returns>
+        </member>
+        <member name="P:Tasty.Web.UrlTokens.QueryStringUrlTokenUrlProvider`1.QueryStringKey">
             <summary>
             Gets or sets the key to use for the URL token in the query string.
             </summary>
         </member>
-        <member name="P:Tasty.Web.QueryStringUrlTokenUrlProvider`1.Url">
+        <member name="P:Tasty.Web.UrlTokens.QueryStringUrlTokenUrlProvider`1.Url">
             <summary>
             Gets or sets the URL to use when generating a URL with a URL token.
             </summary>
         </member>
-        <member name="T:Tasty.Web.SqlServerUrlTokenStore">
+        <member name="T:Tasty.Web.UrlTokens.SqlServerUrlTokenStore">
             <summary>
-            Implements <see cref="T:Tasty.Web.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.IUrlToken"/>s to SQL Server.
+            Implements <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> to persist <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/>s to SQL Server.
             </summary>
         </member>
-        <member name="M:Tasty.Web.SqlServerUrlTokenStore.#ctor">
+        <member name="M:Tasty.Web.UrlTokens.SqlServerUrlTokenStore.#ctor">
             <summary>
             Initializes a new instance of the SqlServerUrlTokenStore class.
             </summary>
         </member>
-        <member name="M:Tasty.Web.SqlServerUrlTokenStore.#ctor(System.String)">
+        <member name="M:Tasty.Web.UrlTokens.SqlServerUrlTokenStore.#ctor(System.String)">
             <summary>
             Initializes a new instance of the SqlServerUrlTokenStore class.
             </summary>
             <param name="connectionString">The connection string to use when connecting to the database.</param>
         </member>
-        <member name="M:Tasty.Web.SqlServerUrlTokenStore.CleanExpiredUrlTokens">
+        <member name="M:Tasty.Web.UrlTokens.SqlServerUrlTokenStore.CleanExpiredUrlTokens">
             <summary>
             Cleans all expired token records from the store.
             </summary>
         </member>
-        <member name="M:Tasty.Web.SqlServerUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokenRecord)">
+        <member name="M:Tasty.Web.UrlTokens.SqlServerUrlTokenStore.CreateUrlToken(Tasty.Web.UrlTokens.UrlTokenRecord)">
             <summary>
             Creates a new URL token record.
             </summary>
             <param name="record">The URL token record to create.</param>
         </member>
-        <member name="M:Tasty.Web.SqlServerUrlTokenStore.GetUrlToken(System.String)">
+        <member name="M:Tasty.Web.UrlTokens.SqlServerUrlTokenStore.GetUrlToken(System.String)">
             <summary>
             Gets a URL token record.
             </summary>
@@ -2261,97 +2795,97 @@
             Gets the MIME type's valid extension set.
             </summary>
         </member>
-        <member name="T:Tasty.Web.UrlToken">
+        <member name="T:Tasty.Web.UrlTokens.UrlToken">
             <summary>
-            Base <see cref="T:Tasty.Web.IUrlToken"/> implementation.
+            Base <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> implementation.
             </summary>
         </member>
-        <member name="F:Tasty.Web.UrlToken.XmlNamespace">
+        <member name="F:Tasty.Web.UrlTokens.UrlToken.XmlNamespace">
             <summary>
             Gets the XML namespace used during token serialization.
             </summary>
         </member>
-        <member name="M:Tasty.Web.UrlToken.GenerateKey">
+        <member name="M:Tasty.Web.UrlTokens.UrlToken.GenerateKey">
             <summary>
             Generates a new unique key that can be used to identify the URL token.
             </summary>
             <returns>A unique token identifier.</returns>
         </member>
-        <member name="M:Tasty.Web.UrlToken.Serialize">
+        <member name="M:Tasty.Web.UrlTokens.UrlToken.Serialize">
             <summary>
             Serializes the URL token for storage.
             </summary>
             <returns>The serialized URL token data.</returns>
         </member>
-        <member name="P:Tasty.Web.UrlToken.ExpiryHours">
+        <member name="P:Tasty.Web.UrlTokens.UrlToken.ExpiryHours">
             <summary>
             Gets the number of hours from creation the URL token expires in.
             </summary>
         </member>
-        <member name="T:Tasty.Web.UrlTokenRecord">
+        <member name="T:Tasty.Web.UrlTokens.UrlTokenRecord">
             <summary>
             Represents a URL token record in persistent storage.
             </summary>
         </member>
-        <member name="M:Tasty.Web.UrlTokenRecord.#ctor">
+        <member name="M:Tasty.Web.UrlTokens.UrlTokenRecord.#ctor">
             <summary>
             Initializes a new instance of the UrlTokenRecord class.
             </summary>
         </member>
-        <member name="M:Tasty.Web.UrlTokenRecord.#ctor(Tasty.Web.UrlTokenRecord)">
+        <member name="M:Tasty.Web.UrlTokens.UrlTokenRecord.#ctor(Tasty.Web.UrlTokens.UrlTokenRecord)">
             <summary>
             Initializes a new instance of the UrlTokenRecord class.
             </summary>
-            <param name="record">The prototype <see cref="T:Tasty.Web.UrlTokenRecord"/> to initialize this instance from.</param>
+            <param name="record">The prototype <see cref="T:Tasty.Web.UrlTokens.UrlTokenRecord"/> to initialize this instance from.</param>
         </member>
-        <member name="M:Tasty.Web.UrlTokenRecord.ToUrlToken">
+        <member name="M:Tasty.Web.UrlTokens.UrlTokenRecord.ToUrlToken">
             <summary>
-            Converts this instance's <see cref="P:Tasty.Web.UrlTokenRecord.TokenType"/> and <see cref="P:Tasty.Web.UrlTokenRecord.Data"/> properties into an <see cref="T:Tasty.Web.IUrlToken"/> object.
+            Converts this instance's <see cref="P:Tasty.Web.UrlTokens.UrlTokenRecord.TokenType"/> and <see cref="P:Tasty.Web.UrlTokens.UrlTokenRecord.Data"/> properties into an <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> object.
             </summary>
-            <returns>An <see cref="T:Tasty.Web.IUrlToken"/> object.</returns>
+            <returns>An <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> object.</returns>
         </member>
-        <member name="P:Tasty.Web.UrlTokenRecord.Created">
+        <member name="P:Tasty.Web.UrlTokens.UrlTokenRecord.Created">
             <summary>
             Gets or sets the date the token was created.
             </summary>
         </member>
-        <member name="P:Tasty.Web.UrlTokenRecord.Data">
+        <member name="P:Tasty.Web.UrlTokens.UrlTokenRecord.Data">
             <summary>
-            Gets or sets the serialized token data (i.e., from calling <see cref="M:Tasty.Web.IUrlToken.Serialize"/>.
+            Gets or sets the serialized token data (i.e., from calling <see cref="M:Tasty.Web.UrlTokens.IUrlToken.Serialize"/>.
             </summary>
         </member>
-        <member name="P:Tasty.Web.UrlTokenRecord.Expires">
+        <member name="P:Tasty.Web.UrlTokens.UrlTokenRecord.Expires">
             <summary>
             Gets or sets the date the token expires.
             </summary>
         </member>
-        <member name="P:Tasty.Web.UrlTokenRecord.Key">
+        <member name="P:Tasty.Web.UrlTokens.UrlTokenRecord.Key">
             <summary>
             Gets or sets the token's unique key.
             </summary>
         </member>
-        <member name="P:Tasty.Web.UrlTokenRecord.TokenType">
+        <member name="P:Tasty.Web.UrlTokens.UrlTokenRecord.TokenType">
             <summary>
-            Gets or sets <see cref="T:Tasty.Web.IUrlToken"/> implementor that the token is persisted for.
+            Gets or sets <see cref="T:Tasty.Web.UrlTokens.IUrlToken"/> implementor that the token is persisted for.
             </summary>
         </member>
-        <member name="T:Tasty.Web.UrlTokenStore">
+        <member name="T:Tasty.Web.UrlTokens.UrlTokenStore">
             <summary>
-            Provides global persistence functionality and a way to access the <see cref="T:Tasty.Web.IUrlTokenStore"/>
+            Provides global persistence functionality and a way to access the <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/>
             currently in use.
             </summary>
         </member>
-        <member name="M:Tasty.Web.UrlTokenStore.CreateRecordCollection(System.Data.DataTable)">
+        <member name="M:Tasty.Web.UrlTokens.UrlTokenStore.CreateRecordCollection(System.Data.DataTable)">
             <summary>
-            Gets the given result set as a collection of <see cref="T:Tasty.Web.UrlTokenRecord"/>s.
+            Gets the given result set as a collection of <see cref="T:Tasty.Web.UrlTokens.UrlTokenRecord"/>s.
             Assumes the result set has the expected schema definition.
             </summary>
-            <param name="resultSet">The result set to convert into a collection of <see cref="T:Tasty.Web.UrlTokenRecord"/>s.</param>
-            <returns>A collection of <see cref="T:Tasty.Web.UrlTokenRecord"/>s.</returns>
+            <param name="resultSet">The result set to convert into a collection of <see cref="T:Tasty.Web.UrlTokens.UrlTokenRecord"/>s.</param>
+            <returns>A collection of <see cref="T:Tasty.Web.UrlTokens.UrlTokenRecord"/>s.</returns>
         </member>
-        <member name="P:Tasty.Web.UrlTokenStore.Current">
+        <member name="P:Tasty.Web.UrlTokens.UrlTokenStore.Current">
             <summary>
-            Gets or sets the current <see cref="T:Tasty.Web.IUrlTokenStore"/> implementation in use.
+            Gets or sets the current <see cref="T:Tasty.Web.UrlTokens.IUrlTokenStore"/> implementation in use.
             The setter on this property is primarily meant for testing purposes.
             </summary>
         </member>

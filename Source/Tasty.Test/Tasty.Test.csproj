@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="GeocodeTests.cs" />
     <Compile Include="HttpCacheUrlTokenStoreTests.cs" />
     <Compile Include="HttpTests.cs" />
     <Compile Include="JobRunnerTests.cs" />

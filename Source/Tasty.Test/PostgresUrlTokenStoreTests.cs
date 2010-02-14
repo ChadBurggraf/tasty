@@ -4,7 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Web;
+using Tasty.Web.UrlTokens;
 
 namespace Tasty.Test
 {

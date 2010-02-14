@@ -8,7 +8,7 @@ using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tasty.Build;
 using Tasty.Jobs;
-using Tasty.Web;
+using Tasty.Web.UrlTokens;
 
 namespace Tasty.Test
 {
@@ -41,7 +41,7 @@ namespace Tasty.Test
             SchemaUpgradeService.CreateDatabase(CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword);
 
             RunEmbeddedSql(Assembly.GetAssembly(typeof(IJobStore)), "Tasty.Jobs.Sql.TastyJobs-SqlServer.sql");
-            RunEmbeddedSql(Assembly.GetAssembly(typeof(IUrlTokenStore)), "Tasty.Web.Sql.TastyUrlTokens-SqlServer.sql");
+            RunEmbeddedSql(Assembly.GetAssembly(typeof(IUrlTokenStore)), "Tasty.Web.UrlTokens.Sql.TastyUrlTokens-SqlServer.sql");
         }
 
         private static void DropTestDatabase()

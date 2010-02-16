@@ -131,6 +131,17 @@ namespace Tasty.Geocode
         /// Makes a geocode request with the given address.
         /// </summary>
         /// <param name="address">The address to make the request with.</param>
+        /// <param name="minimumAccuracy">The minimum accuracy requred for a successful response, or 0 if not applicable.</param>
+        /// <returns>The result of the request.</returns>
+        public static GeocodeCallResult Make(GeocodeRequestAddress address, int minimumAccuracy)
+        {
+            return Make(address, TastySettings.Section.Geocode.ApiKey, minimumAccuracy);
+        }
+
+        /// <summary>
+        /// Makes a geocode request with the given address.
+        /// </summary>
+        /// <param name="address">The address to make the request with.</param>
         /// <param name="apiKey">The API key to use when making the request.</param>
         /// <returns>The result of the request.</returns>
         public static GeocodeCallResult Make(GeocodeRequestAddress address, string apiKey)

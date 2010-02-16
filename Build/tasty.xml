@@ -1145,6 +1145,14 @@
             <param name="address">The address to make the request with.</param>
             <returns>The result of the request.</returns>
         </member>
+        <member name="M:Tasty.Geocode.GeocodeRequest.Make(Tasty.Geocode.GeocodeRequestAddress,System.Int32)">
+            <summary>
+            Makes a geocode request with the given address.
+            </summary>
+            <param name="address">The address to make the request with.</param>
+            <param name="minimumAccuracy">The minimum accuracy requred for a successful response, or 0 if not applicable.</param>
+            <returns>The result of the request.</returns>
+        </member>
         <member name="M:Tasty.Geocode.GeocodeRequest.Make(Tasty.Geocode.GeocodeRequestAddress,System.String)">
             <summary>
             Makes a geocode request with the given address.

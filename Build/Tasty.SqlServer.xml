@@ -22,6 +22,16 @@
             A collection of helper functions that can be imported to SQL Server.
             </summary>
         </member>
+        <member name="M:Tasty.SqlServer.ClrFunctions.RegexIsMatch(System.String,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            Gets a value indicating whether the given input string matches the given regular expression.
+            </summary>
+            <param name="input">The input to check against the regular expression.</param>
+            <param name="pattern">The regular expression patter to check.</param>
+            <param name="ignoreCase">A value indicating whether to ignore case.</param>
+            <param name="multiline">A value indicating whether to treat the input as multiline.</param>
+            <returns>True if the input string matches the regular expression, false otherwise.</returns>
+        </member>
         <member name="M:Tasty.SqlServer.ClrFunctions.StringSetContainsAny(System.String,System.String,System.String)">
             <summary>
             Gets a value indicating whether any of the values in a string set are equal to any

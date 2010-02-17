@@ -38,6 +38,23 @@ namespace Tasty.SqlServer
         }
 
         /// <summary>
+        /// Replaces matches of the given regulare expression string on the given input string with the given replacement string.
+        /// </summary>
+        /// <param name="input">The input string to replace matches on.</param>
+        /// <param name="pattern">The regular expression pattern identifying the replacements to make.</param>
+        /// <param name="replacement">The replacement string to use.</param>
+        /// <param name="ignoreCase">A value indicating whether to ignore case.</param>
+        /// <param name="multiline">A value indicating whether to treat the input as multiline.</param>
+        /// <returns>The result of the replacement operation.</returns>
+        public static SqlString RegexReplace(string input, string pattern, string replacement, bool ignoreCase, bool multiline)
+        {
+            input = input ?? String.Empty;
+            pattern = pattern ?? String.Empty;
+
+            return Regex.Replace(input, pattern, replacement, CreateRegexOptions(ignoreCase, multiline));
+        }
+
+        /// <summary>
         /// Splits the given input string using the given regular expression.
         /// </summary>
         /// <param name="input">The input string to split.</param>

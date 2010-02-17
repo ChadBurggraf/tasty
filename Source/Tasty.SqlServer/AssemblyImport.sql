@@ -1,6 +1,9 @@
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[RegexIsMatch]') AND type IN (N'FN', N'IF', N'TF', N'FS', N'FT'))
 	DROP FUNCTION [RegexIsMatch]
 GO
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[RegexReplace]') AND type IN (N'FN', N'IF', N'TF', N'FS', N'FT'))
+	DROP FUNCTION [RegexReplace]
+GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[RegexSplit]') AND type IN (N'FN', N'IF', N'TF', N'FS', N'FT'))
 	DROP FUNCTION [RegexSplit]
 GO
@@ -53,6 +56,18 @@ CREATE FUNCTION [RegexIsMatch]
 RETURNS bit
 AS
 EXTERNAL NAME [Tasty.SqlServer].[Tasty.SqlServer.ClrFunctions].[RegexIsMatch]
+GO
+
+CREATE FUNCTION [RegexReplace]
+(
+	@Input nvarchar(max),
+	@Pattern nvarchar(max),
+	@Replacement nvarchar(max),
+	@IgnoreCase bit,
+	@Multiline bit
+)
+RETURNS nvarchar(max)
+EXTERNAL NAME [Tasty.SqlServer].[Tasty.SqlServer.ClrFunctions].[RegexReplace]
 GO
 
 CREATE FUNCTION [RegexSplit]

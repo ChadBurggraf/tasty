@@ -9,7 +9,7 @@ namespace Tasty.Configuration
     using System;
     using System.Configuration;
     using System.Diagnostics.CodeAnalysis;
-    using Tasty.Web;
+    using Tasty.Web.UrlTokens;
 
     /// <summary>
     /// Represents the URL tokens configuration element.
@@ -39,7 +39,7 @@ namespace Tasty.Configuration
         /// <summary>
         /// Gets or sets the <see cref="IUrlTokenStore"/> implementation to use when persisting URL tokens.
         /// </summary>
-        [ConfigurationProperty("storeType", IsRequired = false, DefaultValue = "Tasty.Web.HttpCacheUrlTokenStore, Tasty")]
+        [ConfigurationProperty("storeType", IsRequired = false, DefaultValue = "Tasty.Web.UrlTokens.HttpCacheUrlTokenStore, Tasty")]
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Not a URL property.")]
         public string UrlTokenStoreType
         {

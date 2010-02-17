@@ -8,6 +8,7 @@ namespace Tasty.Configuration
 {
     using System;
     using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Represents the Tasty.dll configuration section.
@@ -22,6 +23,16 @@ namespace Tasty.Configuration
         public static TastySettings Section
         {
             get { return section; }
+        }
+
+        /// <summary>
+        /// Gets the geocode configuration element.
+        /// </summary>
+        [ConfigurationProperty("geocode", IsRequired = false)]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public GeocodeElement Geocode
+        {
+            get { return (GeocodeElement)(this["geocode"] ?? (this["geocode"] = new GeocodeElement())); }
         }
 
         /// <summary>

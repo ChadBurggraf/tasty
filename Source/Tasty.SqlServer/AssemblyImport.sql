@@ -34,10 +34,15 @@ IF @TastyAssemblyPath NOT LIKE N'%Tasty.SqlServer.dll'
 
 IF NOT EXISTS (SELECT * FROM sys.assemblies WHERE [name] = 'System.Core')
 BEGIN
-	CREATE ASSEMBLY [System.Core]
-	AUTHORIZATION [dbo]
-	FROM @SystemCoreAssemblyPath
-	WITH PERMISSION_SET = UNSAFE
+	BEGIN TRY
+		CREATE ASSEMBLY [System.Core]
+		AUTHORIZATION [dbo]
+		FROM @SystemCoreAssemblyPath
+		WITH PERMISSION_SET = UNSAFE
+	END TRY
+	BEGIN CATCH
+		-- Hopefully this means we're on SQL Server 2008 and it's known by the system.
+	END CATCH
 END
 
 CREATE ASSEMBLY [Tasty.SqlServer]

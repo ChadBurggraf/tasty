@@ -40,7 +40,7 @@ namespace Tasty.Console
         public override void Execute()
         {
             string from = null, to = null, dir = null, output = null;
-            int verbose = 0;
+            int verbose = 0, man = 0;
 
             var options = new OptionSet()
             {
@@ -48,7 +48,8 @@ namespace Tasty.Console
                 { "o|out=", "(required) the path of the file to create or overwrite with the generated script.", v => output = v },
                 { "f|from=", "the lower-bound version number to restrict the generated script to (e.g., 0.3 or 2.4.5), exclusive.", v => from = v },
                 { "t|to=", "the upper-bound version number to restrict the generated script to (e.g., 1.0 or 1.2.10.3), inclusive.", v => to = v },
-                { "v|verbose", "write generation progress to the console.", v => { ++verbose; } }
+                { "v|verbose", "write generation progress to the console.", v => { ++verbose; } },
+                { "m|man", "show this message", v => { ++man; } }
             };
 
             try
@@ -58,6 +59,13 @@ namespace Tasty.Console
             catch (OptionException ex)
             {
                 ParseError(options, ex);
+                return;
+            }
+
+            if (man > 0)
+            {
+                this.Help(options);
+                return;
             }
 
             if (String.IsNullOrEmpty(dir) || String.IsNullOrEmpty(output))

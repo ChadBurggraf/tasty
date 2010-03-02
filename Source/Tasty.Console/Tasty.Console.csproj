@@ -38,6 +38,7 @@
       <HintPath>..\Dependencies\NDesk.Options.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -58,6 +59,7 @@
       <Link>Properties\SolutionVersionInfo.cs</Link>
     </Compile>
     <Compile Include="ConsoleCommand.cs" />
+    <Compile Include="JobRunnerCommand.cs" />
     <Compile Include="TastyConsole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlInstallCommand.cs" />

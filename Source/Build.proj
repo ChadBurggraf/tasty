@@ -1,30 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Publish" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Doc.proj"/>
+  
   <PropertyGroup>
     <Configuration>Release</Configuration>
-    <ConsolePath>Tasty.Console\</ConsolePath>
-    <ILMergePath>C:\Program Files\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
-    <LibraryPath>Tasty\</LibraryPath>
-    <PublishPath>..\Build\</PublishPath>
-    <SqlServerPath>Tasty.SqlServer\</SqlServerPath>
+    <ConsolePath>Tasty.Console</ConsolePath>
+    <ILMergePath>$(ProgramFiles)\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
+    <LibraryPath>Tasty</LibraryPath>
+    <PublishPath>..\Build</PublishPath>
+    <SqlServerPath>Tasty.SqlServer</SqlServerPath>
   </PropertyGroup>
+  
   <Target Name="Clean">
-    <RemoveDir Directories="$(ConsolePath)bin\Release\"/>
-    <RemoveDir Directories="$(LibraryPath)bin\Release\"/>
-    <RemoveDir Directories="$(SqlServerpath)bin\Release\"/>
-    <RemoveDir Directories="$(PublishPath)"/>
+    <RemoveDir Directories="$(ConsolePath)\bin\Release;$(LibraryPath)\bin\Release;$(SqlServerPath)\bin\Release;$(PublishPath)"/>
     <MakeDir Directories="$(PublishPath)"/>
   </Target>
+  
   <Target Name="Build" DependsOnTargets="Clean">
-    <MSBuild Projects="$(LibraryPath)Tasty.csproj" Properties="Configuration=$(Configuration)"/>
-    <MSBuild Projects="$(ConsolePath)Tasty.Console.csproj" Properties="Configuration=$(Configuration)"/>
-    <MSBuild Projects="$(SqlServerpath)Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration)"/>
+    <MSBuild Projects="$(LibraryPath)\Tasty.csproj;$(ConsolePath)\Tasty.Console.csproj;$(SqlServerpath)\Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration)"/>
   </Target>
+  
   <Target Name="Publish" DependsOnTargets="Build">
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryPath)Tasty.snk /out:$(PublishPath)tasty.dll $(LibraryPath)bin\Release\tasty.dll $(LibraryPath)bin\Release\AWSSDK.dll $(LibraryPath)bin\Release\Ionic.Zlib.dll $(LibraryPath)bin\Release\Npgsql.dll $(LibraryPath)bin\Release\Mono.Security.dll'/>
-    <Copy SourceFiles="$(LibraryPath)bin\Release\tasty.xml" DestinationFiles="$(PublishPath)tasty.xml"/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsolePath)Tasty.Console.snk /out:$(PublishPath)tasty.exe $(ConsolePath)bin\Release\tasty.exe $(ConsolePath)bin\Release\tasty.dll $(ConsolePath)bin\Release\AWSSDK.dll $(ConsolePath)bin\Release\Ionic.Zlib.dll $(LibraryPath)bin\Release\Npgsql.dll $(LibraryPath)bin\Release\Mono.Security.dll $(ConsolePath)bin\Release\NDesk.Options.dll'/>
-    <Copy SourceFiles="$(SqlServerpath)bin\Release\Tasty.SqlServer.dll" DestinationFiles="$(PublishPath)Tasty.SqlServer.dll"/>
-    <Copy SourceFiles="$(SqlServerpath)bin\Release\Tasty.SqlServer.xml" DestinationFiles="$(PublishPath)Tasty.SqlServer.xml"/>
+    <Message Text='Merging assemblies into "tasty.dll".'/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryPath)\Tasty.snk /out:$(PublishPath)\tasty.dll $(LibraryPath)\bin\Release\tasty.dll $(LibraryPath)\bin\Release\AWSSDK.dll $(LibraryPath)\bin\Release\Ionic.Zlib.dll $(LibraryPath)\bin\Release\Npgsql.dll $(LibraryPath)\bin\Release\Mono.Security.dll'/>
+    <Copy SourceFiles="$(LibraryPath)\bin\Release\tasty.xml" DestinationFiles="$(PublishPath)\tasty.xml"/>
+    <Message Text='Merging assemblies into "tasty.exe"'/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsolePath)\Tasty.Console.snk /out:$(PublishPath)\tasty.exe $(ConsolePath)\bin\Release\tasty.exe $(ConsolePath)\bin\Release\tasty.dll $(ConsolePath)\bin\Release\AWSSDK.dll $(ConsolePath)\bin\Release\Ionic.Zlib.dll $(LibraryPath)\bin\Release\Npgsql.dll $(LibraryPath)\bin\Release\Mono.Security.dll $(ConsolePath)\bin\Release\NDesk.Options.dll'/>
+    <Copy SourceFiles="$(SqlServerpath)\bin\Release\Tasty.SqlServer.dll" DestinationFiles="$(PublishPath)\Tasty.SqlServer.dll"/>
+    <Copy SourceFiles="$(SqlServerpath)\bin\Release\Tasty.SqlServer.xml" DestinationFiles="$(PublishPath)\Tasty.SqlServer.xml"/>
   </Target>
 </Project>

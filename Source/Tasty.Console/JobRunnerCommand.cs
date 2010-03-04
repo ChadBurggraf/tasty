@@ -27,7 +27,7 @@ namespace Tasty.Console
         private string logPath;
 
         /// <summary>
-        /// Initializes a new instance of the SqlInstallCommand class.
+        /// Initializes a new instance of the JobRunnerCommand class.
         /// </summary>
         /// <param name="args">The command's input arguments.</param>
         public JobRunnerCommand(string[] args)
@@ -198,7 +198,7 @@ namespace Tasty.Console
         public void OnCancelJob(JobRecord record)
         {
             System.Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Log("Canceled '{0}' ({1})", record.Name, record.Id);
+            this.Log("Canceled '{0}' ({1})", record.Name, record.Id);
             System.Console.ResetColor();
         }
 
@@ -209,7 +209,7 @@ namespace Tasty.Console
         public void OnDequeueJob(JobRecord record)
         {
             System.Console.ForegroundColor = ConsoleColor.Cyan;
-            Log("Dequeued '{0}' ({1})", record.Name, record.Id);
+            this.Log("Dequeued '{0}' ({1})", record.Name, record.Id);
             System.Console.ResetColor();
         }
 
@@ -220,7 +220,7 @@ namespace Tasty.Console
         public void OnEnqueueScheduledJob(JobRecord record)
         {
             System.Console.ForegroundColor = ConsoleColor.Gray;
-            Log("Enqueued '{0}' ({1}) for schedule '{2}'", record.Name, record.Id, record.ScheduleName);
+            this.Log("Enqueued '{0}' ({1}) for schedule '{2}'", record.Name, record.Id, record.ScheduleName);
             System.Console.ResetColor();
         }
 
@@ -238,19 +238,19 @@ namespace Tasty.Console
             if (record != null && ex != null)
             {
                 string message = ExceptionXElement.Parse(record.Exception).Descendants("Message").First().Value;
-                Log("An error occurred during the run loop for '{0}' ({1}). The message received was: '{2}'", record.Name, record.Id, message);
+                this.Log("An error occurred during the run loop for '{0}' ({1}). The message received was: '{2}'", record.Name, record.Id, message);
             }
             else if (record != null)
             {
-                Log("An error occurred during the run loop for '{0}' ({1})", record.Name, record.Id);
+                this.Log("An error occurred during the run loop for '{0}' ({1})", record.Name, record.Id);
             }
             else if (ex != null)
             {
-                Log("An error occurred during the run loop. The message received was: '{0}'", ex.Message);
+                this.Log("An error occurred during the run loop. The message received was: '{0}'", ex.Message);
             }
             else
             {
-                Log("An unspecified error occurred during the run loop");
+                this.Log("An unspecified error occurred during the run loop");
             }
 
             System.Console.ResetColor();
@@ -265,13 +265,13 @@ namespace Tasty.Console
             if (record.Status == JobStatus.Succeeded)
             {
                 System.Console.ForegroundColor = ConsoleColor.Green;
-                Log("'{0}' ({1}) completed successfully", record.Name, record.Id);
+                this.Log("'{0}' ({1}) completed successfully", record.Name, record.Id);
             }
             else
             {
                 System.Console.ForegroundColor = ConsoleColor.Red;
                 string message = ExceptionXElement.Parse(record.Exception).Descendants("Message").First().Value;
-                Log("'{0}' ({1}) failed with the message: ", record.Name, record.Id, message);
+                this.Log("'{0}' ({1}) failed with the message: ", record.Name, record.Id, message);
             }
 
             System.Console.ResetColor();
@@ -284,7 +284,7 @@ namespace Tasty.Console
         public void OnTimeoutJob(JobRecord record)
         {
             System.Console.ForegroundColor = ConsoleColor.Red;
-            Log("Timed out '{0}' ({1}) because it was taking too long to finish.", record.Name, record.Id);
+            this.Log("Timed out '{0}' ({1}) because it was taking too long to finish.", record.Name, record.Id);
             System.Console.ResetColor();
         }
 
@@ -305,6 +305,7 @@ namespace Tasty.Console
         /// Logs the given message to the standard output and/or the current logfile path.
         /// </summary>
         /// <param name="message">The message to log.</param>
+        /// <param name="args">The formatting arguments to use when formatting the message.</param>
         private void Log(string message, params object[] args)
         {
             string logMessage = String.Format(CultureInfo.InvariantCulture, "{0:s}\n", DateTime.Now);

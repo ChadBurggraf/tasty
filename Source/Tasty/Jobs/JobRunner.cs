@@ -9,6 +9,7 @@ namespace Tasty.Jobs
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
@@ -383,6 +384,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// God execution thread handler.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to keep the run loop executing at all costs.")]
         private void SmiteThee()
         {
             while (true)

@@ -12,6 +12,7 @@ namespace Tasty.Jobs
     using System.Data;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using Npgsql;
     using Tasty.Configuration;
@@ -252,20 +253,40 @@ namespace Tasty.Jobs
         /// <returns>A collection of <see cref="JobRecord"/>s.</returns>
         protected override IEnumerable<JobRecord> CreateRecordCollection(DataTable resultSet)
         {
-            return from DataRow row in resultSet.Rows
-                   select new JobRecord()
-                   {
-                       Id = (int)row["id"],
-                       Name = (string)row["name"],
-                       JobType = Type.GetType((string)row["type"]),
-                       Data = (string)row["data"],
-                       Status = (JobStatus)Enum.Parse(typeof(JobStatus), (string)row["status"]),
-                       Exception = (row["exception"] != DBNull.Value) ? (string)row["exception"] : null,
-                       QueueDate = new DateTime(((DateTime)row["queue_date"]).Ticks, DateTimeKind.Utc),
-                       StartDate = (DateTime?)(row["start_date"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["start_date"]).Ticks, DateTimeKind.Utc) : null),
-                       FinishDate = (DateTime?)(row["finish_date"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["finish_date"]).Ticks, DateTimeKind.Utc) : null),
-                       ScheduleName = (row["schedule_name"] != DBNull.Value) ? (string)row["schedule_name"] : null
-                   };
+            List<JobRecord> records = new List<JobRecord>();
+
+            foreach (DataRow row in resultSet.Rows)
+            {
+                JobRecord record = new JobRecord()
+                {
+                    Id = (int)row["id"],
+                    Name = (string)row["name"],
+                    Data = (string)row["data"],
+                    Status = (JobStatus)Enum.Parse(typeof(JobStatus), (string)row["status"]),
+                    Exception = (row["exception"] != DBNull.Value) ? (string)row["exception"] : null,
+                    QueueDate = new DateTime(((DateTime)row["queue_date"]).Ticks, DateTimeKind.Utc),
+                    StartDate = (DateTime?)(row["start_date"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["start_date"]).Ticks, DateTimeKind.Utc) : null),
+                    FinishDate = (DateTime?)(row["finish_date"] != DBNull.Value ? (DateTime?)new DateTime(((DateTime)row["finish_date"]).Ticks, DateTimeKind.Utc) : null),
+                    ScheduleName = (row["schedule_name"] != DBNull.Value) ? (string)row["schedule_name"] : null
+                };
+
+                try
+                {
+                    record.JobType = Type.GetType((string)row["type"], true);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    record.Status = JobStatus.Failed;
+                    record.Exception = new ExceptionXElement(ex).ToString();
+                }
+                catch (TypeLoadException ex)
+                {
+                    record.Status = JobStatus.Failed;
+                    record.Exception = new ExceptionXElement(ex).ToString();
+                }
+            }
+
+            return records;
         }
 
         /// <summary>

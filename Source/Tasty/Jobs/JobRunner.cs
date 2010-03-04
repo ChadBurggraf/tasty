@@ -127,6 +127,17 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Called when an error occurs during the execution of the run-loop.
+        /// Does not get called when a job itself experiences an error; job-specific
+        /// errors are saved in the job store with their respecitve records.
+        /// </summary>
+        /// <param name="record">The record on which the error occurred, if applicable.</param>
+        /// <param name="ex">The exception raised, if applicable.</param>
+        public void OnError(JobRecord record, Exception ex)
+        {
+        }
+
+        /// <summary>
         /// Called when a job is finished.
         /// </summary>
         /// <param name="record">The job record identifying the affected job.</param>
@@ -231,41 +242,49 @@ namespace Tasty.Jobs
                             records,
                             delegate(JobRecord record)
                             {
-                                record.Status = JobStatus.Started;
-                                record.StartDate = DateTime.UtcNow;
+                                if (record.Status != JobStatus.Failed)
+                                {
+                                    record.Status = JobStatus.Started;
+                                    record.StartDate = DateTime.UtcNow;
 
-                                IJob job = null;
-                                Exception toJobEx = null;
+                                    IJob job = null;
+                                    Exception toJobEx = null;
 
-                                try
-                                {
-                                    job = record.ToJob();
-                                }
-                                catch (FileLoadException ex)
-                                {
-                                    toJobEx = ex;
-                                }
-                                catch (FileNotFoundException ex)
-                                {
-                                    toJobEx = ex;
-                                }
-                                catch (SerializationException ex)
-                                {
-                                    toJobEx = ex;
-                                }
+                                    try
+                                    {
+                                        job = record.ToJob();
+                                    }
+                                    catch (FileLoadException ex)
+                                    {
+                                        toJobEx = ex;
+                                    }
+                                    catch (FileNotFoundException ex)
+                                    {
+                                        toJobEx = ex;
+                                    }
+                                    catch (SerializationException ex)
+                                    {
+                                        toJobEx = ex;
+                                    }
 
-                                if (toJobEx != null)
+                                    if (toJobEx != null)
+                                    {
+                                        JobRun run = new JobRun(record.Id.Value, job);
+                                        this.runningJobs.Add(run);
+
+                                        run.Run();
+                                    }
+                                    else
+                                    {
+                                        record.Status = JobStatus.Failed;
+                                        record.Exception = new ExceptionXElement(toJobEx).ToString();
+                                        record.FinishDate = DateTime.UtcNow;
+                                    }
+                                }
+                                else
                                 {
-                                    record.Status = JobStatus.Failed;
-                                    record.Exception = new ExceptionXElement(toJobEx).ToString();
                                     record.FinishDate = DateTime.UtcNow;
-                                    return;
                                 }
-
-                                JobRun run = new JobRun(record.Id.Value, job);
-                                this.runningJobs.Add(run);
-
-                                run.Run();
 
                                 this.runnerDelegate.OnDequeueJob(new JobRecord(record));
                             });
@@ -289,7 +308,7 @@ namespace Tasty.Jobs
                 foreach (var scheduledJob in schedule.ScheduledJobs)
                 {
                     var last = (from r in records
-                                where r.JobType.AssemblyQualifiedName.StartsWith(scheduledJob.JobType, StringComparison.OrdinalIgnoreCase) && r.ScheduleName == schedule.Name
+                                where r.JobType != null && r.JobType.AssemblyQualifiedName.StartsWith(scheduledJob.JobType, StringComparison.OrdinalIgnoreCase) && r.ScheduleName == schedule.Name
                                 select r).FirstOrDefault();
 
                     if (last == null || last.QueueDate < next)
@@ -301,9 +320,20 @@ namespace Tasty.Jobs
 
                             this.runnerDelegate.OnEnqueueScheduledJob(new JobRecord(record));
                         }
-                        catch (ConfigurationErrorsException)
+                        catch (ConfigurationErrorsException ex)
                         {
-                            // TODO: Something should be done with this.
+                            this.runnerDelegate.OnError(last, ex);
+                        }
+                    }
+                    else
+                    {
+                        var bad = (from r in records
+                                   where r.JobType == null && r.ScheduleName == schedule.Name
+                                   select r).FirstOrDefault();
+
+                        if (bad != null)
+                        {
+                            this.runnerDelegate.OnError(bad, null);
                         }
                     }
                 }
@@ -357,14 +387,21 @@ namespace Tasty.Jobs
         {
             while (true)
             {
-                this.CancelJobs();
-                this.FinishJobs();
-                this.TimeoutJobs();
-
-                if (this.IsRunning)
+                try
                 {
-                    this.EnqueueScheduledJobs();
-                    this.DequeueJobs();
+                    this.CancelJobs();
+                    this.FinishJobs();
+                    this.TimeoutJobs();
+
+                    if (this.IsRunning)
+                    {
+                        this.EnqueueScheduledJobs();
+                        this.DequeueJobs();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.runnerDelegate.OnError(null, ex);
                 }
 
                 Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);

@@ -18,7 +18,7 @@ namespace Tasty.Configuration
         private static TastySettings section;
 
         /// <summary>
-        /// Gets the Tasty.dll configuration section.
+        /// Gets or sets the tasty.dll configuration section.
         /// </summary>
         public static TastySettings Section
         {

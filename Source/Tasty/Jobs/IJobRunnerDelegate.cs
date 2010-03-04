@@ -34,6 +34,15 @@ namespace Tasty.Jobs
         void OnEnqueueScheduledJob(JobRecord record);
 
         /// <summary>
+        /// Called when an error occurs during the execution of the run-loop.
+        /// Does not get called when a job itself experiences an error; job-specific
+        /// errors are saved in the job store with their respecitve records.
+        /// </summary>
+        /// <param name="record">The record on which the error occurred, if applicable.</param>
+        /// <param name="ex">The exception raised, if applicable.</param>
+        void OnError(JobRecord record, Exception ex);
+
+        /// <summary>
         /// Called when a job is finished.
         /// </summary>
         /// <param name="record">The job record identifying the affected job.</param>

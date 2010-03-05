@@ -147,6 +147,16 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Gets a pretty URL-safe representation of the given string.
+        /// </summary>
+        /// <param name="value">The string value to get a URL-safe representation of.</param>
+        /// <returns>The escaped string value.</returns>
+        public static string ToUrlPrettyString(this string value)
+        {
+            return Regex.Replace(Regex.Replace(value, @"[^0-9a-z]", " ", RegexOptions.IgnoreCase).Trim(), @"\s+", "-");
+        }
+
+        /// <summary>
         /// Splits the given string on the given separator characters, removing any empty 
         /// results and trimming whitespace around the rest of the results.
         /// </summary>

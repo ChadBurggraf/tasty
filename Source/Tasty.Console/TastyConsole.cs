@@ -81,9 +81,11 @@ namespace Tasty.Console
         {
             output.WriteLine("Usage: tasty command [COMMAND_ARGUMENTS]+");
             output.WriteLine("Executes one of the available tasty.dll command actions.");
+            output.WriteLine("Use 'tasty command -man' to show the manual for any command listed below.");
             output.WriteLine();
             output.WriteLine("Commands:");
             output.WriteLine("  sql-install                a SQL install script generator.");
+            output.WriteLine("  jobs                       start a tasty jobs session.");
             options.WriteOptionDescriptions(output);
         }
     }

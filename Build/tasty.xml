@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <doc>
     <assembly>
-        <name>tasty</name>
+        <name>Tasty</name>
     </assembly>
     <members>
         <member name="T:Tasty.Build.Extensions">
@@ -453,7 +453,7 @@
         </member>
         <member name="P:Tasty.Configuration.GeocodeElement.ApiKey">
             <summary>
-            Gets the API key to use in geocode requests.
+            Gets or sets the API key to use in geocode requests.
             </summary>
         </member>
         <member name="T:Tasty.Configuration.HttpElement">
@@ -569,13 +569,13 @@
             <summary>
             Gets or sets the heartbeat timeout (in miliseconds) to use for the job runner. The runner will 
             pause for this duration at the end of each cancel/finish/timeout/dequeue loop.
-            When not configured, defaults to 10,000 (10 seconds).
+            When not configured, defaults to 2,000 (2 seconds).
             </summary>
         </member>
         <member name="P:Tasty.Configuration.JobsElement.MaximumConcurrency">
             <summary>
             Gets or sets the maximum number of jobs that are allowed to be
-            running simultaneously. When not configured, defaults to 10.
+            running simultaneously. When not configured, defaults to 25.
             </summary>
         </member>
         <member name="P:Tasty.Configuration.JobsElement.MaximumFailedRetries">
@@ -728,7 +728,7 @@
         </member>
         <member name="P:Tasty.Configuration.TastySettings.Section">
             <summary>
-            Gets the Tasty.dll configuration section.
+            Gets or sets the tasty.dll configuration section.
             </summary>
         </member>
         <member name="P:Tasty.Configuration.TastySettings.Geocode">
@@ -1491,6 +1491,50 @@
             Gets the timeout, in miliseconds, the job is allowed to run for.
             </summary>
         </member>
+        <member name="T:Tasty.Jobs.IJobRunnerDelegate">
+            <summary>
+            Defines the interface for job runner delegates.
+            </summary>
+        </member>
+        <member name="M:Tasty.Jobs.IJobRunnerDelegate.OnCancelJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a job is canceled.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
+        <member name="M:Tasty.Jobs.IJobRunnerDelegate.OnDequeueJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a job is dequeued.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
+        <member name="M:Tasty.Jobs.IJobRunnerDelegate.OnEnqueueScheduledJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a scheduled job is enqueued.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
+        <member name="M:Tasty.Jobs.IJobRunnerDelegate.OnError(Tasty.Jobs.JobRecord,System.Exception)">
+            <summary>
+            Called when an error occurs during the execution of the run-loop.
+            Does not get called when a job itself experiences an error; job-specific
+            errors are saved in the job store with their respecitve records.
+            </summary>
+            <param name="record">The record on which the error occurred, if applicable.</param>
+            <param name="ex">The exception raised, if applicable.</param>
+        </member>
+        <member name="M:Tasty.Jobs.IJobRunnerDelegate.OnFinishJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a job is finished.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
+        <member name="M:Tasty.Jobs.IJobRunnerDelegate.OnTimeoutJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a job is timed out.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
         <member name="T:Tasty.Jobs.IJobStore">
             <summary>
             Interface definition for persistent job stores.
@@ -1748,21 +1792,60 @@
             Prevents a default instance of the JobRunner class from being created.
             </summary>
         </member>
+        <member name="M:Tasty.Jobs.JobRunner.OnCancelJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a job is canceled.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
+        <member name="M:Tasty.Jobs.JobRunner.OnDequeueJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a job is dequeued.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
+        <member name="M:Tasty.Jobs.JobRunner.OnEnqueueScheduledJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a scheduled job is enqueued.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
+        <member name="M:Tasty.Jobs.JobRunner.OnError(Tasty.Jobs.JobRecord,System.Exception)">
+            <summary>
+            Called when an error occurs during the execution of the run-loop.
+            Does not get called when a job itself experiences an error; job-specific
+            errors are saved in the job store with their respecitve records.
+            </summary>
+            <param name="record">The record on which the error occurred, if applicable.</param>
+            <param name="ex">The exception raised, if applicable.</param>
+        </member>
+        <member name="M:Tasty.Jobs.JobRunner.OnFinishJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a job is finished.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
+        <member name="M:Tasty.Jobs.JobRunner.OnTimeoutJob(Tasty.Jobs.JobRecord)">
+            <summary>
+            Called when a job is timed out.
+            </summary>
+            <param name="record">The job record identifying the affected job.</param>
+        </member>
         <member name="M:Tasty.Jobs.JobRunner.Start">
             <summary>
             Starts the runner if it is not already running.
             </summary>
         </member>
+        <member name="M:Tasty.Jobs.JobRunner.Start(Tasty.Jobs.IJobRunnerDelegate)">
+            <summary>
+            Starts the runner if it is not already running.
+            </summary>
+            <param name="runnerDelegate">The <see cref="T:Tasty.Jobs.IJobRunnerDelegate"/> that should handle notifications.</param>
+        </member>
         <member name="M:Tasty.Jobs.JobRunner.Stop">
             <summary>
             Stops the runner if it is running.
             Does not abort any currently executing job runs.
-            </summary>
-        </member>
-        <member name="M:Tasty.Jobs.JobRunner.EnqueueScheduledJobs">
-            <summary>
-            Enqueues any scheduled jobs that are either new to the system or
-            need to be re-enqueued due to their next scheduled run date arriving.
             </summary>
         </member>
         <member name="M:Tasty.Jobs.JobRunner.CancelJobs">
@@ -1773,6 +1856,12 @@
         <member name="M:Tasty.Jobs.JobRunner.DequeueJobs">
             <summary>
             Dequeues pending jobs in the job store.
+            </summary>
+        </member>
+        <member name="M:Tasty.Jobs.JobRunner.EnqueueScheduledJobs">
+            <summary>
+            Enqueues any scheduled jobs that are either new to the system or
+            need to be re-enqueued due to their next scheduled run date arriving.
             </summary>
         </member>
         <member name="M:Tasty.Jobs.JobRunner.FinishJobs">

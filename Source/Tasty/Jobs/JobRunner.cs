@@ -9,6 +9,7 @@ namespace Tasty.Jobs
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
@@ -18,7 +19,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Runs jobs.
     /// </summary>
-    public sealed class JobRunner
+    public sealed class JobRunner : IJobRunnerDelegate
     {
         #region Private Fields
 
@@ -26,6 +27,7 @@ namespace Tasty.Jobs
         private static JobRunner instance;
         private Thread god;
         private IList<JobRun> runningJobs;
+        private IJobRunnerDelegate runnerDelegate;
 
         #endregion
 
@@ -102,18 +104,79 @@ namespace Tasty.Jobs
         #region Public Instance Methods
 
         /// <summary>
+        /// Called when a job is canceled.
+        /// </summary>
+        /// <param name="record">The job record identifying the affected job.</param>
+        public void OnCancelJob(JobRecord record)
+        {
+        }
+
+        /// <summary>
+        /// Called when a job is dequeued.
+        /// </summary>
+        /// <param name="record">The job record identifying the affected job.</param>
+        public void OnDequeueJob(JobRecord record)
+        {
+        }
+
+        /// <summary>
+        /// Called when a scheduled job is enqueued.
+        /// </summary>
+        /// <param name="record">The job record identifying the affected job.</param>
+        public void OnEnqueueScheduledJob(JobRecord record)
+        {
+        }
+
+        /// <summary>
+        /// Called when an error occurs during the execution of the run-loop.
+        /// Does not get called when a job itself experiences an error; job-specific
+        /// errors are saved in the job store with their respecitve records.
+        /// </summary>
+        /// <param name="record">The record on which the error occurred, if applicable.</param>
+        /// <param name="ex">The exception raised, if applicable.</param>
+        public void OnError(JobRecord record, Exception ex)
+        {
+        }
+
+        /// <summary>
+        /// Called when a job is finished.
+        /// </summary>
+        /// <param name="record">The job record identifying the affected job.</param>
+        public void OnFinishJob(JobRecord record)
+        {
+        }
+
+        /// <summary>
+        /// Called when a job is timed out.
+        /// </summary>
+        /// <param name="record">The job record identifying the affected job.</param>
+        public void OnTimeoutJob(JobRecord record)
+        {
+        }
+
+        /// <summary>
         /// Starts the runner if it is not already running.
         /// </summary>
         public void Start()
         {
+            this.Start(this);
+        }
+
+        /// <summary>
+        /// Starts the runner if it is not already running.
+        /// </summary>
+        /// <param name="runnerDelegate">The <see cref="IJobRunnerDelegate"/> that should handle notifications.</param>
+        public void Start(IJobRunnerDelegate runnerDelegate)
+        {
             lock (this)
             {
                 this.IsRunning = true;
+                this.runnerDelegate = runnerDelegate ?? this;
 
                 if (this.IsGreen)
                 {
                     this.IsGreen = false;
-
+                    
                     this.god = new Thread(this.SmiteThee);
                     this.god.Start();
                 }
@@ -127,45 +190,6 @@ namespace Tasty.Jobs
         public void Stop()
         {
             this.IsRunning = false;
-        }
-
-        #endregion
-
-        #region Private Static Methods
-
-        /// <summary>
-        /// Enqueues any scheduled jobs that are either new to the system or
-        /// need to be re-enqueued due to their next scheduled run date arriving.
-        /// </summary>
-        private static void EnqueueScheduledJobs()
-        {
-            DateTime now = DateTime.UtcNow;
-            var records = JobStore.Current.GetLatestScheduledJobs().ToArray();
-
-            foreach (var schedule in TastySettings.Section.Jobs.Schedules)
-            {
-                DateTime next = ScheduledJob.GetNextExecuteDate(schedule, now);
-
-                foreach (var scheduledJob in schedule.ScheduledJobs)
-                {
-                    var last = (from r in records
-                                where r.JobType.AssemblyQualifiedName.StartsWith(scheduledJob.JobType, StringComparison.OrdinalIgnoreCase) && r.ScheduleName == schedule.Name
-                                select r).FirstOrDefault();
-
-                    if (last == null || last.QueueDate < next)
-                    {
-                        try
-                        {
-                            IJob job = ScheduledJob.CreateFromConfiguration(scheduledJob);
-                            job.Enqueue(next, schedule.Name);
-                        }
-                        catch (ConfigurationErrorsException)
-                        {
-                            // TODO: Something should be done with this.
-                        }
-                    }
-                }
-            }
         }
 
         #endregion
@@ -197,6 +221,8 @@ namespace Tasty.Jobs
 
                                 record.Status = JobStatus.Canceled;
                                 record.FinishDate = run.Finished;
+
+                                this.runnerDelegate.OnCancelJob(new JobRecord(record));
                             });
                     });
             }
@@ -217,43 +243,101 @@ namespace Tasty.Jobs
                             records,
                             delegate(JobRecord record)
                             {
-                                record.Status = JobStatus.Started;
-                                record.StartDate = DateTime.UtcNow;
+                                if (record.Status != JobStatus.Failed)
+                                {
+                                    record.Status = JobStatus.Started;
+                                    record.StartDate = DateTime.UtcNow;
 
-                                IJob job = null;
-                                Exception toJobEx = null;
+                                    IJob job = null;
+                                    Exception toJobEx = null;
 
-                                try
-                                {
-                                    job = record.ToJob();
-                                }
-                                catch (FileLoadException ex)
-                                {
-                                    toJobEx = ex;
-                                }
-                                catch (FileNotFoundException ex)
-                                {
-                                    toJobEx = ex;
-                                }
-                                catch (SerializationException ex)
-                                {
-                                    toJobEx = ex;
-                                }
+                                    try
+                                    {
+                                        job = record.ToJob();
+                                    }
+                                    catch (FileLoadException ex)
+                                    {
+                                        toJobEx = ex;
+                                    }
+                                    catch (FileNotFoundException ex)
+                                    {
+                                        toJobEx = ex;
+                                    }
+                                    catch (SerializationException ex)
+                                    {
+                                        toJobEx = ex;
+                                    }
 
-                                if (toJobEx != null)
+                                    if (toJobEx != null)
+                                    {
+                                        JobRun run = new JobRun(record.Id.Value, job);
+                                        this.runningJobs.Add(run);
+
+                                        run.Run();
+                                    }
+                                    else
+                                    {
+                                        record.Status = JobStatus.Failed;
+                                        record.Exception = new ExceptionXElement(toJobEx).ToString();
+                                        record.FinishDate = DateTime.UtcNow;
+                                    }
+                                }
+                                else
                                 {
-                                    record.Status = JobStatus.Failed;
-                                    record.Exception = new ExceptionXElement(toJobEx).ToString();
                                     record.FinishDate = DateTime.UtcNow;
-                                    return;
                                 }
 
-                                JobRun run = new JobRun(record.Id.Value, job);
-                                this.runningJobs.Add(run);
-
-                                run.Run();
+                                this.runnerDelegate.OnDequeueJob(new JobRecord(record));
                             });
                     });
+            }
+        }
+
+        /// <summary>
+        /// Enqueues any scheduled jobs that are either new to the system or
+        /// need to be re-enqueued due to their next scheduled run date arriving.
+        /// </summary>
+        private void EnqueueScheduledJobs()
+        {
+            DateTime now = DateTime.UtcNow;
+            var records = JobStore.Current.GetLatestScheduledJobs().ToArray();
+
+            foreach (var schedule in TastySettings.Section.Jobs.Schedules)
+            {
+                DateTime next = ScheduledJob.GetNextExecuteDate(schedule, now);
+
+                foreach (var scheduledJob in schedule.ScheduledJobs)
+                {
+                    var last = (from r in records
+                                where r.JobType != null && r.JobType.AssemblyQualifiedName.StartsWith(scheduledJob.JobType, StringComparison.OrdinalIgnoreCase) && r.ScheduleName == schedule.Name
+                                select r).FirstOrDefault();
+
+                    if (last == null || last.QueueDate < next)
+                    {
+                        try
+                        {
+                            IJob job = ScheduledJob.CreateFromConfiguration(scheduledJob);
+                            JobRecord record = job.Enqueue(next, schedule.Name);
+
+                            this.runnerDelegate.OnEnqueueScheduledJob(new JobRecord(record));
+                        }
+                        catch (ConfigurationErrorsException ex)
+                        {
+                            this.runnerDelegate.OnError(last, ex);
+                        }
+                    }
+                    else
+                    {
+                        var bad = (from r in records
+                                   where r.JobType == null && r.ScheduleName == schedule.Name
+                                   select r).FirstOrDefault();
+
+                        if (bad != null)
+                        {
+                            this.runnerDelegate.OnError(bad, null);
+                        }
+                    }
+                }
             }
         }
 
@@ -290,6 +374,8 @@ namespace Tasty.Jobs
                                 {
                                     record.Status = JobStatus.Succeeded;
                                 }
+
+                                this.runnerDelegate.OnFinishJob(new JobRecord(record));
                             });
                     });
             }
@@ -298,18 +384,26 @@ namespace Tasty.Jobs
         /// <summary>
         /// God execution thread handler.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to keep the run loop executing at all costs.")]
         private void SmiteThee()
         {
             while (true)
             {
-                this.CancelJobs();
-                this.FinishJobs();
-                this.TimeoutJobs();
-
-                if (this.IsRunning)
+                try
                 {
-                    EnqueueScheduledJobs();
-                    this.DequeueJobs();
+                    this.CancelJobs();
+                    this.FinishJobs();
+                    this.TimeoutJobs();
+
+                    if (this.IsRunning)
+                    {
+                        this.EnqueueScheduledJobs();
+                        this.DequeueJobs();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    this.runnerDelegate.OnError(null, ex);
                 }
 
                 Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);
@@ -341,6 +435,8 @@ namespace Tasty.Jobs
 
                                 record.Status = JobStatus.TimedOut;
                                 record.FinishDate = DateTime.UtcNow;
+
+                                this.runnerDelegate.OnTimeoutJob(new JobRecord(record));
                             });
                     });
             }

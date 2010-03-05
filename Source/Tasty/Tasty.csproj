@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Tasty</RootNamespace>
-    <AssemblyName>tasty</AssemblyName>
+    <AssemblyName>Tasty</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
@@ -23,7 +23,7 @@
     <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\tasty.xml</DocumentationFile>
+    <DocumentationFile>bin\Debug\Tasty.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\tasty.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\Tasty.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AWSSDK, Version=1.0.3.0, Culture=neutral, PublicKeyToken=498aea76c1205a29, processorArchitecture=MSIL">
@@ -134,6 +134,7 @@
     <Compile Include="Http\HttpRedirectRuleMatcher.cs" />
     <Compile Include="Http\HttpRedirectType.cs" />
     <Compile Include="Jobs\IJob.cs" />
+    <Compile Include="Jobs\IJobRunnerDelegate.cs" />
     <Compile Include="Jobs\IJobStore.cs" />
     <Compile Include="Jobs\Job.cs" />
     <Compile Include="Jobs\JobRecord.cs" />

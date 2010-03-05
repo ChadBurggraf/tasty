@@ -17,12 +17,13 @@ namespace Tasty.Configuration
     public class GeocodeElement : ConfigurationElement
     {
         /// <summary>
-        /// Gets the API key to use in geocode requests.
+        /// Gets or sets the API key to use in geocode requests.
         /// </summary>
         [ConfigurationProperty("apiKey", IsRequired = false)]
         public string ApiKey
         {
             get { return (string)this["apiKey"]; }
+            set { this["apiKey"] = value; }
         }
     }
 }

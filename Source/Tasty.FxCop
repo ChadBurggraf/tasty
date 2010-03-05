@@ -21,9 +21,9 @@
   <IgnoreGeneratedCode>False</IgnoreGeneratedCode>
  </ProjectOptions>
  <Targets>
-  <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/tasty.exe" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/Tasty.exe" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/Tasty.SqlServer/bin/Debug/Tasty.SqlServer.dll" Analyze="True" AnalyzeAllChildren="True" />
-  <Target Name="$(ProjectDir)/Tasty/bin/Debug/tasty.dll" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
  <Rules>
   <RuleFiles>
@@ -44,7 +44,7 @@
   <Namespaces>
    <Namespace Name="Tasty">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-02-09 02:55:43Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-03-04 03:29:50Z">
       <Issue>
        <Item>Tasty</Item>
       </Issue>
@@ -53,7 +53,7 @@
    </Namespace>
    <Namespace Name="Tasty.Http">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-02-09 02:55:43Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-03-04 03:29:50Z">
       <Issue>
        <Item>Tasty.Http</Item>
       </Issue>
@@ -62,7 +62,7 @@
    </Namespace>
    <Namespace Name="Tasty.Web">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-02-14 19:07:34Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-03-04 03:29:50Z">
       <Issue>
        <Item>Tasty.Web</Item>
       </Issue>

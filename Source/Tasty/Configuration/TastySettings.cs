@@ -15,14 +15,15 @@ namespace Tasty.Configuration
     /// </summary>
     public class TastySettings : ConfigurationSection
     {
-        private static TastySettings section = (TastySettings)(ConfigurationManager.GetSection("tasty") ?? new TastySettings());
+        private static TastySettings section;
 
         /// <summary>
-        /// Gets the Tasty.dll configuration section.
+        /// Gets or sets the tasty.dll configuration section.
         /// </summary>
         public static TastySettings Section
         {
-            get { return section; }
+            get { return section ?? (section = (TastySettings)(ConfigurationManager.GetSection("tasty") ?? new TastySettings())); }
+            set { section = value; }
         }
 
         /// <summary>

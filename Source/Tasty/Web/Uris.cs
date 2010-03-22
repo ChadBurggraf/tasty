@@ -47,6 +47,19 @@ namespace Tasty.Web
         }
 
         /// <summary>
+        /// Clears the given URI's query string.
+        /// </summary>
+        /// <param name="uri">The URI to clear the question string from.</param>
+        /// <returns>The URI with its query string cleared.</returns>
+        public static Uri ClearQueryString(this Uri uri)
+        {
+            UriBuilder builder = new UriBuilder(uri);
+            builder.Query = String.Empty;
+
+            return builder.Uri;
+        }
+
+        /// <summary>
         /// Combines the two URL parts with a URL path separator.
         /// </summary>
         /// <param name="first">The first part to combine.</param>

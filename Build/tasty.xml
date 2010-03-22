@@ -32,6 +32,47 @@
             <param name="collection">The connection string collection to convert.</param>
             <returns>A connection string.</returns>
         </member>
+        <member name="T:Tasty.Build.GetVersion">
+            <summary>
+            Extends <see cref="T:Microsoft.Build.Utilities.Task"/> to get version information from an assembly or AssemblyInfo.cs file.
+            </summary>
+        </member>
+        <member name="M:Tasty.Build.GetVersion.Execute">
+            <summary>
+            Executes the task.
+            </summary>
+            <returns>True if the task executed successfully, false otherwise.</returns>
+        </member>
+        <member name="P:Tasty.Build.GetVersion.AssemblyFile">
+            <summary>
+            Gets or sets the path to the assembly DLL to pull version information from.
+            </summary>
+        </member>
+        <member name="P:Tasty.Build.GetVersion.AssemblyInfoFile">
+            <summary>
+            Gets or sets the path of the AssemblyInfo.cs file to pull version information from.
+            </summary>
+        </member>
+        <member name="P:Tasty.Build.GetVersion.Build">
+            <summary>
+            Gets the version's build number.
+            </summary>
+        </member>
+        <member name="P:Tasty.Build.GetVersion.Major">
+            <summary>
+            Gets the version's major number.
+            </summary>
+        </member>
+        <member name="P:Tasty.Build.GetVersion.Minor">
+            <summary>
+            Gets the version's minor number.
+            </summary>
+        </member>
+        <member name="P:Tasty.Build.GetVersion.Revision">
+            <summary>
+            Gets the version's revision number.
+            </summary>
+        </member>
         <member name="T:Tasty.Build.IS3PublisherDelegate">
             <summary>
             Delegate for notifications during an <see cref="T:Tasty.Build.S3Publisher"/> publish process.
@@ -2378,6 +2419,13 @@
             <param name="dateTime">The DateTime object to convert.</param>
             <returns>A string representing the date in ISO 8601 format with unsaf path characters removed.</returns>
         </member>
+        <member name="M:Tasty.Primitives.ToUrlPrettyString(System.String)">
+            <summary>
+            Gets a pretty URL-safe representation of the given string.
+            </summary>
+            <param name="value">The string value to get a URL-safe representation of.</param>
+            <returns>The escaped string value.</returns>
+        </member>
         <member name="M:Tasty.Primitives.SplitAndTrim(System.String,System.Char[])">
             <summary>
             Splits the given string on the given separator characters, removing any empty 
@@ -2763,6 +2811,13 @@
             <param name="uri">The URI to append the path to.</param>
             <param name="path">The path to append.</param>
             <returns>A URI with the path appended.</returns>
+        </member>
+        <member name="M:Tasty.Web.Uris.ClearQueryString(System.Uri)">
+            <summary>
+            Clears the given URI's query string.
+            </summary>
+            <param name="uri">The URI to clear the question string from.</param>
+            <returns>The URI with its query string cleared.</returns>
         </member>
         <member name="M:Tasty.Web.Uris.Combine(System.String,System.String)">
             <summary>

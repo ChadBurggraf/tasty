@@ -3,6 +3,7 @@
   <Description>This is a default test run configuration for a local test run.</Description>
   <Deployment>
     <DeploymentItem filename="Tasty.Test\assets-test\" />
+    <DeploymentItem filename="SolutionVersionInfo.cs" />
     <DeploymentItem filename="Tasty.Test\S3Publish.proj" />
   </Deployment>
   <TestTypeSpecific />

@@ -7,8 +7,10 @@
 namespace Tasty.Web
 {
     using System;
+    using System.Collections;
     using System.Collections.ObjectModel;
     using System.Collections.Specialized;
+    using System.Linq;
     using System.Text;
     using System.Web;
 
@@ -156,6 +158,16 @@ namespace Tasty.Web
         public string Get(string key)
         {
             return this.innerCollection[key];
+        }
+
+        /// <summary>
+        /// Gets a collection of all values for the specified key.
+        /// </summary>
+        /// <param name="key">The key to get values for.</param>
+        /// <returns>A collection of all of the key's values.</returns>
+        public string[] GetAll(string key)
+        {
+            return this.innerCollection.GetValues(key); 
         }
 
         /// <summary>

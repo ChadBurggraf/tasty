@@ -2655,6 +2655,13 @@
             <param name="key">The key to get the value for.</param>
             <returns>The key's value.</returns>
         </member>
+        <member name="M:Tasty.Web.QueryString.GetAll(System.String)">
+            <summary>
+            Gets a collection of all values for the specified key.
+            </summary>
+            <param name="key">The key to get values for.</param>
+            <returns>A collection of all of the key's values.</returns>
+        </member>
         <member name="M:Tasty.Web.QueryString.Remove(System.String)">
             <summary>
             Removes the specified key and its value(s) from the query string.

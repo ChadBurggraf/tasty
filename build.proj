@@ -1,31 +1,53 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="3.5" DefaultTargets="Publish" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" />
+  
+  <!-- 
+    NOTE: At least one debug build must have been performed before this script can be used in order to import 
+    the following tasks. 
+  -->
+
+  <UsingTask TaskName="Tasty.Build.GetVersion" AssemblyFile="$(MSBuildProjectDirectory)\Source\Tasty\bin\Debug\Tasty.dll"/>
+  <UsingTask TaskName="Tasty.Build.SetVersion" AssemblyFile="$(MSBuildProjectDirectory)\Source\Tasty\bin\Debug\Tasty.dll"/>
+  
   <PropertyGroup>
-    <Configuration>Release</Configuration>
-    <ConsolePath>$(MSBuildProjectDirectory)\Source\Tasty.Console</ConsolePath>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <ConsoleDir>$(MSBuildProjectDirectory)\Source\Tasty.Console</ConsoleDir>
     <ILMergePath Condition="'$(ILMergePath)' == ''">$(ProgramFiles)\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
-    <LibraryPath>$(MSBuildProjectDirectory)\Source\Tasty</LibraryPath>
-    <PublishPath>$(MSBuildProjectDirectory)\Source\Build</PublishPath>
-    <SqlServerPath>$(MSBuildProjectDirectory)\Source\Tasty.SqlServer</SqlServerPath>
+    <LibraryDir>$(MSBuildProjectDirectory)\Source\Tasty</LibraryDir>
+    <BuildDir>$(MSBuildProjectDirectory)\Build</BuildDir>
+    <SolutionVersionInfoPath>$(MSBuildProjectDirectory)\Source\SolutionVersionInfo.cs</SolutionVersionInfoPath>
+    <SqlServerDir>$(MSBuildProjectDirectory)\Source\Tasty.SqlServer</SqlServerDir>
   </PropertyGroup>
   
-  <Target Name="Clean">
-    <RemoveDir Directories="$(ConsolePath)\bin\Release;$(LibraryPath)\bin\Release;$(SqlServerPath)\bin\Release;$(PublishPath)"/>
-    <MakeDir Directories="$(PublishPath)"/>
-  </Target>
+  <Target Name="Build" DependsOnTargets="GetVersion">
+    <RemoveDir Directories="$(BuildDir)"/>
+    <MakeDir Directories="$(BuildDir)"/>
+    
+    <SetVersion Files="$(SolutionVersionInfoPath)" Version="$(Major).$(Minor).$(Build).$(IncrementedRevision)"/>
+    <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration)"/>
   
-  <Target Name="Build" DependsOnTargets="Clean">
-    <MSBuild Projects="$(LibraryPath)\Tasty.csproj;$(ConsolePath)\Tasty.Console.csproj;$(SqlServerpath)\Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration)"/>
-  </Target>
-  
-  <Target Name="Publish" DependsOnTargets="Build">
     <Message Text='Merging assemblies into "Tasty.dll".'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryPath)\Tasty.snk /out:$(PublishPath)\Tasty.dll $(LibraryPath)\bin\Release\tasty.dll $(LibraryPath)\bin\Release\AWSSDK.dll $(LibraryPath)\bin\Release\Ionic.Zlib.dll $(LibraryPath)\bin\Release\Npgsql.dll $(LibraryPath)\bin\Release\Mono.Security.dll'/>
-    <Copy SourceFiles="$(LibraryPath)\bin\Release\Tasty.xml" DestinationFiles="$(PublishPath)\Tasty.xml"/>
-    <Copy SourceFiles="$(ConsolePath)\bin\Release\Tasty.exe.config" DestinationFiles="$(PublishPath)\Tasty.exe.config"/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryDir)\Tasty.snk /out:$(BuildDir)\Tasty.dll $(LibraryDir)\bin\Release\tasty.dll $(LibraryDir)\bin\Release\AWSSDK.dll $(LibraryDir)\bin\Release\Ionic.Zlib.dll $(LibraryDir)\bin\Release\Npgsql.dll $(LibraryDir)\bin\Release\Mono.Security.dll'/>
+    <Copy SourceFiles="$(LibraryDir)\bin\Release\Tasty.xml" DestinationFiles="$(BuildDir)\Tasty.xml"/>
+    <Copy SourceFiles="$(ConsoleDir)\bin\Release\Tasty.exe.config" DestinationFiles="$(BuildDir)\Tasty.exe.config"/>
+    
     <Message Text='Merging assemblies into "Tasty.exe"'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsolePath)\Tasty.Console.snk /out:$(PublishPath)\Tasty.exe $(ConsolePath)\bin\Release\tasty.exe $(ConsolePath)\bin\Release\tasty.dll $(ConsolePath)\bin\Release\AWSSDK.dll $(ConsolePath)\bin\Release\Ionic.Zlib.dll $(LibraryPath)\bin\Release\Npgsql.dll $(LibraryPath)\bin\Release\Mono.Security.dll $(ConsolePath)\bin\Release\NDesk.Options.dll'/>
-    <Copy SourceFiles="$(SqlServerpath)\bin\Release\Tasty.SqlServer.dll" DestinationFiles="$(PublishPath)\Tasty.SqlServer.dll"/>
-    <Copy SourceFiles="$(SqlServerpath)\bin\Release\Tasty.SqlServer.xml" DestinationFiles="$(PublishPath)\Tasty.SqlServer.xml"/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsoleDir)\Tasty.Console.snk /out:$(BuildDir)\Tasty.exe $(ConsoleDir)\bin\Release\tasty.exe $(ConsoleDir)\bin\Release\tasty.dll $(ConsoleDir)\bin\Release\AWSSDK.dll $(ConsoleDir)\bin\Release\Ionic.Zlib.dll $(LibraryDir)\bin\Release\Npgsql.dll $(LibraryDir)\bin\Release\Mono.Security.dll $(ConsoleDir)\bin\Release\NDesk.Options.dll'/>
+    <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.dll" DestinationFiles="$(BuildDir)\Tasty.SqlServer.dll"/>
+    <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.xml" DestinationFiles="$(BuildDir)\Tasty.SqlServer.xml"/>
+  </Target>
+
+  <Target Name="GetVersion">
+    <GetVersion AssemblyInfoFile="$(SolutionVersionInfoPath)">
+      <Output TaskParameter="Major" PropertyName="Major"/>
+      <Output TaskParameter="Minor" PropertyName="Minor"/>
+      <Output TaskParameter="Build" PropertyName="Build"/>
+      <Output TaskParameter="Revision" PropertyName="Revision"/>
+    </GetVersion>
+
+    <Math.Add Numbers="$(Revision);1">
+      <Output TaskParameter="Result" PropertyName="IncrementedRevision"/>
+    </Math.Add>
   </Target>
 </Project>

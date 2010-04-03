@@ -9,6 +9,16 @@
             <see cref="N:Tasty.Build"/> extension methods.
             </summary>
         </member>
+        <member name="F:Tasty.Build.Extensions.AssemblyFileVersionPattern">
+            <summary>
+            Gets the regular expression pattern used for matching AssemblyFileVersion attributes in AssemblyInfo files.
+            </summary>
+        </member>
+        <member name="F:Tasty.Build.Extensions.AssemblyVersionPattern">
+            <summary>
+            Gets the regular expression pattern used for matching AssemblyVersion attributes in AssemblyInfo files.
+            </summary>
+        </member>
         <member name="M:Tasty.Build.Extensions.SplitConnectionString(System.String)">
             <summary>
             Splits a database connection string into a collection of key/value pairs.
@@ -485,6 +495,42 @@
         <member name="P:Tasty.Build.SchemaUpgradeCommandSetResult.Sql">
             <summary>
             Gets or sets the SQL script to run.
+            </summary>
+        </member>
+        <member name="T:Tasty.Build.SetVersion">
+            <summary>
+            Implements <see cref="T:Microsoft.Build.Utilities.Task"/> to set version information in AssemblyInfo files.
+            </summary>
+        </member>
+        <member name="M:Tasty.Build.SetVersion.#ctor">
+            <summary>
+            Initializes a new instance of the SetVersion class.
+            </summary>
+        </member>
+        <member name="M:Tasty.Build.SetVersion.Execute">
+            <summary>
+            Executes the task.
+            </summary>
+            <returns>True if the task executed successfully, false otherwise.</returns>
+        </member>
+        <member name="P:Tasty.Build.SetVersion.Files">
+            <summary>
+            Gets or sets the file set to set version information in.
+            </summary>
+        </member>
+        <member name="P:Tasty.Build.SetVersion.SetAssemblyFileVersion">
+            <summary>
+            Gets or sets a value indicating whether to set the AssemblyFileVersion attribute.
+            </summary>
+        </member>
+        <member name="P:Tasty.Build.SetVersion.SetAssemblyVersion">
+            <summary>
+            Gets or sets a value indicating whether to set the AssemblyVersion attribute.
+            </summary>
+        </member>
+        <member name="P:Tasty.Build.SetVersion.Version">
+            <summary>
+            Gets or sets the version string to set.
             </summary>
         </member>
         <member name="T:Tasty.Configuration.GeocodeElement">

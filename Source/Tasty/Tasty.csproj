@@ -95,6 +95,7 @@
     <Compile Include="Build\SchemaUpgradeService.cs" />
     <Compile Include="Build\SchemaUpgradeCommandSet.cs" />
     <Compile Include="Build\SchemaUpgradeCommandSetResult.cs" />
+    <Compile Include="Build\SetVersion.cs" />
     <Compile Include="Configuration\GeocodeElement.cs" />
     <Compile Include="Configuration\HttpElement.cs" />
     <Compile Include="Configuration\HttpRedirectRuleElement.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="Jobs\IJobRunnerDelegate.cs" />
     <Compile Include="Jobs\IJobStore.cs" />
     <Compile Include="Jobs\Job.cs" />
+    <Compile Include="Jobs\JobProxy.cs" />
     <Compile Include="Jobs\JobRecord.cs" />
     <Compile Include="Jobs\JobRun.cs" />
     <Compile Include="Jobs\JobRunner.cs" />

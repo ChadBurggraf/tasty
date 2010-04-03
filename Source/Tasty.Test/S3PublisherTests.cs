@@ -72,6 +72,14 @@ namespace Tasty.Test
                     Assert.AreEqual("gzip", response.Headers["Content-Encoding"]);
                 }
             }
+
+            DeleteObjectRequest deleteRequest = new DeleteObjectRequest()
+                .WithBucketName(bucketName)
+                .WithKey(objectKey);
+
+            using (DeleteObjectResponse deleteResponse = s3Client.DeleteObject(deleteRequest))
+            {
+            }
         }
 
         #endregion

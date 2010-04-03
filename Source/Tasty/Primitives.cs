@@ -18,6 +18,8 @@ namespace Tasty
     /// </summary>
     public static class Primitives
     {
+        private const string typeExpression = @"^([^,]+)(,([^,]+).*)?";
+
         /// <summary>
         /// Copies any same-named property values from the source object to the destination object.
         /// Each destination property must be of a type that is assignable from the type
@@ -144,6 +146,42 @@ namespace Tasty
         public static string ToIso8601UtcPathSafeString(this DateTime dateTime)
         {
             return Regex.Replace(dateTime.ToIso8601UtcString(), @"[\.:]", "-");
+        }
+
+        /// <summary>
+        /// Gets the type name from the give type name string without any assembly information.
+        /// </summary>
+        /// <param name="typeName">The type name string to pull the bare type name from.</param>
+        /// <returns>A type name.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when typeName is null or empty.</exception>
+        /// <exception cref="ArgumentException">Thrown when typeName doesn't represent a valid type string.</exception>
+        public static string TypeNameWithoutAssembly(this string typeName)
+        {
+            return MatchTypeName(typeName).Groups[1].Value;
+        }
+
+        /// <summary>
+        /// Gets the regular expression match for the given type name.
+        /// </summary>
+        /// <param name="typeName">The type name to get the regular expression match for.</param>
+        /// <returns>A regular expression match.</returns>
+        private static Match MatchTypeName(string typeName)
+        {
+            if (String.IsNullOrEmpty(typeName))
+            {
+                throw new ArgumentNullException("typeName", "typeName must have a value.");
+            }
+
+            Match match = Regex.Match(typeName, typeExpression);
+
+            if (match.Success)
+            {
+                return match;
+            }
+            else
+            {
+                throw new ArgumentException("typeName does not appear to be a valid type name", "typeName");
+            }
         }
 
         /// <summary>

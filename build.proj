@@ -2,11 +2,11 @@
 <Project ToolsVersion="3.5" DefaultTargets="Publish" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration>Release</Configuration>
-    <ConsolePath>Tasty.Console</ConsolePath>
-    <ILMergePath>$(ProgramFiles)\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
-    <LibraryPath>Tasty</LibraryPath>
-    <PublishPath>..\Build</PublishPath>
-    <SqlServerPath>Tasty.SqlServer</SqlServerPath>
+    <ConsolePath>$(MSBuildProjectDirectory)\Source\Tasty.Console</ConsolePath>
+    <ILMergePath Condition="'$(ILMergePath)' == ''">$(ProgramFiles)\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
+    <LibraryPath>$(MSBuildProjectDirectory)\Source\Tasty</LibraryPath>
+    <PublishPath>$(MSBuildProjectDirectory)\Source\Build</PublishPath>
+    <SqlServerPath>$(MSBuildProjectDirectory)\Source\Tasty.SqlServer</SqlServerPath>
   </PropertyGroup>
   
   <Target Name="Clean">

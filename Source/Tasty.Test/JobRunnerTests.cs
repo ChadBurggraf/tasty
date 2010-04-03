@@ -21,6 +21,20 @@ namespace Tasty.Test
         }
 
         [TestMethod]
+        public void Test()
+        {
+            AppDomainSetup setup = new AppDomainSetup();
+            setup.ConfigurationFile = @"C:\Projects\CaptainFuzz\Fuzz.Web\Web.config";
+            setup.ShadowCopyFiles = "true";
+
+            AssemblyName assemblyName = new AssemblyName();
+            assemblyName.CodeBase = @"C:\Projects\CaptainFuzz\Fuzz.Web\bin\Fuzz.Core.dll";
+
+            AppDomain domain = AppDomain.CreateDomain("Fuzz.Core", null, setup);
+            Assembly assembly = domain.Load(assemblyName);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(SerializationException))]
         public void JobRunner_Serialize()
         {

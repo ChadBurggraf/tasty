@@ -4,7 +4,9 @@
   <Deployment>
     <DeploymentItem filename="Tasty.Test\assets-test\" />
     <DeploymentItem filename="SolutionVersionInfo.cs" />
+    <DeploymentItem filename="Tasty.Test\AssemblyInfo2.txt" />
     <DeploymentItem filename="Tasty.Test\S3Publish.proj" />
+    <DeploymentItem filename="Tasty.Test\AssemblyInfo1.txt" />
   </Deployment>
   <TestTypeSpecific />
 </TestRunConfiguration>

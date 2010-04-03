@@ -20,6 +20,16 @@ namespace Tasty.Build
     public static class Extensions
     {
         /// <summary>
+        /// Gets the regular expression pattern used for matching AssemblyFileVersion attributes in AssemblyInfo files.
+        /// </summary>
+        internal const string AssemblyFileVersionPattern = @"(AssemblyFileVersion\s*?\()([^\)]+)(\))";
+
+        /// <summary>
+        /// Gets the regular expression pattern used for matching AssemblyVersion attributes in AssemblyInfo files.
+        /// </summary>
+        internal const string AssemblyVersionPattern = @"(AssemblyVersion\s*?\()([^\)]+)(\))";
+
+        /// <summary>
         /// Splits a database connection string into a collection of key/value pairs.
         /// The resulting keys are all normalized to lower-case.
         /// </summary>

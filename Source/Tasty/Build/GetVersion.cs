@@ -82,11 +82,11 @@ namespace Tasty.Build
                         using (StreamReader reader = new StreamReader(stream))
                         {
                             string contents = reader.ReadToEnd();
-                            Match match = Regex.Match(contents, @"AssemblyVersion\s*?\(([^\)]+)\)");
+                            Match match = Regex.Match(contents, Extensions.AssemblyVersionPattern);
 
                             if (match.Success)
                             {
-                                string value = match.Groups[1].Value.Replace("\"", String.Empty).Trim();
+                                string value = match.Groups[2].Value.Replace("\"", String.Empty).Trim();
                                 version = new Version(value);
                             }
                         }

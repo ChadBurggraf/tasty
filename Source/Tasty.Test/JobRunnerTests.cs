@@ -21,20 +21,6 @@ namespace Tasty.Test
         }
 
         [TestMethod]
-        public void Test()
-        {
-            AppDomainSetup setup = new AppDomainSetup();
-            setup.ConfigurationFile = @"C:\Projects\CaptainFuzz\Fuzz.Web\Web.config";
-            setup.ShadowCopyFiles = "true";
-
-            AssemblyName assemblyName = new AssemblyName();
-            assemblyName.CodeBase = @"C:\Projects\CaptainFuzz\Fuzz.Web\bin\Fuzz.Core.dll";
-
-            AppDomain domain = AppDomain.CreateDomain("Fuzz.Core", null, setup);
-            Assembly assembly = domain.Load(assemblyName);
-        }
-
-        [TestMethod]
         [ExpectedException(typeof(SerializationException))]
         public void JobRunner_Serialize()
         {
@@ -90,21 +76,6 @@ namespace Tasty.Test
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 3);
 
             Assert.AreEqual(JobStatus.Succeeded, JobStore.Current.GetJob(id).Status);
-        }
-
-        [TestMethod]
-        public void Jobs_Testing()
-        {
-            AppDomainSetup domainSetup = new AppDomainSetup();
-            domainSetup.ConfigurationFile = @"C:\Projects\CaptainFuzz\Fuzz.Web\Fuzz.Web.config";
-            domainSetup.ShadowCopyFiles = "true";
-
-            AppDomain domain = AppDomain.CreateDomain("Fuzz.Core.dll", null, domainSetup);
-
-            AssemblyName name = new AssemblyName();
-            name.CodeBase = @"C:\Projects\CaptainFuzz\Fuzz.Core\bin\Debug\Fuzz.Core.dll";
-
-            Assembly assembly = domain.Load(name);
         }
 
         [TestMethod]

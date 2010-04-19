@@ -268,7 +268,7 @@ namespace Tasty.Jobs
                                         toJobEx = ex;
                                     }
 
-                                    if (toJobEx != null)
+                                    if (toJobEx == null)
                                     {
                                         JobRun run = new JobRun(record.Id.Value, job);
                                         this.runningJobs.Add(run);

@@ -11,24 +11,33 @@ namespace Tasty.Test
     [TestClass]
     public class PostgresUrlTokenStoreTests
     {
-        private static string ConnectionString = ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString;
+        private static string ConnectionString = ConfigurationManager.ConnectionStrings["Postgres"] != null ? ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString : String.Empty;
 
         [TestMethod]
         public void PostgresUrlTokenStore_CreateUrlToken()
         {
-            UrlTokenTests.Store_CreateUrlToken(new PostgresUrlTokenStore(ConnectionString));
+            if (!String.IsNullOrEmpty(ConnectionString))
+            {
+                UrlTokenTests.Store_CreateUrlToken(new PostgresUrlTokenStore(ConnectionString));
+            }
         }
 
         [TestMethod]
         public void PostgresUrlTokenStore_ExpireUrlToken()
         {
-            UrlTokenTests.Store_ExpireUrlToken(new PostgresUrlTokenStore(ConnectionString));
+            if (!String.IsNullOrEmpty(ConnectionString))
+            {
+                UrlTokenTests.Store_ExpireUrlToken(new PostgresUrlTokenStore(ConnectionString));
+            }
         }
 
         [TestMethod]
         public void PostgresUrlTokenStore_GetUrlToken()
         {
-            UrlTokenTests.Store_GetUrlToken(new PostgresUrlTokenStore(ConnectionString));
+            if (!String.IsNullOrEmpty(ConnectionString))
+            {
+                UrlTokenTests.Store_GetUrlToken(new PostgresUrlTokenStore(ConnectionString));
+            }
         }
     }
 }

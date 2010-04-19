@@ -14,11 +14,11 @@ namespace Tasty.Test
         [TestMethod]
         public void SqlServerClr_AssemblyImportScript()
         {
-            string system = @"C:\Program Files\Reference Assemblies\Microsoft\Framework\v3.5";
+            string system = @"C:\Program Files\Reference Assemblies\Microsoft\Framework\v3.5\System.Core.dll";
             string tasty = Assembly.GetAssembly(typeof(AssemblyImportScript)).Location;
             string script = AssemblyImportScript.Get(system);
 
-            Assert.IsTrue(script.Contains("@SystemAssembliesPath = '" + system + "'"));
+            Assert.IsTrue(script.Contains("@SystemCoreAssemblyPath = '" + system + "'"));
             Assert.IsTrue(script.Contains("@TastyAssemblyPath = '" + tasty + "'"));
         }
 

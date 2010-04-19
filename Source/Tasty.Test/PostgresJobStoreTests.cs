@@ -8,8 +8,10 @@ namespace Tasty.Test
     [TestClass]
     public class PostgresJobStoreTests : JobStoreTests
     {
+        private static string ConnectionString = ConfigurationManager.ConnectionStrings["Postgres"] != null ? ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString : String.Empty;
+
         public PostgresJobStoreTests()
-            : base(new PostgresJobStore(ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString))
+            : base(!String.IsNullOrEmpty(ConnectionString) ? new PostgresJobStore(ConnectionString) : null)
         {
         }
 

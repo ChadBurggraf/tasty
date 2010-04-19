@@ -281,6 +281,8 @@ namespace Tasty.Jobs
                     record.Status = JobStatus.Failed;
                     record.Exception = new ExceptionXElement(ex).ToString();
                 }
+
+                records.Add(record);
             }
 
             return records;

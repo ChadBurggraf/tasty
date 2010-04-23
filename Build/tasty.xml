@@ -2461,6 +2461,33 @@
             <param name="hex">The hex string to convert.</param>
             <returns>An array of bytes.</returns>
         </member>
+        <member name="M:Tasty.Primitives.FromJson(System.Type,System.String)">
+            <summary>
+            De-serializes a string of JSON into an object of the given type.
+            </summary>
+            <param name="type">The type of object to de-serialize the given JSON into.</param>
+            <param name="value">A string of JSON to de-serialize.</param>
+            <returns>The de-serialized object.</returns>
+        </member>
+        <member name="M:Tasty.Primitives.FromJson(System.Type,System.String,System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            De-serializes a string of JSON into an object of the given type.
+            </summary>
+            <param name="type">The type of object to de-serialize the given JSON into.</param>
+            <param name="value">A string of JSON to de-serialize.</param>
+            <param name="knownTypes">A collection of known types the serializer may encounter in the object graph.</param>
+            <returns>The de-serialized object.</returns>
+        </member>
+        <member name="M:Tasty.Primitives.FromJson(System.Type,System.String,System.Text.Encoding,System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            De-serializes a string of JSON into an object of the given type.
+            </summary>
+            <param name="type">The type of object to de-serialize the given JSON into.</param>
+            <param name="value">A string of JSON to de-serialize.</param>
+            <param name="encoding">The encoding the JSON string is in.</param>
+            <param name="knownTypes">A collection of known types the serializer may encounter in the object graph.</param>
+            <returns>The de-serialized object.</returns>
+        </member>
         <member name="M:Tasty.Primitives.SplitAndTrim(System.String,System.Char)">
             <summary>
             Splits the given string on the given character, removing any empty 
@@ -2502,6 +2529,30 @@
             </summary>
             <param name="dateTime">The DateTime object to convert.</param>
             <returns>A string representing the date in ISO 8601 format with unsaf path characters removed.</returns>
+        </member>
+        <member name="M:Tasty.Primitives.ToJson``1(``0)">
+            <summary>
+            Serializes the given object to a JSON string.
+            </summary>
+            <param name="value">The object to serialize.</param>
+            <returns>A string of JSON.</returns>
+        </member>
+        <member name="M:Tasty.Primitives.ToJson``1(``0,System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            Serializes the given object to a JSON string.
+            </summary>
+            <param name="value">The object to serialize.</param>
+            <param name="knownTypes">A collection of known types to feed the serializer that may be found in the object graph.</param>
+            <returns>A string of JSON.</returns>
+        </member>
+        <member name="M:Tasty.Primitives.ToJson(System.Type,System.Object,System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            Serializes the given object to a JSON string.
+            </summary>
+            <param name="type">The type of the object being serialized.</param>
+            <param name="value">The object to serialize.</param>
+            <param name="knownTypes">A collection of known types to feed the serializer that may be found in the object graph.</param>
+            <returns>A string of JSON.</returns>
         </member>
         <member name="M:Tasty.Primitives.TypeNameWithoutAssembly(System.String)">
             <summary>

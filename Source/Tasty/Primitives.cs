@@ -7,9 +7,12 @@
 namespace Tasty
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.Serialization.Json;
     using System.Text;
     using System.Text.RegularExpressions;
 
@@ -76,6 +79,59 @@ namespace Tasty
             }
 
             return buffer;
+        }
+
+        /// <summary>
+        /// De-serializes a string of JSON into an object of the given type.
+        /// </summary>
+        /// <param name="type">The type of object to de-serialize the given JSON into.</param>
+        /// <param name="value">A string of JSON to de-serialize.</param>
+        /// <returns>The de-serialized object.</returns>
+        public static object FromJson(Type type, string value)
+        {
+            return FromJson(type, value, new List<Type>());
+        }
+
+        /// <summary>
+        /// De-serializes a string of JSON into an object of the given type.
+        /// </summary>
+        /// <param name="type">The type of object to de-serialize the given JSON into.</param>
+        /// <param name="value">A string of JSON to de-serialize.</param>
+        /// <param name="knownTypes">A collection of known types the serializer may encounter in the object graph.</param>
+        /// <returns>The de-serialized object.</returns>
+        public static object FromJson(Type type, string value, IEnumerable<Type> knownTypes)
+        {
+            return FromJson(type, value, Encoding.Default, knownTypes);
+        }
+
+        /// <summary>
+        /// De-serializes a string of JSON into an object of the given type.
+        /// </summary>
+        /// <param name="type">The type of object to de-serialize the given JSON into.</param>
+        /// <param name="value">A string of JSON to de-serialize.</param>
+        /// <param name="encoding">The encoding the JSON string is in.</param>
+        /// <param name="knownTypes">A collection of known types the serializer may encounter in the object graph.</param>
+        /// <returns>The de-serialized object.</returns>
+        public static object FromJson(Type type, string value, Encoding encoding, IEnumerable<Type> knownTypes)
+        {
+            if (!String.IsNullOrEmpty(value))
+            {
+                using (Stream stream = new MemoryStream())
+                {
+                    using (StreamWriter writer = new StreamWriter(stream, encoding))
+                    {
+                        writer.Write(value);
+                        writer.Flush();
+                        stream.Position = 0;
+
+                        return new DataContractJsonSerializer(type, knownTypes).ReadObject(stream);
+                    }
+                }
+            }
+            else
+            {
+                return Activator.CreateInstance(type);
+            }
         }
 
         /// <summary>
@@ -146,6 +202,55 @@ namespace Tasty
         public static string ToIso8601UtcPathSafeString(this DateTime dateTime)
         {
             return Regex.Replace(dateTime.ToIso8601UtcString(), @"[\.:]", "-");
+        }
+
+        /// <summary>
+        /// Serializes the given object to a JSON string.
+        /// </summary>
+        /// <param name="value">The object to serialize.</param>
+        /// <returns>A string of JSON.</returns>
+        public static string ToJson<T>(this T value)
+        {
+            return ToJson(value, new List<Type>());
+        }
+
+        /// <summary>
+        /// Serializes the given object to a JSON string.
+        /// </summary>
+        /// <param name="value">The object to serialize.</param>
+        /// <param name="knownTypes">A collection of known types to feed the serializer that may be found in the object graph.</param>
+        /// <returns>A string of JSON.</returns>
+        public static string ToJson<T>(this T value, IEnumerable<Type> knownTypes)
+        {
+            return ToJson(typeof(T), value, knownTypes);
+        }
+
+        /// <summary>
+        /// Serializes the given object to a JSON string.
+        /// </summary>
+        /// <param name="type">The type of the object being serialized.</param>
+        /// <param name="value">The object to serialize.</param>
+        /// <param name="knownTypes">A collection of known types to feed the serializer that may be found in the object graph.</param>
+        /// <returns>A string of JSON.</returns>
+        public static string ToJson(Type type, object value, IEnumerable<Type> knownTypes)
+        {
+            if (value != null)
+            {
+                using (Stream stream = new MemoryStream())
+                {
+                    new DataContractJsonSerializer(type, knownTypes).WriteObject(stream, value);
+                    stream.Position = 0;
+
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+            }
+            else
+            {
+                return String.Empty;
+            }
         }
 
         /// <summary>

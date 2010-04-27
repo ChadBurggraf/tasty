@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bootstrapper.cs" />
+    <Compile Include="DataSetsTests.cs" />
     <Compile Include="GeocodeTests.cs" />
     <Compile Include="GetVersionTests.cs" />
     <Compile Include="HttpCacheUrlTokenStoreTests.cs" />

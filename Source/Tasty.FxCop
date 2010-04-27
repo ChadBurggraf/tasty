@@ -42,15 +42,6 @@
  </Rules>
  <FxCopReport Version="1.36">
   <Namespaces>
-   <Namespace Name="Tasty">
-    <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-04-27 18:05:18Z">
-      <Issue>
-       <Item>Tasty</Item>
-      </Issue>
-     </Message>
-    </Messages>
-   </Namespace>
    <Namespace Name="Tasty.Http">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-04-27 18:05:18Z">
@@ -70,9 +61,39 @@
     </Messages>
    </Namespace>
   </Namespaces>
+  <Targets>
+   <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll">
+    <Modules>
+     <Module Name="tasty.dll">
+      <Namespaces>
+       <Namespace Name="Tasty">
+        <Types>
+         <Type Name="DataSets">
+          <Members>
+           <Member Name="#odfNamespaces">
+            <Messages>
+             <Message Id="Member" TypeName="PreferJaggedArraysOverMultidimensional" Category="Microsoft.Performance" CheckId="CA1814" Created="2010-04-27 22:55:11Z">
+              <Issue>
+               <Item>'DataSets.odfNamespaces'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
+      </Namespaces>
+     </Module>
+    </Modules>
+   </Target>
+  </Targets>
   <Rules>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
+   </Rule>
+   <Rule TypeName="PreferJaggedArraysOverMultidimensional" Category="Microsoft.Performance" CheckId="CA1814">
+    <Resolution Name="Default">{0} is a multidimensional array. Replace it with a jagged array if possible.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

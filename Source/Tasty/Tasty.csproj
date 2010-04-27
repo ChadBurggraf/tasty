@@ -139,7 +139,6 @@
     <Compile Include="Jobs\IJobRunnerDelegate.cs" />
     <Compile Include="Jobs\IJobStore.cs" />
     <Compile Include="Jobs\Job.cs" />
-    <Compile Include="Jobs\JobProxy.cs" />
     <Compile Include="Jobs\JobRecord.cs" />
     <Compile Include="Jobs\JobRun.cs" />
     <Compile Include="Jobs\JobRunner.cs" />

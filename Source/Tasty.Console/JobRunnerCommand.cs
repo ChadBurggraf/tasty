@@ -53,7 +53,7 @@ namespace Tasty.Console
 
             var options = new OptionSet()
             {
-                { "c|config=", "(optional) the path to the configuration file to use for configuring the session.", v => config = v },
+                { "c|config=", "(optional) the path to a configuration file to use other than the default.", v => config = v },
                 { "v|verbose", "(optional) write session output to the console.", v => { ++verbose; } },
                 { "l|log=", "(optional) the path to a file to log session output to.", v => log = v },
                 { "m|man", "show this message", v => { ++man; } }
@@ -79,66 +79,24 @@ namespace Tasty.Console
             {
                 if (File.Exists(config))
                 {
-                    ExeConfigurationFileMap configMap = new ExeConfigurationFileMap() { ExeConfigFilename = config };
+                    ExeConfigurationFileMap map = new ExeConfigurationFileMap();
+                    map.ExeConfigFilename = config;
 
-                    try
+                    Configuration customConfig = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
+
+                    if (customConfig.HasFile)
                     {
-                        Configuration customConfig = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
-                        TastySettings customTastySettings = customConfig.GetSection("tasty") as TastySettings;
+                        Configuration currentConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                        customConfig.SaveAs(currentConfig.FilePath, ConfigurationSaveMode.Full);
 
-                        if (customTastySettings == null)
-                        {
-                            StandardOut.WriteLine("The configuration file '{0}' does not contain a 'tasty' section. Falling back to the default configuration.\n", config);
-                        }
-                        else
-                        {
-                            Configuration processConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-
-                            AppSettingsSection customAppSettings = (AppSettingsSection)customConfig.GetSection("appSettings");
-                            
-                            if (customAppSettings != null)
-                            {
-                                foreach (KeyValueConfigurationElement appSetting in customAppSettings.Settings)
-                                {
-                                    processConfig.AppSettings.Settings.Remove(appSetting.Key);
-                                    processConfig.AppSettings.Settings.Add(appSetting.Key, appSetting.Value);
-                                }
-                            }
-
-                            ConnectionStringsSection customConnectionStrings = (ConnectionStringsSection)customConfig.GetSection("connectionStrings");
-                            
-                            if (customConnectionStrings != null)
-                            {
-                                foreach (ConnectionStringSettings connectionString in customConnectionStrings.ConnectionStrings)
-                                {
-                                    processConfig.ConnectionStrings.ConnectionStrings.Remove(connectionString.Name);
-                                    processConfig.ConnectionStrings.ConnectionStrings.Add(new ConnectionStringSettings(connectionString.Name, connectionString.ConnectionString));
-                                }
-                            }
-
-                            ConfigurationSection processTastySettings = new TastySettings();
-                            processTastySettings.SectionInformation.SetRawXml(customTastySettings.SectionInformation.GetRawXml());
-                            processConfig.Sections.Remove("tasty");
-                            processConfig.Sections.Add("tasty", processTastySettings);
-
-                            processConfig.Save(ConfigurationSaveMode.Modified);
-
-                            ConfigurationManager.RefreshSection("appSettings");
-                            ConfigurationManager.RefreshSection("connectionStrings");
-                            ConfigurationManager.RefreshSection("tasty");
-
-                            TastySettings.Section = null;
-                        }
-                    }
-                    catch (ConfigurationErrorsException ex)
-                    {
-                        BadArgument("The configuration file '{0}' has configuration errors: {1}", config, ex.Message);
-                        return;
+                        ConfigurationManager.RefreshSection("appSettings");
+                        ConfigurationManager.RefreshSection("connectionStrings");
+                        ConfigurationManager.RefreshSection("tasty");
                     }
                 }
                 else
                 {
-                    BadArgument("The configuration file '{0}' does not exist.", config);
+                    BadArgument("There is no configuration file at \"{0}\".", config);
                     return;
                 }
             }

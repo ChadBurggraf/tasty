@@ -44,7 +44,7 @@
   <Namespaces>
    <Namespace Name="Tasty">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-03-04 03:29:50Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-04-27 18:05:18Z">
       <Issue>
        <Item>Tasty</Item>
       </Issue>
@@ -53,7 +53,7 @@
    </Namespace>
    <Namespace Name="Tasty.Http">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-03-04 03:29:50Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-04-27 18:05:18Z">
       <Issue>
        <Item>Tasty.Http</Item>
       </Issue>
@@ -62,7 +62,7 @@
    </Namespace>
    <Namespace Name="Tasty.Web">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-03-04 03:29:50Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2010-04-27 18:05:18Z">
       <Issue>
        <Item>Tasty.Web</Item>
       </Issue>

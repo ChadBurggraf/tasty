@@ -223,6 +223,8 @@ namespace Tasty.Jobs
                                 record.FinishDate = run.Finished;
 
                                 this.runnerDelegate.OnCancelJob(new JobRecord(record));
+
+                                run = null;
                             });
                     });
             }
@@ -376,6 +378,8 @@ namespace Tasty.Jobs
                                 }
 
                                 this.runnerDelegate.OnFinishJob(new JobRecord(record));
+
+                                run = null;
                             });
                     });
             }
@@ -437,6 +441,8 @@ namespace Tasty.Jobs
                                 record.FinishDate = DateTime.UtcNow;
 
                                 this.runnerDelegate.OnTimeoutJob(new JobRecord(record));
+
+                                run = null;
                             });
                     });
             }

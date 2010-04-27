@@ -8,6 +8,7 @@ namespace Tasty
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -21,7 +22,7 @@ namespace Tasty
     /// </summary>
     public static class Primitives
     {
-        private const string typeExpression = @"^([^,]+)(,([^,]+).*)?";
+        private const string TypeExpression = @"^([^,]+)(,([^,]+).*)?";
 
         /// <summary>
         /// Copies any same-named property values from the source object to the destination object.
@@ -87,6 +88,7 @@ namespace Tasty
         /// <param name="type">The type of object to de-serialize the given JSON into.</param>
         /// <param name="value">A string of JSON to de-serialize.</param>
         /// <returns>The de-serialized object.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
         public static object FromJson(Type type, string value)
         {
             return FromJson(type, value, new List<Type>());
@@ -99,6 +101,7 @@ namespace Tasty
         /// <param name="value">A string of JSON to de-serialize.</param>
         /// <param name="knownTypes">A collection of known types the serializer may encounter in the object graph.</param>
         /// <returns>The de-serialized object.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
         public static object FromJson(Type type, string value, IEnumerable<Type> knownTypes)
         {
             return FromJson(type, value, Encoding.Default, knownTypes);
@@ -112,6 +115,7 @@ namespace Tasty
         /// <param name="encoding">The encoding the JSON string is in.</param>
         /// <param name="knownTypes">A collection of known types the serializer may encounter in the object graph.</param>
         /// <returns>The de-serialized object.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
         public static object FromJson(Type type, string value, Encoding encoding, IEnumerable<Type> knownTypes)
         {
             if (!String.IsNullOrEmpty(value))
@@ -207,8 +211,10 @@ namespace Tasty
         /// <summary>
         /// Serializes the given object to a JSON string.
         /// </summary>
+        /// <typeparam name="T">The type of the object being serialized.</typeparam>
         /// <param name="value">The object to serialize.</param>
         /// <returns>A string of JSON.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
         public static string ToJson<T>(this T value)
         {
             return ToJson(value, new List<Type>());
@@ -217,9 +223,11 @@ namespace Tasty
         /// <summary>
         /// Serializes the given object to a JSON string.
         /// </summary>
+        /// <typeparam name="T">The type of the object being serialized.</typeparam>
         /// <param name="value">The object to serialize.</param>
         /// <param name="knownTypes">A collection of known types to feed the serializer that may be found in the object graph.</param>
         /// <returns>A string of JSON.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
         public static string ToJson<T>(this T value, IEnumerable<Type> knownTypes)
         {
             return ToJson(typeof(T), value, knownTypes);
@@ -232,6 +240,7 @@ namespace Tasty
         /// <param name="value">The object to serialize.</param>
         /// <param name="knownTypes">A collection of known types to feed the serializer that may be found in the object graph.</param>
         /// <returns>A string of JSON.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
         public static string ToJson(Type type, object value, IEnumerable<Type> knownTypes)
         {
             if (value != null)
@@ -251,6 +260,17 @@ namespace Tasty
             {
                 return String.Empty;
             }
+        }
+
+        /// <summary>
+        /// Gets a pretty URL-safe representation of the given string.
+        /// </summary>
+        /// <param name="value">The string value to get a URL-safe representation of.</param>
+        /// <returns>The escaped string value.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Not a URI return value.")]
+        public static string ToUrlPrettyString(this string value)
+        {
+            return Regex.Replace(Regex.Replace(value, @"[^0-9a-z]", " ", RegexOptions.IgnoreCase).Trim(), @"\s+", "-");
         }
 
         /// <summary>
@@ -277,7 +297,7 @@ namespace Tasty
                 throw new ArgumentNullException("typeName", "typeName must have a value.");
             }
 
-            Match match = Regex.Match(typeName, typeExpression);
+            Match match = Regex.Match(typeName, TypeExpression);
 
             if (match.Success)
             {
@@ -287,16 +307,6 @@ namespace Tasty
             {
                 throw new ArgumentException("typeName does not appear to be a valid type name", "typeName");
             }
-        }
-
-        /// <summary>
-        /// Gets a pretty URL-safe representation of the given string.
-        /// </summary>
-        /// <param name="value">The string value to get a URL-safe representation of.</param>
-        /// <returns>The escaped string value.</returns>
-        public static string ToUrlPrettyString(this string value)
-        {
-            return Regex.Replace(Regex.Replace(value, @"[^0-9a-z]", " ", RegexOptions.IgnoreCase).Trim(), @"\s+", "-");
         }
 
         /// <summary>

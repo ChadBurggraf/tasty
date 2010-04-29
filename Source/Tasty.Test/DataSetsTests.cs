@@ -11,6 +11,29 @@ namespace Tasty.Test
         [TestMethod]
         public void DataSets_WriteToOdsFile()
         {
+            if (File.Exists("dataset.ods"))
+            {
+                File.Delete("dataset.ods");
+            }
+
+            CreateTestDataSet().WriteToOdsFile("dataset.ods");
+            Assert.IsTrue(File.Exists("dataset.ods"));
+        }
+
+        [TestMethod]
+        public void DataSets_WriteToXlsxFile()
+        {
+            if (File.Exists("dataset.xlsx"))
+            {
+                File.Delete("dataset.xlsx");
+            }
+
+            CreateTestDataSet().WriteToXlsxFile("dataset.xlsx");
+            Assert.IsTrue(File.Exists("dataset.xlsx"));
+        }
+
+        private static DataSet CreateTestDataSet()
+        {
             DataSet ds = new DataSet("Chad's Data Set");
 
             DataTable dt1 = ds.Tables.Add("Data Table 01");
@@ -30,13 +53,7 @@ namespace Tasty.Test
             dt2.Rows.Add(new DateTime(2012, 1, 1));
             dt2.Rows.Add(new DateTime(1982, 5, 28));
 
-            if (File.Exists("dataset.ods"))
-            {
-                File.Delete("dataset.ods");
-            }
-
-            ds.WriteToOdsFile("dataset.ods");
-            Assert.IsTrue(File.Exists("dataset.ods"));
+            return ds;
         }
     }
 }

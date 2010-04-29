@@ -100,18 +100,7 @@ namespace Tasty
                     for (int i = 0; i < row.ItemArray.Length; i++)
                     {
                         XmlNode cellNode = document.CreateElement("table:table-cell", tableUri);
-
-                        if (row[i] != null && row[i] != DBNull.Value)
-                        {
-                            XmlAttribute cellValueTypeAttribute = document.CreateAttribute("office:value-type", officeUri);
-                            cellValueTypeAttribute.Value = "string";
-                            cellNode.Attributes.Append(cellValueTypeAttribute);
-
-                            XmlNode cellValueNode = document.CreateElement("text:p", textUri);
-                            cellValueNode.InnerText = row[i].ToString();
-                            cellNode.AppendChild(cellValueNode);
-                        }
-
+                        SetCellValue(document, cellNode, officeUri, textUri, row[i]);
                         rowNode.AppendChild(cellNode);
                     }
 
@@ -206,6 +195,87 @@ namespace Tasty
                         odsFile.Save(path);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sets the value of the given cell <see cref="XmlNode"/>.
+        /// </summary>
+        /// <param name="document">The <see cref="XmlDocument"/> the given cell belongs to.</param>
+        /// <param name="cellNode">The cell <see cref="XmlNode"/> to set the value of.</param>
+        /// <param name="officeUri">The office namespace URI to use.</param>
+        /// <param name="textUri">The text namespace URI to use.</param>
+        /// <param name="value">The value to set.</param>
+        private static void SetCellValue(XmlDocument document, XmlNode cellNode, string officeUri, string textUri, object value)
+        {
+            string cellText = String.Empty, 
+                cellValue = String.Empty, 
+                cellValueName = "value",
+                cellValueType = String.Empty;
+
+            if (value != null)
+            {
+                Type valueType = value.GetType();
+
+                if (typeof(bool).IsAssignableFrom(valueType) || typeof(bool?).IsAssignableFrom(valueType))
+                {
+                    cellValue = (bool)value ? "1" : "0";
+                    cellValueType = "float";
+                }
+                else if (typeof(DateTime).IsAssignableFrom(valueType) || typeof(DateTime?).IsAssignableFrom(valueType))
+                {
+                    DateTime dateValue = (DateTime)value;
+
+                    if (dateValue.Date == DateTime.MinValue)
+                    {
+                        cellValue = String.Format(CultureInfo.InvariantCulture, "PT{0:HH}H{0:mm}M{0:ss},{0:ffff}S", dateValue);
+                        cellValueName = "time-value";
+                        cellValueType = "time";
+
+                        
+                    }
+                    else
+                    {
+                        cellValue = String.Format(CultureInfo.InvariantCulture, "{0:yyyy}-{0:MM}-{0:dd}T{0:HH}:{0:mm}:{0:ss}", dateValue);
+                        cellValueName = "date-value";
+                        cellValueType = "date";
+                    }
+                }
+                else if (typeof(decimal).IsAssignableFrom(valueType) || typeof(decimal?).IsAssignableFrom(valueType) ||
+                         typeof(double).IsAssignableFrom(valueType) || typeof(double?).IsAssignableFrom(valueType) ||
+                         typeof(float).IsAssignableFrom(valueType) || typeof(float?).IsAssignableFrom(valueType))
+                {
+                    cellValue = String.Format(CultureInfo.InvariantCulture, "{0:N2}", value);
+                    cellValueType = "float";
+                }
+                else if (typeof(int).IsAssignableFrom(valueType) || typeof(int?).IsAssignableFrom(valueType) ||
+                         typeof(long).IsAssignableFrom(valueType) || typeof(long?).IsAssignableFrom(valueType))
+                {
+                    cellValue = value.ToString();
+                    cellValueType = "float";
+                }
+                else
+                {
+                    cellText = value.ToString();
+                }
+            }
+
+            if (!String.IsNullOrEmpty(cellValue))
+            {
+                XmlAttribute cellValueTypeAttribute = document.CreateAttribute("office:value-type", officeUri);
+                cellValueTypeAttribute.Value = cellValueType;
+                cellNode.Attributes.Append(cellValueTypeAttribute);
+
+                XmlAttribute cellValueAttribute = document.CreateAttribute(String.Concat("office:", cellValueName), officeUri);
+                cellValueAttribute.Value = cellValueName;
+                cellNode.Attributes.Append(cellValueAttribute);
+            }
+
+            if (!String.IsNullOrEmpty(cellText))
+            {
+                XmlNode cellValueNode = document.CreateElement("text:p", textUri);
+                cellValueNode.InnerText = cellText;
+                cellNode.AppendChild(cellValueNode);
             }
         }
     }

@@ -216,15 +216,14 @@ namespace Tasty.Jobs
                             delegate(JobRecord record)
                             {
                                 JobRun run = this.runningJobs.Where(j => j.JobId == record.Id.Value).FirstOrDefault();
-                                run.Abort();
                                 this.runningJobs.Remove(run);
 
+                                run.Abort();
+
                                 record.Status = JobStatus.Canceled;
-                                record.FinishDate = run.Finished;
+                                record.FinishDate = DateTime.UtcNow;
 
                                 this.runnerDelegate.OnCancelJob(new JobRecord(record));
-
-                                run = null;
                             });
                     });
             }
@@ -273,9 +272,9 @@ namespace Tasty.Jobs
                                     if (toJobEx == null)
                                     {
                                         JobRun run = new JobRun(record.Id.Value, job);
-                                        this.runningJobs.Add(run);
-
                                         run.Run();
+
+                                        this.runningJobs.Add(run);
                                     }
                                     else
                                     {
@@ -378,8 +377,6 @@ namespace Tasty.Jobs
                                 }
 
                                 this.runnerDelegate.OnFinishJob(new JobRecord(record));
-
-                                run = null;
                             });
                     });
             }
@@ -434,15 +431,14 @@ namespace Tasty.Jobs
                             delegate(JobRecord record)
                             {
                                 JobRun run = this.runningJobs.Where(j => j.JobId == record.Id.Value).FirstOrDefault();
-                                run.Abort();
                                 this.runningJobs.Remove(run);
+
+                                run.Abort();
 
                                 record.Status = JobStatus.TimedOut;
                                 record.FinishDate = DateTime.UtcNow;
 
                                 this.runnerDelegate.OnTimeoutJob(new JobRecord(record));
-
-                                run = null;
                             });
                     });
             }

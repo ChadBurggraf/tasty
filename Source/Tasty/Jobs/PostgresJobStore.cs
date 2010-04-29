@@ -374,7 +374,7 @@ namespace Tasty.Jobs
         private static NpgsqlCommand ParameterizeRecord(JobRecord record, NpgsqlCommand command)
         {
             command.Parameters.Add(new NpgsqlParameter(":name", record.Name));
-            command.Parameters.Add(new NpgsqlParameter(":type", record.JobType.AssemblyQualifiedName));
+            command.Parameters.Add(new NpgsqlParameter(":type", record.JobTypeString));
             command.Parameters.Add(new NpgsqlParameter(":data", record.Data));
             command.Parameters.Add(new NpgsqlParameter(":status", record.Status.ToString()));
 

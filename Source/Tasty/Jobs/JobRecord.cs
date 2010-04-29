@@ -73,6 +73,22 @@ namespace Tasty.Jobs
         public Type JobType { get; set; }
 
         /// <summary>
+        /// Gets this record's <see cref="JobType"/> as an assembly qualified name, without version or public key information.
+        /// </summary>
+        public string JobTypeString
+        {
+            get
+            {
+                if (this.JobType != null)
+                {
+                    return String.Concat(this.JobType.FullName, ", ", this.JobType.Assembly.GetName().Name);
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the job's display name (i.e., the value of <see cref="IJob.Name"/>).
         /// </summary>
         public string Name { get; set; }

@@ -372,7 +372,7 @@ namespace Tasty.Jobs
         private static SqlCommand ParameterizeRecord(JobRecord record, SqlCommand command)
         {
             command.Parameters.Add(new SqlParameter("@Name", record.Name));
-            command.Parameters.Add(new SqlParameter("@Type", record.JobType.AssemblyQualifiedName));
+            command.Parameters.Add(new SqlParameter("@Type", record.JobTypeString));
             command.Parameters.Add(new SqlParameter("@Data", record.Data));
             command.Parameters.Add(new SqlParameter("@Status", record.Status.ToString()));
 

@@ -263,6 +263,27 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Gets the spreadhseet column name (i.e., A or AB or EF) for the given column number.
+        /// </summary>
+        /// <param name="columnNumber">The column number (the first column is 1, not 0).</param>
+        /// <returns>The spreadsheet column name.</returns>
+        public static string ToSpreadsheetColumnName(this int columnNumber)
+        {
+            int dividend = columnNumber;
+            string columnName = String.Empty;
+            int modulo;
+
+            while (dividend > 0)
+            {
+                modulo = (dividend - 1) % 26;
+                columnName = Convert.ToChar(65 + modulo).ToString() + columnName;
+                dividend = (int)((dividend - modulo) / 26);
+            }
+
+            return columnName;
+        }
+
+        /// <summary>
         /// Gets a pretty URL-safe representation of the given string.
         /// </summary>
         /// <param name="value">The string value to get a URL-safe representation of.</param>

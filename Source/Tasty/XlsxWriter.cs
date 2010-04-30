@@ -9,6 +9,7 @@ namespace Tasty
     using System;
     using System.Data;
     using System.IO;
+    using System.Linq;
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Spreadsheet;
@@ -54,36 +55,82 @@ namespace Tasty
                 WorkbookPart workbookPart = document.AddWorkbookPart();
                 workbookPart.Workbook = new Workbook();
 
-                WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
-                worksheetPart.Worksheet = new Worksheet(new SheetData());
+                Sheets sheets = workbookPart.Workbook.AppendChild<Sheets>(new Sheets());
 
-                Sheets sheets = document.WorkbookPart.Workbook.AppendChild<Sheets>(new Sheets());
-
-                for(int i = 0; i < dataSet.Tables.Count; i++)
+                for (int i = 0; i < dataSet.Tables.Count; i++)
                 {
-                    uint sheetId = (uint)(i + 1);
+                    WorksheetPart worksheetPart = AddWorksheet(workbookPart, sheets, dataSet.Tables[i].TableName);
+                    SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
-                    Sheet sheet = new Sheet()
+                    Row headerRow = new Row { RowIndex = 1 };
+                    sheetData.Append(headerRow);
+
+                    for (int j = 0; j < dataSet.Tables[i].Columns.Count; j++)
                     {
-                        Id = document.WorkbookPart.GetIdOfPart(worksheetPart),
-                        SheetId = sheetId,
-                        Name = dataSet.Tables[i].TableName
-                    };
+                        Cell cell = new Cell()
+                        {
+                            CellReference = (j + 1).ToSpreadsheetColumnName() + 1,
+                            DataType = CellValues.InlineString,
+                            InlineString = new InlineString(new Text(dataSet.Tables[i].Columns[j].ColumnName))
+                        };
 
-                    sheets.Append(sheet);
-
+                        headerRow.Append(cell);
+                    }
 
                     for (int j = 0; j < dataSet.Tables[i].Rows.Count; j++)
                     {
                         DataRow dataRow = dataSet.Tables[i].Rows[j];
-                        Row row = new Row() { RowIndex = (uint)j };
+                        uint rowNum = (uint)(j + 2);
 
-                        
+                        Row row = new Row() { RowIndex = rowNum };
+                        sheetData.Append(row);
+
+                        for (int k = 0; k < dataRow.ItemArray.Length; k++)
+                        {
+                            Cell cell = new Cell()
+                            {
+                                CellReference = (k + 1).ToSpreadsheetColumnName() + rowNum,
+                                DataType = CellValues.InlineString,
+                                InlineString = new InlineString(new Text(dataRow[k] != null ? dataRow[k].ToString() : String.Empty))
+                            };
+
+                            row.Append(cell);
+                        }
                     }
+
+                    worksheetPart.Worksheet.Save();
                 }
 
                 workbookPart.Workbook.Save();
             }
+        }
+
+        /// <summary>
+        /// Adds a new worksheet to the given workbook.
+        /// </summary>
+        /// <param name="workbookPart">The <see cref="WorkbookPart"/> to add the worksheet to.</param>
+        /// <param name="sheets">The workbook's <see cref="Sheets"/> collection to add a sheet reference to.</param>
+        /// <param name="sheetName">The name of the sheet to add.</param>
+        /// <returns>The created <see cref="WorksheetPart"/>.</returns>
+        private static WorksheetPart AddWorksheet(WorkbookPart workbookPart, Sheets sheets, string sheetName)
+        {
+            WorksheetPart worksheetPart = workbookPart.AddNewPart<WorksheetPart>();
+            worksheetPart.Worksheet = new Worksheet(new SheetData());
+
+            string id = workbookPart.GetIdOfPart(worksheetPart);
+            uint sheetId = 1;
+
+            if (sheets.Elements<Sheet>().Count() > 0)
+            {
+                sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
+            }
+
+            Sheet sheet = new Sheet() { Id = id, SheetId = sheetId, Name = sheetName };
+            sheets.Append(sheet);
+
+            workbookPart.Workbook.Save();
+
+            return worksheetPart;
         }
     }
 }

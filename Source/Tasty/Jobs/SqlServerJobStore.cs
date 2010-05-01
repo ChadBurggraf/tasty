@@ -276,6 +276,11 @@ namespace Tasty.Jobs
                     record.Status = JobStatus.Failed;
                     record.Exception = new ExceptionXElement(ex).ToString();
                 }
+                catch (FileLoadException ex)
+                {
+                    record.Status = JobStatus.Failed;
+                    record.Exception = new ExceptionXElement(ex).ToString();
+                }
                 catch (TypeLoadException ex)
                 {
                     record.Status = JobStatus.Failed;

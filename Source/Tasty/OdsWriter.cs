@@ -134,7 +134,7 @@ namespace Tasty
                 foreach (DataColumn column in table.Columns)
                 {
                     XmlNode cellNode = document.CreateElement("table:table-cell", tableUri);
-                    SetCellValue(document, cellNode, officeUri, tableUri, textUri, column.ColumnName);
+                    SetCellValue(document, cellNode, officeUri, tableUri, textUri, typeof(string), column.ColumnName);
                     headerNode.AppendChild(cellNode);
                 }
 
@@ -147,7 +147,7 @@ namespace Tasty
                     for (int i = 0; i < row.ItemArray.Length; i++)
                     {
                         XmlNode cellNode = document.CreateElement("table:table-cell", tableUri);
-                        SetCellValue(document, cellNode, officeUri, tableUri, textUri, row[i]);
+                        SetCellValue(document, cellNode, officeUri, tableUri, textUri, table.Columns[i].DataType, row[i]);
                         rowNode.AppendChild(cellNode);
                     }
 
@@ -258,8 +258,9 @@ namespace Tasty
         /// <param name="officeUri">The office namespace URI to use.</param>
         /// <param name="tableUri">The table namespace URI to use.</param>
         /// <param name="textUri">The text namespace URI to use.</param>
+        /// <param name="columnType">The type of the column the cell belongs to.</param>
         /// <param name="value">The value to set.</param>
-        private static void SetCellValue(XmlDocument document, XmlNode cellNode, string officeUri, string tableUri, string textUri, object value)
+        private static void SetCellValue(XmlDocument document, XmlNode cellNode, string officeUri, string tableUri, string textUri, Type columnType, object value)
         {
             string cellStyleName = String.Empty,
                 cellText = String.Empty,
@@ -269,14 +270,12 @@ namespace Tasty
 
             if (value != null)
             {
-                Type valueType = value.GetType();
-
-                if (typeof(bool).IsAssignableFrom(valueType) || typeof(bool?).IsAssignableFrom(valueType))
+                if (typeof(bool).IsAssignableFrom(columnType))
                 {
                     cellText = cellValue = (bool)value ? "1" : "0";
                     cellValueType = "float";
                 }
-                else if (typeof(DateTime).IsAssignableFrom(valueType) || typeof(DateTime?).IsAssignableFrom(valueType))
+                else if (typeof(DateTime).IsAssignableFrom(columnType))
                 {
                     DateTime dateValue = (DateTime)value;
 
@@ -297,15 +296,15 @@ namespace Tasty
                         cellValueType = "date";
                     }
                 }
-                else if (typeof(decimal).IsAssignableFrom(valueType) || typeof(decimal?).IsAssignableFrom(valueType) ||
-                         typeof(double).IsAssignableFrom(valueType) || typeof(double?).IsAssignableFrom(valueType) ||
-                         typeof(float).IsAssignableFrom(valueType) || typeof(float?).IsAssignableFrom(valueType))
+                else if (typeof(decimal).IsAssignableFrom(columnType) ||
+                         typeof(double).IsAssignableFrom(columnType) ||
+                         typeof(float).IsAssignableFrom(columnType))
                 {
                     cellText = cellValue = String.Format(CultureInfo.InvariantCulture, "{0:N2}", value);
                     cellValueType = "float";
                 }
-                else if (typeof(int).IsAssignableFrom(valueType) || typeof(int?).IsAssignableFrom(valueType) ||
-                         typeof(long).IsAssignableFrom(valueType) || typeof(long?).IsAssignableFrom(valueType))
+                else if (typeof(int).IsAssignableFrom(columnType) ||
+                         typeof(long).IsAssignableFrom(columnType))
                 {
                     cellText = cellValue = value.ToString();
                     cellValueType = "float";

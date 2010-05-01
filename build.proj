@@ -36,6 +36,13 @@
     <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsoleDir)\Tasty.Console.snk /out:$(BuildDir)\Tasty.exe $(ConsoleDir)\bin\Release\tasty.exe $(ConsoleDir)\bin\Release\Tasty.dll $(ConsoleDir)\bin\Release\AWSSDK.dll $(ConsoleDir)\bin\Release\Ionic.Zip.Reduced.dll $(LibraryDir)\bin\Release\Npgsql.dll $(LibraryDir)\bin\Release\Mono.Security.dll $(ConsoleDir)\bin\Release\NDesk.Options.dll'/>
     <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.dll" DestinationFiles="$(BuildDir)\Tasty.SqlServer.dll"/>
     <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.xml" DestinationFiles="$(BuildDir)\Tasty.SqlServer.xml"/>
+
+    <ItemGroup>
+      <OpenXml Include="$(MSBuildProjectDirectory)\Source\Dependencies\DocumentFormat.OpenXml.dll"/>
+      <OpenXml Include="$(MSBuildProjectDirectory)\Source\Dependencies\DocumentFormat.OpenXml.xml"/>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(OpenXml)" DestinationFolder="$(BuildDir)"/>
   </Target>
 
   <Target Name="GetVersion">

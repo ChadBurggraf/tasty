@@ -168,6 +168,63 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Splits a semi-colon separated connection string into a dictionary of key-value pairs.
+        /// </summary>
+        /// <param name="connectionString">The connection string to split.</param>
+        /// <returns>A dictionary of key-value pairs.</returns>
+        public static Dictionary<string, string> SplitConnectionString(string connectionString)
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+            char[] semi = new char[] { ';' };
+            char[] eq = new char[] { '=' };
+
+            if (!String.IsNullOrEmpty(connectionString))
+            {
+                string[] pairs = connectionString.Split(semi, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string pair in pairs)
+                {
+                    string[] keyValue = pair.Split(eq, StringSplitOptions.RemoveEmptyEntries);
+                    string key = keyValue[0].Trim();
+                    string value = keyValue.Length > 1 ? keyValue[1].Trim() : String.Empty;
+
+                    if (!String.IsNullOrEmpty(key) && !String.IsNullOrEmpty(value))
+                    {
+                        dict[key] = value;
+                    }
+                }
+            }
+
+            return dict;
+        }
+
+        /// <summary>
+        /// Combines the string dictionary with semi-colon (;) separators to form a connection string.
+        /// </summary>
+        /// <param name="dict">The string dictionary to combine.</param>
+        /// <returns>The combined connection string.</returns>
+        public static string ToConnectionString(this IDictionary<string, string> dict)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            if (dict != null)
+            {
+                foreach (KeyValuePair<string, string> pair in dict)
+                {
+                    string key = pair.Key.Trim().Replace(";", String.Empty);
+                    string value = pair.Value.Trim().Replace(";", String.Empty);
+
+                    if (!String.IsNullOrEmpty(key) && !String.IsNullOrEmpty(value))
+                    {
+                        sb.AppendFormat(CultureInfo.InvariantCulture, "{0}={1};", key, value);
+                    }
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Converts the given byte array to a hex string.
         /// </summary>
         /// <param name="buffer">The byte array to convert.</param>

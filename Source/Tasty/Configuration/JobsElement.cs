@@ -17,9 +17,9 @@ namespace Tasty.Configuration
         /// <summary>
         /// Gets or sets the heartbeat timeout (in miliseconds) to use for the job runner. The runner will 
         /// pause for this duration at the end of each cancel/finish/timeout/dequeue loop.
-        /// When not configured, defaults to 2,000 (2 seconds).
+        /// When not configured, defaults to 10,000 (10 seconds).
         /// </summary>
-        [ConfigurationProperty("heartbeat", IsRequired = false, DefaultValue = 2000)]
+        [ConfigurationProperty("heartbeat", IsRequired = false, DefaultValue = 10000)]
         public int Heartbeat
         {
             get { return (int)this["heartbeat"]; }
@@ -28,9 +28,9 @@ namespace Tasty.Configuration
 
         /// <summary>
         /// Gets or sets the maximum number of jobs that are allowed to be
-        /// running simultaneously. When not configured, defaults to 25.
+        /// running simultaneously. When not configured, defaults to 4.
         /// </summary>
-        [ConfigurationProperty("maximumConcurrency", IsRequired = false, DefaultValue = 25)]
+        [ConfigurationProperty("maximumConcurrency", IsRequired = false, DefaultValue = 4)]
         public int MaximumConcurrency
         {
             get { return (int)this["maximumConcurrency"]; }

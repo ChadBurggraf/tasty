@@ -20,11 +20,10 @@
     <SqlServerDir>$(MSBuildProjectDirectory)\Source\Tasty.SqlServer</SqlServerDir>
   </PropertyGroup>
   
-  <Target Name="Build" DependsOnTargets="GetVersion">
+  <Target Name="Build">
     <RemoveDir Directories="$(BuildDir)"/>
     <MakeDir Directories="$(BuildDir)"/>
     
-    <SetVersion Files="$(SolutionVersionInfoPath)" Version="$(Major).$(Minor).$(Build).$(IncrementedRevision)"/>
     <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration)"/>
   
     <Message Text='Merging assemblies into "Tasty.dll".'/>

@@ -12,12 +12,22 @@ using Tasty.Jobs;
 namespace Tasty.Test
 {
     [TestClass]
-    public class JobRunnerTests
+    public class JobRunnerTests : IJobRunnerDelegate
     {
         [ClassInitialize]
         public static void ClassInitialize(TestContext testContext)
         {
             Bootstrapper.EnsureTestDatabase();
+        }
+
+        [TestMethod]
+        public void JobRunner_DelegateType()
+        {
+            Type type = GetType();
+            string typeName = type.FullName + ", " + Assembly.GetAssembly(type).GetName().Name;
+            TastySettings.Section.Jobs.DelegateType = typeName;
+            JobRunner.Instance.Start();
+            Assert.AreEqual(type.AssemblyQualifiedName, JobRunner.Instance.RunnerDelegate.GetType().AssemblyQualifiedName);
         }
 
         [TestMethod]
@@ -88,5 +98,33 @@ namespace Tasty.Test
 
             Assert.AreEqual(JobStatus.TimedOut, JobStore.Current.GetJob(id).Status);
         }
+
+        #region IJobRunnerDelegate Members
+
+        public void OnCancelJob(JobRecord record)
+        {
+        }
+
+        public void OnDequeueJob(JobRecord record)
+        {
+        }
+
+        public void OnEnqueueScheduledJob(JobRecord record)
+        {
+        }
+
+        public void OnError(JobRecord record, Exception ex)
+        {
+        }
+
+        public void OnFinishJob(JobRecord record)
+        {
+        }
+
+        public void OnTimeoutJob(JobRecord record)
+        {
+        }
+
+        #endregion
     }
 }

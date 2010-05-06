@@ -27,7 +27,6 @@ namespace Tasty.Jobs
         private static JobRunner instance;
         private Thread god;
         private IList<JobRun> runningJobs;
-        private IJobRunnerDelegate runnerDelegate;
 
         #endregion
 
@@ -99,6 +98,11 @@ namespace Tasty.Jobs
         /// </summary>
         public bool IsRunning { get; private set; }
 
+        /// <summary>
+        /// Gets the current job runner delegate.
+        /// </summary>
+        public IJobRunnerDelegate RunnerDelegate { get; private set; }
+
         #endregion
 
         #region Public Instance Methods
@@ -159,7 +163,19 @@ namespace Tasty.Jobs
         /// </summary>
         public void Start()
         {
-            this.Start(this);
+            IJobRunnerDelegate runnerDelegate = null;
+
+            if (!String.IsNullOrEmpty(TastySettings.Section.Jobs.DelegateType))
+            {
+                Type delegateType = Type.GetType(TastySettings.Section.Jobs.DelegateType);
+
+                if (delegateType != null)
+                {
+                    runnerDelegate = (IJobRunnerDelegate)Activator.CreateInstance(delegateType);
+                }
+            }
+
+            this.Start(runnerDelegate);
         }
 
         /// <summary>
@@ -171,7 +187,7 @@ namespace Tasty.Jobs
             lock (this)
             {
                 this.IsRunning = true;
-                this.runnerDelegate = runnerDelegate ?? this;
+                this.RunnerDelegate = runnerDelegate ?? this;
 
                 if (this.IsGreen)
                 {
@@ -223,7 +239,7 @@ namespace Tasty.Jobs
                                 record.Status = JobStatus.Canceled;
                                 record.FinishDate = DateTime.UtcNow;
 
-                                this.runnerDelegate.OnCancelJob(new JobRecord(record));
+                                this.RunnerDelegate.OnCancelJob(new JobRecord(record));
                             });
                     });
             }
@@ -281,6 +297,8 @@ namespace Tasty.Jobs
                                         record.Status = JobStatus.Failed;
                                         record.Exception = new ExceptionXElement(toJobEx).ToString();
                                         record.FinishDate = DateTime.UtcNow;
+
+                                        this.RunnerDelegate.OnError(new JobRecord(record), toJobEx);
                                     }
                                 }
                                 else
@@ -288,7 +306,7 @@ namespace Tasty.Jobs
                                     record.FinishDate = DateTime.UtcNow;
                                 }
 
-                                this.runnerDelegate.OnDequeueJob(new JobRecord(record));
+                                this.RunnerDelegate.OnDequeueJob(new JobRecord(record));
                             });
                     });
             }
@@ -320,11 +338,11 @@ namespace Tasty.Jobs
                             IJob job = ScheduledJob.CreateFromConfiguration(scheduledJob);
                             JobRecord record = job.Enqueue(next, schedule.Name);
 
-                            this.runnerDelegate.OnEnqueueScheduledJob(new JobRecord(record));
+                            this.RunnerDelegate.OnEnqueueScheduledJob(new JobRecord(record));
                         }
                         catch (ConfigurationErrorsException ex)
                         {
-                            this.runnerDelegate.OnError(last, ex);
+                            this.RunnerDelegate.OnError(new JobRecord(last), ex);
                         }
                     }
                     else
@@ -335,7 +353,7 @@ namespace Tasty.Jobs
 
                         if (bad != null)
                         {
-                            this.runnerDelegate.OnError(bad, null);
+                            this.RunnerDelegate.OnError(new JobRecord(bad), null);
                         }
                     }
                 }
@@ -370,13 +388,15 @@ namespace Tasty.Jobs
                                 {
                                     record.Exception = new ExceptionXElement(run.ExecutionException).ToString();
                                     record.Status = JobStatus.Failed;
+
+                                    this.RunnerDelegate.OnError(new JobRecord(record), run.ExecutionException);
                                 }
                                 else
                                 {
                                     record.Status = JobStatus.Succeeded;
                                 }
 
-                                this.runnerDelegate.OnFinishJob(new JobRecord(record));
+                                this.RunnerDelegate.OnFinishJob(new JobRecord(record));
                             });
                     });
             }
@@ -404,7 +424,7 @@ namespace Tasty.Jobs
                 }
                 catch (Exception ex)
                 {
-                    this.runnerDelegate.OnError(null, ex);
+                    this.RunnerDelegate.OnError(null, ex);
                 }
 
                 Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);
@@ -438,7 +458,7 @@ namespace Tasty.Jobs
                                 record.Status = JobStatus.TimedOut;
                                 record.FinishDate = DateTime.UtcNow;
 
-                                this.runnerDelegate.OnTimeoutJob(new JobRecord(record));
+                                this.RunnerDelegate.OnTimeoutJob(new JobRecord(record));
                             });
                     });
             }

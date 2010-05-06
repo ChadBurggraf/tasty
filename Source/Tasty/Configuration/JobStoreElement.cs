@@ -32,5 +32,14 @@ namespace Tasty.Configuration
         {
             get { return (KeyValueConfigurationCollection)(this["metadata"] ?? (this["metadata"] = new KeyValueConfigurationCollection())); }
         }
+
+        /// <summary>
+        /// Gets a value indicating if the System.Configuration.ConfigurationElement object is read-only.
+        /// </summary>
+        /// <returns>True if the System.Configuration.ConfigurationElement object is read-only, false otherwise.</returns>
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
     }
 }

@@ -168,11 +168,7 @@ namespace Tasty.Jobs
             if (!String.IsNullOrEmpty(TastySettings.Section.Jobs.DelegateType))
             {
                 Type delegateType = Type.GetType(TastySettings.Section.Jobs.DelegateType);
-
-                if (delegateType != null)
-                {
-                    runnerDelegate = (IJobRunnerDelegate)Activator.CreateInstance(delegateType);
-                }
+                runnerDelegate = (IJobRunnerDelegate)Activator.CreateInstance(delegateType);
             }
 
             this.Start(runnerDelegate);
@@ -345,15 +341,23 @@ namespace Tasty.Jobs
                             this.RunnerDelegate.OnError(new JobRecord(last), ex);
                         }
                     }
-                    else
+                    else if (TastySettings.Section.Jobs.DeleteBadScheduledJobRecords || TastySettings.Section.Jobs.NotifyOnBadScheduledJobs)
                     {
-                        var bad = (from r in records
-                                   where r.JobType == null && r.ScheduleName == schedule.Name
-                                   select r).FirstOrDefault();
+                        var bad = from r in records
+                                  where r.JobType == null && r.ScheduleName == schedule.Name
+                                  select r;
 
-                        if (bad != null)
+                        foreach (JobRecord badRecord in bad)
                         {
-                            this.RunnerDelegate.OnError(new JobRecord(bad), null);
+                            if (TastySettings.Section.Jobs.DeleteBadScheduledJobRecords)
+                            {
+                                JobStore.Current.DeleteJob(badRecord.Id.Value);
+                            }
+
+                            if (TastySettings.Section.Jobs.NotifyOnBadScheduledJobs)
+                            {
+                                this.RunnerDelegate.OnError(new JobRecord(badRecord), null);
+                            }
                         }
                     }
                 }

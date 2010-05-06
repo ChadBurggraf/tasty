@@ -34,6 +34,12 @@ namespace Tasty.Jobs
         JobRecord CreateJob(JobRecord record);
 
         /// <summary>
+        /// Deletes a job record from the job store.
+        /// </summary>
+        /// <param name="id">The ID of the job to delete.</param>
+        void DeleteJob(int id);
+
+        /// <summary>
         /// Gets a collection of queued jobs that can be dequeued right now.
         /// Opens a new transaction, then calls the delegate to perform any work. The transaction
         /// is committed when the delegate returns.

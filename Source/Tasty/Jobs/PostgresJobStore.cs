@@ -75,6 +75,27 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Deletes a job record from the job store.
+        /// </summary>
+        /// <param name="id">The ID of the job to delete.</param>
+        public override void DeleteJob(int id)
+        {
+            const string Sql = "DELETE FROM [TastyJob] WHERE [Id] = :id";
+
+            using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
+            {
+                connection.Open();
+
+                NpgsqlCommand command = connection.CreateCommand();
+                command.CommandText = Sql;
+                command.CommandType = CommandType.Text;
+                command.Parameters.Add(new NpgsqlParameter(":id", id));
+
+                command.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of queued jobs that can be dequeued right now.
         /// Opens a new transaction, then calls the delegate to perform any work. The transaction
         /// is committed when the delegate returns.

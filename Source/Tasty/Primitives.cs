@@ -66,6 +66,51 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Escapes the given string for use in a filesystem or URL path.
+        /// </summary>
+        /// <param name="pathPart">The path part to escape</param>
+        /// <returns>The escaped path part.</returns>
+        public static string EscapeForPath(this string pathPart)
+        {
+            return EscapeForPath(pathPart, Char.MinValue);
+        }
+
+        /// <summary>
+        /// Escapes the given string for use in a filesystem or URL path.
+        /// If pathSeparator is not <see cref="Char.MinValue"/>, will 
+        /// normalize all path separator characters to the given value and leave the
+        /// path hierarchy intact.
+        /// </summary>
+        /// <param name="pathPart">The path or path part to escape.</param>
+        /// <param name="pathSeparator">The path separator, or <see cref="Char.MinValue"/> to escape as a single path part.</param>
+        /// <returns>The escaped path.</returns>
+        public static string EscapeForPath(this string pathPart, char pathSeparator)
+        {
+            const string BaseExp = @"[^0-9a-z]";
+
+            if (!String.IsNullOrEmpty(pathPart))
+            {
+                if (pathSeparator != Char.MinValue)
+                {
+                    string[] pathParts = pathPart
+                        .Split(new char[] { '/', '\\' })
+                        .Select(s => Regex.Replace(s, BaseExp, " ", RegexOptions.IgnoreCase))
+                        .ToArray();
+
+                    pathPart = String.Join(pathSeparator.ToString(CultureInfo.InvariantCulture), pathParts);
+                }
+                else
+                {
+                    pathPart = Regex.Replace(pathPart, BaseExp, " ", RegexOptions.IgnoreCase);
+                }
+
+                pathPart = Regex.Replace(pathPart, @"\s+", "-");
+            }
+
+            return pathPart;
+        }
+
+        /// <summary>
         /// Converts the given hex string to an array of bytes.
         /// </summary>
         /// <param name="hex">The hex string to convert.</param>
@@ -225,6 +270,52 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Gets the first part of an email address for use as a name.
+        /// </summary>
+        /// <param name="email">The email address to get the name part of.</param>
+        /// <returns>An email name.</returns>
+        public static string ToEmailName(this string email)
+        {
+            return Regex.Replace(email ?? String.Empty, @"@.*$", String.Empty);
+        }
+
+        /// <summary>
+        /// Converts a length of bytes to a friendly file size string.
+        /// </summary>
+        /// <param name="bytes">The bytes length to convert.</param>
+        /// <returns>A friendly file size string.</returns>
+        public static string ToFileSize(this long bytes)
+        {
+            const decimal KB = 1024;
+            const decimal MB = KB * 1024;
+            const decimal GB = MB * 1024;
+
+            decimal size = Convert.ToDecimal(bytes);
+            string suffix = " B";
+            string format = "N0";
+
+            if (bytes > GB)
+            {
+                size /= GB;
+                suffix = " GB";
+                format = "N2";
+            }
+            else if (bytes > MB)
+            {
+                size /= MB;
+                suffix = " MB";
+                format = "N1";
+            }
+            else if (bytes > KB)
+            {
+                size /= KB;
+                suffix = " KB";
+            }
+
+            return size.ToString(format, CultureInfo.InvariantCulture) + suffix;
+        }
+
+        /// <summary>
         /// Converts the given byte array to a hex string.
         /// </summary>
         /// <param name="buffer">The byte array to convert.</param>
@@ -338,17 +429,6 @@ namespace Tasty
             }
 
             return columnName;
-        }
-
-        /// <summary>
-        /// Gets a pretty URL-safe representation of the given string.
-        /// </summary>
-        /// <param name="value">The string value to get a URL-safe representation of.</param>
-        /// <returns>The escaped string value.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Not a URI return value.")]
-        public static string ToUrlPrettyString(this string value)
-        {
-            return Regex.Replace(Regex.Replace(value, @"[^0-9a-z]", " ", RegexOptions.IgnoreCase).Trim(), @"\s+", "-");
         }
 
         /// <summary>

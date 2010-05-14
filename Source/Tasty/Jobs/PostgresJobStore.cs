@@ -80,7 +80,7 @@ namespace Tasty.Jobs
         /// <param name="id">The ID of the job to delete.</param>
         public override void DeleteJob(int id)
         {
-            const string Sql = "DELETE FROM [TastyJob] WHERE [Id] = :id";
+            const string Sql = "DELETE FROM \"tasty_job\" WHERE \"id\" = :id";
 
             using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
             {

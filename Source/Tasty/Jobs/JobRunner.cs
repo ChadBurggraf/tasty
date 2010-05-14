@@ -19,14 +19,16 @@ namespace Tasty.Jobs
     /// <summary>
     /// Runs jobs.
     /// </summary>
-    public sealed class JobRunner : IJobRunnerDelegate
+    public sealed class JobRunner
     {
         #region Private Fields
 
-        private static readonly object locker = new object();
+        private static readonly object instanceLocker = new object();
+        private readonly object statusLocker = new object();
         private static JobRunner instance;
         private Thread god;
         private IList<JobRun> runningJobs;
+        private Action onAllFinished;
 
         #endregion
 
@@ -48,6 +50,45 @@ namespace Tasty.Jobs
 
         #endregion
 
+        #region Events
+
+        /// <summary>
+        /// Event raised when a job has been canceled and and its run terminated.
+        /// </summary>
+        public event EventHandler<JobRecordEventArgs> CancelJob;
+
+        /// <summary>
+        /// Event raised when a job has been dequeued from the persistent store
+        /// and its run started.
+        /// </summary>
+        public event EventHandler<JobRecordEventArgs> DequeueJob;
+
+        /// <summary>
+        /// Event raised when a scheduled job has been enqueued to the persistent store.
+        /// </summary>
+        public event EventHandler<JobRecordEventArgs> EnqueueScheduledJob;
+
+        /// <summary>
+        /// Event raised when an error occurs.
+        /// WARNING: The <see cref="JobRecord"/> passed with this event may be empty,
+        /// or the <see cref="Exception"/> may be null, or both.
+        /// </summary>
+        public event EventHandler<JobErrorEventArgs> Error;
+
+        /// <summary>
+        /// Event raised when a job has finished execution.
+        /// This event is raised when the job finished naturally (i.e., not by canceling or timing out),
+        /// but regardless of whether it succeeded or not.
+        /// </summary>
+        public event EventHandler<JobRecordEventArgs> FinishJob;
+
+        /// <summary>
+        /// Event raised when a job has been timed out.
+        /// </summary>
+        public event EventHandler<JobRecordEventArgs> TimeoutJob;
+
+        #endregion
+
         #region Public Static Properties
 
         /// <summary>
@@ -57,7 +98,7 @@ namespace Tasty.Jobs
         {
             get
             {
-                lock (locker)
+                lock (instanceLocker)
                 {
                     if (instance == null)
                     {
@@ -98,92 +139,18 @@ namespace Tasty.Jobs
         /// </summary>
         public bool IsRunning { get; private set; }
 
-        /// <summary>
-        /// Gets the current job runner delegate.
-        /// </summary>
-        public IJobRunnerDelegate RunnerDelegate { get; private set; }
-
         #endregion
 
         #region Public Instance Methods
-
-        /// <summary>
-        /// Called when a job is canceled.
-        /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void OnCancelJob(JobRecord record)
-        {
-        }
-
-        /// <summary>
-        /// Called when a job is dequeued.
-        /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void OnDequeueJob(JobRecord record)
-        {
-        }
-
-        /// <summary>
-        /// Called when a scheduled job is enqueued.
-        /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void OnEnqueueScheduledJob(JobRecord record)
-        {
-        }
-
-        /// <summary>
-        /// Called when an error occurs during the execution of the run-loop.
-        /// Does not get called when a job itself experiences an error; job-specific
-        /// errors are saved in the job store with their respecitve records.
-        /// </summary>
-        /// <param name="record">The record on which the error occurred, if applicable.</param>
-        /// <param name="ex">The exception raised, if applicable.</param>
-        public void OnError(JobRecord record, Exception ex)
-        {
-        }
-
-        /// <summary>
-        /// Called when a job is finished.
-        /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void OnFinishJob(JobRecord record)
-        {
-        }
-
-        /// <summary>
-        /// Called when a job is timed out.
-        /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void OnTimeoutJob(JobRecord record)
-        {
-        }
 
         /// <summary>
         /// Starts the runner if it is not already running.
         /// </summary>
         public void Start()
         {
-            IJobRunnerDelegate runnerDelegate = null;
-
-            if (!String.IsNullOrEmpty(TastySettings.Section.Jobs.DelegateType))
-            {
-                Type delegateType = Type.GetType(TastySettings.Section.Jobs.DelegateType);
-                runnerDelegate = (IJobRunnerDelegate)Activator.CreateInstance(delegateType);
-            }
-
-            this.Start(runnerDelegate);
-        }
-
-        /// <summary>
-        /// Starts the runner if it is not already running.
-        /// </summary>
-        /// <param name="runnerDelegate">The <see cref="IJobRunnerDelegate"/> that should handle notifications.</param>
-        public void Start(IJobRunnerDelegate runnerDelegate)
-        {
-            lock (this)
+            lock (this.statusLocker)
             {
                 this.IsRunning = true;
-                this.RunnerDelegate = runnerDelegate ?? this;
 
                 if (this.IsGreen)
                 {
@@ -201,7 +168,21 @@ namespace Tasty.Jobs
         /// </summary>
         public void Stop()
         {
-            this.IsRunning = false;
+            this.Stop(null);
+        }
+
+        /// <summary>
+        /// Stops the runner if it is running.
+        /// Does not abort any currently executing job runs.
+        /// </summary>
+        /// <param name="onAllFinished">A callback to invoke when all currently-running jobs have finished or timed out.</param>
+        public void Stop(Action onAllFinished)
+        {
+            lock (this.statusLocker)
+            {
+                this.onAllFinished = onAllFinished;
+                this.IsRunning = false;
+            }
         }
 
         #endregion
@@ -235,7 +216,10 @@ namespace Tasty.Jobs
                                 record.Status = JobStatus.Canceled;
                                 record.FinishDate = DateTime.UtcNow;
 
-                                this.RunnerDelegate.OnCancelJob(new JobRecord(record));
+                                if (this.CancelJob != null)
+                                {
+                                    this.CancelJob(this, new JobRecordEventArgs(new JobRecord(record)));
+                                }
                             });
                     });
             }
@@ -294,7 +278,10 @@ namespace Tasty.Jobs
                                         record.Exception = new ExceptionXElement(toJobEx).ToString();
                                         record.FinishDate = DateTime.UtcNow;
 
-                                        this.RunnerDelegate.OnError(new JobRecord(record), toJobEx);
+                                        if (this.Error != null)
+                                        {
+                                            this.Error(this, new JobErrorEventArgs(new JobRecord(record), toJobEx));
+                                        }
                                     }
                                 }
                                 else
@@ -302,7 +289,10 @@ namespace Tasty.Jobs
                                     record.FinishDate = DateTime.UtcNow;
                                 }
 
-                                this.RunnerDelegate.OnDequeueJob(new JobRecord(record));
+                                if (this.DequeueJob != null)
+                                {
+                                    this.DequeueJob(this, new JobRecordEventArgs(new JobRecord(record)));
+                                }
                             });
                     });
             }
@@ -334,11 +324,17 @@ namespace Tasty.Jobs
                             IJob job = ScheduledJob.CreateFromConfiguration(scheduledJob);
                             JobRecord record = job.Enqueue(next, schedule.Name);
 
-                            this.RunnerDelegate.OnEnqueueScheduledJob(new JobRecord(record));
+                            if (this.EnqueueScheduledJob != null)
+                            {
+                                this.EnqueueScheduledJob(this, new JobRecordEventArgs(new JobRecord(record)));
+                            }
                         }
                         catch (ConfigurationErrorsException ex)
                         {
-                            this.RunnerDelegate.OnError(new JobRecord(last), ex);
+                            if (this.Error != null)
+                            {
+                                this.Error(this, new JobErrorEventArgs(new JobRecord(), ex));
+                            }
                         }
                     }
                     else if (TastySettings.Section.Jobs.DeleteBadScheduledJobRecords || TastySettings.Section.Jobs.NotifyOnBadScheduledJobs)
@@ -356,7 +352,10 @@ namespace Tasty.Jobs
 
                             if (TastySettings.Section.Jobs.NotifyOnBadScheduledJobs)
                             {
-                                this.RunnerDelegate.OnError(new JobRecord(badRecord), null);
+                                if (this.Error != null)
+                                {
+                                    this.Error(this, new JobErrorEventArgs(new JobRecord(badRecord), null));
+                                }
                             }
                         }
                     }
@@ -393,14 +392,20 @@ namespace Tasty.Jobs
                                     record.Exception = new ExceptionXElement(run.ExecutionException).ToString();
                                     record.Status = JobStatus.Failed;
 
-                                    this.RunnerDelegate.OnError(new JobRecord(record), run.ExecutionException);
+                                    if (this.Error != null)
+                                    {
+                                        this.Error(this, new JobErrorEventArgs(new JobRecord(record), run.ExecutionException));
+                                    }
                                 }
                                 else
                                 {
                                     record.Status = JobStatus.Succeeded;
                                 }
 
-                                this.RunnerDelegate.OnFinishJob(new JobRecord(record));
+                                if (this.FinishJob != null)
+                                {
+                                    this.FinishJob(this, new JobRecordEventArgs(new JobRecord(record)));
+                                }
                             });
                     });
             }
@@ -420,15 +425,26 @@ namespace Tasty.Jobs
                     this.FinishJobs();
                     this.TimeoutJobs();
 
-                    if (this.IsRunning)
+                    lock (this.statusLocker)
                     {
-                        this.EnqueueScheduledJobs();
-                        this.DequeueJobs();
+                        if (this.IsRunning)
+                        {
+                            this.EnqueueScheduledJobs();
+                            this.DequeueJobs();
+                        }
+                        else if (this.onAllFinished != null && this.runningJobs.Count == 0)
+                        {
+                            this.onAllFinished();
+                            this.onAllFinished = null;
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    this.RunnerDelegate.OnError(null, ex);
+                    if (this.Error != null)
+                    {
+                        this.Error(this, new JobErrorEventArgs(new JobRecord(), ex));
+                    }
                 }
 
                 Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);
@@ -462,7 +478,10 @@ namespace Tasty.Jobs
                                 record.Status = JobStatus.TimedOut;
                                 record.FinishDate = DateTime.UtcNow;
 
-                                this.RunnerDelegate.OnTimeoutJob(new JobRecord(record));
+                                if (this.TimeoutJob != null)
+                                {
+                                    this.TimeoutJob(this, new JobRecordEventArgs(new JobRecord(record)));
+                                }
                             });
                     });
             }

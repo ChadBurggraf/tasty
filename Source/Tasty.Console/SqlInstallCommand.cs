@@ -64,13 +64,13 @@ namespace Tasty.Console
 
             if (man > 0)
             {
-                this.Help(options);
+                Help(options);
                 return;
             }
 
             if (String.IsNullOrEmpty(dir) || String.IsNullOrEmpty(output))
             {
-                this.Help(options);
+                Help(options);
                 return;
             }
 

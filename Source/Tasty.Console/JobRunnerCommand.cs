@@ -21,10 +21,11 @@ namespace Tasty.Console
     /// <summary>
     /// Implements <see cref="ConsoleCommand"/> to run a tasty job runner.
     /// </summary>
-    internal class JobRunnerCommand : ConsoleCommand, IJobRunnerDelegate
+    internal class JobRunnerCommand : ConsoleCommand
     {
         private bool verbose, log;
-        private string logPath;
+        private string config, directory, logPath;
+        private JobBootstraps bootstaps;
 
         /// <summary>
         /// Initializes a new instance of the JobRunnerCommand class.
@@ -48,14 +49,15 @@ namespace Tasty.Console
         /// </summary>
         public override void Execute()
         {
-            string config = null, log = null;
+            string config = null, log = null, directory = null;
             int verbose = 0, man = 0;
 
             var options = new OptionSet()
             {
-                { "c|config=", "(optional) the path to a configuration file to use other than the default.", v => config = v },
-                { "v|verbose", "(optional) write session output to the console.", v => { ++verbose; } },
-                { "l|log=", "(optional) the path to a file to log session output to.", v => log = v },
+                { "d|directory=", "(required) the path to the application directory of the target Tasty.dll and job assemblies to run.", v => directory = v },
+                { "c|config=", "(required) the path to a configuration file to use.", v => config = v },
+                { "v|verbose", "write session output to the console.", v => { ++verbose; } },
+                { "l|log=", "the path to a file to log session output to.", v => log = v },
                 { "m|man", "show this message", v => { ++man; } }
             };
 
@@ -71,34 +73,35 @@ namespace Tasty.Console
 
             if (man > 0)
             {
-                this.Help(options);
+                Help(options);
                 return;
             }
 
-            if (!String.IsNullOrEmpty(config))
+            if (String.IsNullOrEmpty(directory))
             {
-                if (File.Exists(config))
-                {
-                    ExeConfigurationFileMap map = new ExeConfigurationFileMap();
-                    map.ExeConfigFilename = config;
+                Help(options);
+                return;
+            }
+            else if (!Directory.Exists(directory))
+            {
+                BadArgument("There directory \"{0}\" does not exist.", directory);
+                return;
+            }
+            else if (!File.Exists(Path.Combine(directory, "Tasty.dll")))
+            {
+                BadArgument("Tasty.dll could not be located at \"{0}\".", directory);
+                return;
+            }
 
-                    Configuration customConfig = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
-
-                    if (customConfig.HasFile)
-                    {
-                        Configuration currentConfig = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                        customConfig.SaveAs(currentConfig.FilePath, ConfigurationSaveMode.Full);
-
-                        ConfigurationManager.RefreshSection("appSettings");
-                        ConfigurationManager.RefreshSection("connectionStrings");
-                        ConfigurationManager.RefreshSection("tasty");
-                    }
-                }
-                else
-                {
-                    BadArgument("There is no configuration file at \"{0}\".", config);
-                    return;
-                }
+            if (String.IsNullOrEmpty(config))
+            {
+                Help(options);
+                return;
+            }
+            else if (!File.Exists(config))
+            {
+                BadArgument("There is no configuration file at \"{0}\".", config);
+                return;
             }
 
             if (!String.IsNullOrEmpty(log))
@@ -135,17 +138,41 @@ namespace Tasty.Console
                 }
             }
 
+            this.directory = directory;
+            this.config = config;
             this.verbose = verbose > 0;
+
+            this.bootstaps = new JobBootstraps(this.directory, this.config);
+            this.bootstaps.CancelJob += new EventHandler<JobRecordEventArgs>(BootstrapsCancelJob);
+            this.bootstaps.DequeueJob += new EventHandler<JobRecordEventArgs>(BootstrapsDequeueJob);
+            this.bootstaps.EnqueueScheduledJob += new EventHandler<JobRecordEventArgs>(BootstrapsEnqueueScheduledJob);
+            this.bootstaps.Error += new EventHandler<JobErrorEventArgs>(BootstrapsError);
+            this.bootstaps.FinishJob += new EventHandler<JobRecordEventArgs>(BootstrapsFinishJob);
+            this.bootstaps.TimeoutJob += new EventHandler<JobRecordEventArgs>(BootstrapsTimeoutJob);
+            this.bootstaps.PullUp();
 
             StandardOut.WriteLine("The tasty job runner is active.");
             StandardOut.WriteLine("The current job store is: '{0}'.", TastySettings.Section.Jobs.Store.JobStoreType); 
-            StandardOut.WriteLine("Press Ctl+C to exit.\n");
+            StandardOut.WriteLine("Press Ctl+Q to safely shut down, Ctl+C to exit immediately.\n");
 
-            JobRunner.Instance.Start(this);
+
+            //JobRunner.Instance.Start(this);
 
             while (true)
             {
-                System.Console.ReadKey();
+                ConsoleKeyInfo info = System.Console.ReadKey();
+
+                if ("q".Equals(info.Key.ToString(), StringComparison.OrdinalIgnoreCase) && 
+                    (info.Modifiers & ConsoleModifiers.Control) == ConsoleModifiers.Control)
+                {
+                    this.Log("The tasty job runner is sutting down...");
+
+                    this.bootstaps.PushDown(true, delegate
+                    {
+                        this.Log("All jobs have finished running. Stay classy.");
+                        AppDomain.Unload(AppDomain.CurrentDomain);
+                    });
+                }
             }
         }
 
@@ -153,10 +180,10 @@ namespace Tasty.Console
         /// Called when a job is canceled.
         /// </summary>
         /// <param name="record">The job record identifying the affected job.</param>
-        public void OnCancelJob(JobRecord record)
+        public void BootstrapsCancelJob(object sender, JobRecordEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.DarkYellow;
-            this.Log("Canceled '{0}' ({1})", record.Name, record.Id);
+            this.Log("Canceled '{0}' ({1})", e.Record.Name, e.Record.Id);
             System.Console.ResetColor();
         }
 
@@ -164,10 +191,10 @@ namespace Tasty.Console
         /// Called when a job is dequeued.
         /// </summary>
         /// <param name="record">The job record identifying the affected job.</param>
-        public void OnDequeueJob(JobRecord record)
+        public void BootstrapsDequeueJob(object sender, JobRecordEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.Cyan;
-            this.Log("Dequeued '{0}' ({1})", record.Name, record.Id);
+            this.Log("Dequeued '{0}' ({1})", e.Record.Name, e.Record.Id);
             System.Console.ResetColor();
         }
 
@@ -175,10 +202,10 @@ namespace Tasty.Console
         /// Called when a scheduled job is enqueued.
         /// </summary>
         /// <param name="record">The job record identifying the affected job.</param>
-        public void OnEnqueueScheduledJob(JobRecord record)
+        public void BootstrapsEnqueueScheduledJob(object sender, JobRecordEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.Gray;
-            this.Log("Enqueued '{0}' ({1}) for schedule '{2}'", record.Name, record.Id, record.ScheduleName);
+            this.Log("Enqueued '{0}' ({1}) for schedule '{2}'", e.Record.Name, e.Record.Id, e.Record.ScheduleName);
             System.Console.ResetColor();
         }
 
@@ -189,22 +216,22 @@ namespace Tasty.Console
         /// </summary>
         /// <param name="record">The record on which the error occurred, if applicable.</param>
         /// <param name="ex">The exception raised, if applicable.</param>
-        public void OnError(JobRecord record, Exception ex)
+        public void BootstrapsError(object sender, JobErrorEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.Red;
 
-            if (record != null && ex != null)
+            if (!String.IsNullOrEmpty(e.Record.Name) && !String.IsNullOrEmpty(e.Record.Exception))
             {
-                string message = ExceptionXElement.Parse(record.Exception).Descendants("Message").First().Value;
-                this.Log("An error occurred during the run loop for '{0}' ({1}). The message received was: '{2}'", record.Name, record.Id, message);
+                string message = ExceptionXElement.Parse(e.Record.Exception).Descendants("Message").First().Value;
+                this.Log("An error occurred during the run loop for '{0}' ({1}). The message received was: '{2}'", e.Record.Name, e.Record.Id, message);
             }
-            else if (record != null)
+            else if (!String.IsNullOrEmpty(e.Record.Name))
             {
-                this.Log("An error occurred during the run loop for '{0}' ({1})", record.Name, record.Id);
+                this.Log("An error occurred during the run loop for '{0}' ({1})", e.Record.Name, e.Record.Id);
             }
-            else if (ex != null)
+            else if (e.Exception != null)
             {
-                this.Log("An error occurred during the run loop. The message received was: '{0}'", ex.Message);
+                this.Log("An error occurred during the run loop. The message received was: '{0}'", e.Exception.Message);
             }
             else
             {
@@ -218,18 +245,18 @@ namespace Tasty.Console
         /// Called when a job is finished.
         /// </summary>
         /// <param name="record">The job record identifying the affected job.</param>
-        public void OnFinishJob(JobRecord record)
+        public void BootstrapsFinishJob(object sender, JobRecordEventArgs e)
         {
-            if (record.Status == JobStatus.Succeeded)
+            if (e.Record.Status == JobStatus.Succeeded)
             {
                 System.Console.ForegroundColor = ConsoleColor.Green;
-                this.Log("'{0}' ({1}) completed successfully", record.Name, record.Id);
+                this.Log("'{0}' ({1}) completed successfully", e.Record.Name, e.Record.Id);
             }
             else
             {
                 System.Console.ForegroundColor = ConsoleColor.Red;
-                string message = ExceptionXElement.Parse(record.Exception).Descendants("Message").First().Value;
-                this.Log("'{0}' ({1}) failed with the message: ", record.Name, record.Id, message);
+                string message = ExceptionXElement.Parse(e.Record.Exception).Descendants("Message").First().Value;
+                this.Log("'{0}' ({1}) failed with the message: ", e.Record.Name, e.Record.Id, message);
             }
 
             System.Console.ResetColor();
@@ -239,10 +266,10 @@ namespace Tasty.Console
         /// Called when a job is timed out.
         /// </summary>
         /// <param name="record">The job record identifying the affected job.</param>
-        public void OnTimeoutJob(JobRecord record)
+        public void BootstrapsTimeoutJob(object sender, JobRecordEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.Red;
-            this.Log("Timed out '{0}' ({1}) because it was taking too long to finish.", record.Name, record.Id);
+            this.Log("Timed out '{0}' ({1}) because it was taking too long to finish.", e.Record.Name, e.Record.Id);
             System.Console.ResetColor();
         }
 
@@ -252,8 +279,8 @@ namespace Tasty.Console
         /// <param name="options">The option set to use when generating the help message.</param>
         protected override void Help(OptionSet options)
         {
-            StandardOut.WriteLine("Usage: tasty jobs [OPTIONS]+");
-            StandardOut.WriteLine("Starts a tasty job runner session and executes jobs until the process is ended.");
+            StandardOut.WriteLine("Usage: tasty jobs -d:APPLICATION_DIRECTORY -c:CONFIG_PATH [OPTIONS]+");
+            StandardOut.WriteLine("Starts a tasty job runner session and executes jobs until the process is ended. You must provide an application directory that contains a copy of Tasty.dll, along with your job assemblies and a configuration file for the job runner to use.");
             StandardOut.WriteLine();
 
             base.Help(options);

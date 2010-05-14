@@ -22,6 +22,7 @@ namespace Tasty.Configuration
         {
             get { return (HttpRedirectRuleElementCollection)(this["redirects"] ?? (this["redirects"] = new HttpRedirectRuleElementCollection())); }
         }
+
         /// <summary>
         /// Gets a value indicating if the System.Configuration.ConfigurationElement object is read-only.
         /// </summary>

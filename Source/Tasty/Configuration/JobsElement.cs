@@ -15,16 +15,6 @@ namespace Tasty.Configuration
     public class JobsElement : ConfigurationElement
     {
         /// <summary>
-        /// Gets or sets the delegate type to use if the job runner is started without a delegate.
-        /// </summary>
-        [ConfigurationProperty("delegateType", IsRequired = false)]
-        public string DelegateType
-        {
-            get { return (string)this["delegateType"]; }
-            set { this["delegateType"] = value; }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether to delete job records found in the job store
         /// for scheduled jobs that could not be instantiated (e.g., if the type no longer exists or could not be loaded).
         /// </summary>

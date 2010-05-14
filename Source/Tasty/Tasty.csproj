@@ -120,6 +120,9 @@
     <Compile Include="DataSets.cs" />
     <Compile Include="ExceptionXElement.cs" />
     <Compile Include="Files.cs" />
+    <Compile Include="Jobs\JobErrorEventArgs.cs" />
+    <Compile Include="Jobs\JobRecordEventArgs.cs" />
+    <Compile Include="TastyFileSystemEventType.cs" />
     <Compile Include="Geocode\GeocodeAddressDetails.cs" />
     <Compile Include="Geocode\GeocodeAdministrativeArea.cs" />
     <Compile Include="Geocode\GeocodeCallResult.cs" />
@@ -144,13 +147,14 @@
     <Compile Include="Http\HttpRedirectRuleMatcher.cs" />
     <Compile Include="Http\HttpRedirectType.cs" />
     <Compile Include="ISpreadsheetWriter.cs" />
+    <Compile Include="Jobs\JobBootstraps.cs" />
     <Compile Include="Jobs\IJob.cs" />
-    <Compile Include="Jobs\IJobRunnerDelegate.cs" />
     <Compile Include="Jobs\IJobStore.cs" />
     <Compile Include="Jobs\Job.cs" />
     <Compile Include="Jobs\JobRecord.cs" />
     <Compile Include="Jobs\JobRun.cs" />
     <Compile Include="Jobs\JobRunner.cs" />
+    <Compile Include="Jobs\JobRunnerProxy.cs" />
     <Compile Include="Jobs\JobsInProcessModule.cs" />
     <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="Jobs\JobStore.cs" />
@@ -163,6 +167,8 @@
     <Compile Include="Primitives.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpreadsheetWriter.cs" />
+    <Compile Include="TastyFileSystemWatcher.cs" />
+    <Compile Include="TastyFileSystemWatcherMode.cs" />
     <Compile Include="Web\UrlTokens\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\UrlTokens\IUrlToken.cs" />
     <Compile Include="Web\UrlTokens\IUrlTokenStore.cs" />

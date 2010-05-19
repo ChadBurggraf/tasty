@@ -22,11 +22,10 @@ namespace Tasty.Jobs
     {
         #region Private Fields
 
-        private string basePath, configurationFilePath;
         private AppDomain domain;
         private JobRunnerProxy proxy;
+        private JobRunnerEventSink eventSink;
         private TastyFileSystemWatcher watcher;
-        private Action onStopped;
 
         #endregion
 
@@ -59,13 +58,18 @@ namespace Tasty.Jobs
                 throw new ArgumentNullException("configurationFilePath", "configurationFilePath must contain a value.");
             }
 
-            this.basePath = basePath;
-            this.configurationFilePath = configurationFilePath;
+            this.BasePath = basePath;
+            this.ConfigurationFilePath = configurationFilePath;
         }
 
         #endregion
 
         #region Events
+
+        /// <summary>
+        /// Event raised when the job runner is shutting down and all running jobs have finished executing.
+        /// </summary>
+        public event EventHandler AllFinished;
 
         /// <summary>
         /// Event raised when a job has been canceled and and its run terminated.
@@ -147,6 +151,7 @@ namespace Tasty.Jobs
                     }
 
                     this.LoadAppDomain();
+                    this.proxy.StartRunner();
                 }
             }
         }
@@ -157,25 +162,18 @@ namespace Tasty.Jobs
         /// </summary>
         /// <param name="unwind">Performs a delayed shutdown, waiting for all running jobs to complate.
         /// WARNING: When true, this will cause the value of <see cref="AutoReload"/> to be set to false.</param>
-        /// <param name="onStopped">Optional callback function to invoke when the job runner has been completely stopped.</param>
-        public void PushDown(bool unwind, Action onStopped)
+        public void PushDown(bool unwind)
         {
             lock (this)
             {
                 if (unwind)
                 {
                     this.AutoReload = false;
-                    this.onStopped = onStopped;
                     this.proxy.StopRunner();
                 }
                 else
                 {
                     AppDomain.Unload(this.domain);
-
-                    if (onStopped != null)
-                    {
-                        onStopped();
-                    }
                 }
             }
         }
@@ -206,32 +204,33 @@ namespace Tasty.Jobs
             setup.ConfigurationFile = this.ConfigurationFilePath;
 
             this.domain = AppDomain.CreateDomain("Tasty Job Runner", null, setup);
-
             this.proxy = (JobRunnerProxy)this.domain.CreateInstanceAndUnwrap(GetType().Assembly.FullName, typeof(JobRunnerProxy).FullName);
-            this.proxy.AllFinished += new EventHandler(this.ProxyAllJobsFinished);
-            this.proxy.CancelJob += new EventHandler<JobRecordEventArgs>(this.ProxyCancelJob);
-            this.proxy.DequeueJob += new EventHandler<JobRecordEventArgs>(this.ProxyDequeueJob);
-            this.proxy.EnqueueScheduledJob += new EventHandler<JobRecordEventArgs>(this.EnqueueScheduledJob);
-            this.proxy.Error += new EventHandler<JobErrorEventArgs>(this.Error);
-            this.proxy.FinishJob += new EventHandler<JobRecordEventArgs>(this.FinishJob);
-            this.proxy.TimeoutJob += new EventHandler<JobRecordEventArgs>(this.TimeoutJob);
+
+            this.eventSink = new JobRunnerEventSink();
+            this.eventSink.AllFinished += new EventHandler(this.ProxyAllFinished);
+            this.eventSink.CancelJob += new EventHandler<JobRecordEventArgs>(this.ProxyCancelJob);
+            this.eventSink.DequeueJob += new EventHandler<JobRecordEventArgs>(this.ProxyDequeueJob);
+            this.eventSink.EnqueueScheduledJob += new EventHandler<JobRecordEventArgs>(this.ProxyEnqueueScheduledJob);
+            this.eventSink.Error += new EventHandler<JobErrorEventArgs>(this.ProxyError);
+            this.eventSink.FinishJob += new EventHandler<JobRecordEventArgs>(this.ProxyFinishJob);
+            this.eventSink.TimeoutJob += new EventHandler<JobRecordEventArgs>(this.ProxyTimeoutJob);
+            this.proxy.EventSink = this.eventSink;
         }
 
         /// <summary>
-        /// Raises the proxy's AllJobsFinished event. 
+        /// Raises the proxy's AllFinished event. 
         /// </summary>
         /// <param name="sender">The event sender.</param>
         /// <param name="e">The event arguments.</param>
-        private void ProxyAllJobsFinished(object sender, EventArgs e)
+        private void ProxyAllFinished(object sender, EventArgs e)
         {
             lock (this)
             {
                 AppDomain.Unload(this.domain);
 
-                if (this.onStopped != null)
+                if (this.AllFinished != null)
                 {
-                    this.onStopped();
-                    this.onStopped = null;
+                    this.AllFinished(this, e);
                 }
 
                 if (this.AutoReload)

@@ -127,7 +127,7 @@ namespace Tasty.Test
         {
             if (this.Store != null)
             {
-                JobRunner.Instance.Stop();
+                JobRunner.Instance.Stop(true);
 
                 string a = Guid.NewGuid().ToString();
                 string b = Guid.NewGuid().ToString();

@@ -36,7 +36,7 @@ namespace Tasty.Test
         {
             JobRunner.Instance.Start();
             Assert.IsTrue(JobRunner.Instance.IsRunning);
-            JobRunner.Instance.Stop();
+            JobRunner.Instance.Stop(true);
             Assert.IsFalse(JobRunner.Instance.IsRunning);
         }
 

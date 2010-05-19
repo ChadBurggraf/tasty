@@ -30,10 +30,7 @@ namespace Tasty.Jobs
         {
             context.BeginRequest += new EventHandler(delegate(object sender, EventArgs e)
             {
-                if (JobRunner.Instance.IsGreen)
-                {
-                    JobRunner.Instance.Start();
-                }
+                JobRunner.Instance.Start();
             });
         }
     }

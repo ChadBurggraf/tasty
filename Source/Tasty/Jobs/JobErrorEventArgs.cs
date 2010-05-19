@@ -11,6 +11,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Event arguments passed to <see cref="JobRunner"/> error events.
     /// </summary>
+    [Serializable]
     public class JobErrorEventArgs : JobRecordEventArgs
     {
         /// <summary>

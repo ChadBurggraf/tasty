@@ -143,44 +143,47 @@ namespace Tasty.Console
             this.verbose = verbose > 0;
 
             this.bootstaps = new JobBootstraps(this.directory, this.config);
-            this.bootstaps.CancelJob += new EventHandler<JobRecordEventArgs>(BootstrapsCancelJob);
-            this.bootstaps.DequeueJob += new EventHandler<JobRecordEventArgs>(BootstrapsDequeueJob);
-            this.bootstaps.EnqueueScheduledJob += new EventHandler<JobRecordEventArgs>(BootstrapsEnqueueScheduledJob);
-            this.bootstaps.Error += new EventHandler<JobErrorEventArgs>(BootstrapsError);
-            this.bootstaps.FinishJob += new EventHandler<JobRecordEventArgs>(BootstrapsFinishJob);
-            this.bootstaps.TimeoutJob += new EventHandler<JobRecordEventArgs>(BootstrapsTimeoutJob);
+            this.bootstaps.AllFinished += new EventHandler(this.BootstrapsAllFinished);
+            this.bootstaps.CancelJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsCancelJob);
+            this.bootstaps.DequeueJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsDequeueJob);
+            this.bootstaps.EnqueueScheduledJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsEnqueueScheduledJob);
+            this.bootstaps.Error += new EventHandler<JobErrorEventArgs>(this.BootstrapsError);
+            this.bootstaps.FinishJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsFinishJob);
+            this.bootstaps.TimeoutJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsTimeoutJob);
             this.bootstaps.PullUp();
 
             StandardOut.WriteLine("The tasty job runner is active.");
-            StandardOut.WriteLine("The current job store is: '{0}'.", TastySettings.Section.Jobs.Store.JobStoreType); 
-            StandardOut.WriteLine("Press Ctl+Q to safely shut down, Ctl+C to exit immediately.\n");
-
-
-            //JobRunner.Instance.Start(this);
+            StandardOut.WriteLine("Press Q to safely shut down, Ctl+C to exit immediately.\n");
 
             while (true)
             {
                 ConsoleKeyInfo info = System.Console.ReadKey();
 
-                if ("q".Equals(info.Key.ToString(), StringComparison.OrdinalIgnoreCase) && 
-                    (info.Modifiers & ConsoleModifiers.Control) == ConsoleModifiers.Control)
+                if ("q".Equals(info.Key.ToString(), StringComparison.OrdinalIgnoreCase))
                 {
                     this.Log("The tasty job runner is sutting down...");
-
-                    this.bootstaps.PushDown(true, delegate
-                    {
-                        this.Log("All jobs have finished running. Stay classy.");
-                        AppDomain.Unload(AppDomain.CurrentDomain);
-                    });
+                    this.bootstaps.PushDown(true);
                 }
             }
         }
 
         /// <summary>
-        /// Called when a job is canceled.
+        /// Raises the boostraper's AllFinished event.
         /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void BootstrapsCancelJob(object sender, JobRecordEventArgs e)
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void BootstrapsAllFinished(object sender, EventArgs e)
+        {
+            this.Log("All jobs have finished running. Stay classy.");
+            AppDomain.Unload(AppDomain.CurrentDomain);
+        }
+
+        /// <summary>
+        /// Raises the boostraper's CancelJob event.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void BootstrapsCancelJob(object sender, JobRecordEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.DarkYellow;
             this.Log("Canceled '{0}' ({1})", e.Record.Name, e.Record.Id);
@@ -188,10 +191,11 @@ namespace Tasty.Console
         }
 
         /// <summary>
-        /// Called when a job is dequeued.
+        /// Raises the boostraper's DequeueJob event.
         /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void BootstrapsDequeueJob(object sender, JobRecordEventArgs e)
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void BootstrapsDequeueJob(object sender, JobRecordEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.Cyan;
             this.Log("Dequeued '{0}' ({1})", e.Record.Name, e.Record.Id);
@@ -199,10 +203,11 @@ namespace Tasty.Console
         }
 
         /// <summary>
-        /// Called when a scheduled job is enqueued.
+        /// Raises the boostraper's EnqueueScheduledJob event.
         /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void BootstrapsEnqueueScheduledJob(object sender, JobRecordEventArgs e)
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void BootstrapsEnqueueScheduledJob(object sender, JobRecordEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.Gray;
             this.Log("Enqueued '{0}' ({1}) for schedule '{2}'", e.Record.Name, e.Record.Id, e.Record.ScheduleName);
@@ -210,13 +215,11 @@ namespace Tasty.Console
         }
 
         /// <summary>
-        /// Called when an error occurs during the execution of the run-loop.
-        /// Does not get called when a job itself experiences an error; job-specific
-        /// errors are saved in the job store with their respecitve records.
+        /// Raises the boostraper's Error event.
         /// </summary>
-        /// <param name="record">The record on which the error occurred, if applicable.</param>
-        /// <param name="ex">The exception raised, if applicable.</param>
-        public void BootstrapsError(object sender, JobErrorEventArgs e)
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void BootstrapsError(object sender, JobErrorEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.Red;
 
@@ -242,10 +245,11 @@ namespace Tasty.Console
         }
 
         /// <summary>
-        /// Called when a job is finished.
+        /// Raises the boostraper's FinishJob event.
         /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void BootstrapsFinishJob(object sender, JobRecordEventArgs e)
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void BootstrapsFinishJob(object sender, JobRecordEventArgs e)
         {
             if (e.Record.Status == JobStatus.Succeeded)
             {
@@ -263,10 +267,11 @@ namespace Tasty.Console
         }
 
         /// <summary>
-        /// Called when a job is timed out.
+        /// Raises the boostraper's TimeoutJob event.
         /// </summary>
-        /// <param name="record">The job record identifying the affected job.</param>
-        public void BootstrapsTimeoutJob(object sender, JobRecordEventArgs e)
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void BootstrapsTimeoutJob(object sender, JobRecordEventArgs e)
         {
             System.Console.ForegroundColor = ConsoleColor.Red;
             this.Log("Timed out '{0}' ({1}) because it was taking too long to finish.", e.Record.Name, e.Record.Id);

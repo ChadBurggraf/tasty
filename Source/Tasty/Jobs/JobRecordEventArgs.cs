@@ -11,6 +11,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Event arguments passed to <see cref="JobRunner"/> events.
     /// </summary>
+    [Serializable]
     public class JobRecordEventArgs : EventArgs
     {
         /// <summary>
@@ -24,7 +25,7 @@ namespace Tasty.Jobs
                 throw new ArgumentNullException("record", "record cannot be null.");
             }
 
-            this.Record = record;
+            this.Record = new JobRecord(record);
         }
 
         /// <summary>

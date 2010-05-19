@@ -122,6 +122,7 @@
     <Compile Include="Files.cs" />
     <Compile Include="Jobs\JobErrorEventArgs.cs" />
     <Compile Include="Jobs\JobRecordEventArgs.cs" />
+    <Compile Include="Jobs\JobRunnerEventSink.cs" />
     <Compile Include="TastyFileSystemEventType.cs" />
     <Compile Include="Geocode\GeocodeAddressDetails.cs" />
     <Compile Include="Geocode\GeocodeAdministrativeArea.cs" />

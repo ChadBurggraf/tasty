@@ -51,37 +51,37 @@ namespace Tasty.Test
             Assert.AreEqual(nowPlusOneHour, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = nowPlusOneHour,
-                Repeat = JobScheduleRepeatType.Daily
+                RepeatHours = 24
             }, now));
 
             Assert.AreEqual(nowPlusOneWeek, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = nowPlusOneWeek,
-                Repeat = JobScheduleRepeatType.Weekly
+                RepeatHours = 168
             }, now));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = now,
-                Repeat = JobScheduleRepeatType.Daily
+                RepeatHours = 24
             }, now));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = now,
-                Repeat = JobScheduleRepeatType.Hourly
+                RepeatHours = 24
             }, now));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = now,
-                Repeat = JobScheduleRepeatType.Weekly
+                RepeatHours = 168
             }, now));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = nowMinusOneDay,
-                Repeat = JobScheduleRepeatType.Daily
+                RepeatHours = 24
             }, now));
         }
     }

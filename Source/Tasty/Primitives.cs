@@ -184,6 +184,35 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Safely raises an event on an object by first checking if the handler is null.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="handler">The event delegate.</param>
+        /// <param name="e">The event arguments.</param>
+        public static void RaiseEvent(this object sender, EventHandler handler, EventArgs e)
+        {
+            if (handler != null)
+            {
+                handler(sender, e);
+            }
+        }
+
+        /// <summary>
+        /// Safely raises an event on an object by first checking if the handler is null.
+        /// </summary>
+        /// <typeparam name="T">The type of the event arguments for the generic event being raised.</typeparam>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="handler">The event delegate.</param>
+        /// <param name="e">The event arguments.</param>
+        public static void RaiseEvent<T>(this object sender, EventHandler<T> handler, T e) where T : EventArgs
+        {
+            if (handler != null)
+            {
+                handler(sender, e);
+            }
+        }
+
+        /// <summary>
         /// Splits the given string on the given character, removing any empty 
         /// results and trimming whitespace around the rest of the results.
         /// </summary>

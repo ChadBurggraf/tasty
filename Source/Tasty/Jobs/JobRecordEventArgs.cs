@@ -1,9 +1,4 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="JobRecordEventArgs.cs" company="Tasty Codes">
-//     Copyright (c) 2010 Tasty Codes.
-// </copyright>
-//-----------------------------------------------------------------------
-
+﻿
 namespace Tasty.Jobs
 {
     using System;
@@ -20,11 +15,6 @@ namespace Tasty.Jobs
         /// <param name="record">The <see cref="JobRecord"/> the event is being raised for.</param>
         public JobRecordEventArgs(JobRecord record)
         {
-            if (record == null)
-            {
-                throw new ArgumentNullException("record", "record cannot be null.");
-            }
-
             this.Record = new JobRecord(record);
         }
 

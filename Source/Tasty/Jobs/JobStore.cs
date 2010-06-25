@@ -1,22 +1,12 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="JobStore.cs" company="Tasty Codes">
-//     Copyright (c) 2010 Tasty Codes.
-// </copyright>
-//-----------------------------------------------------------------------
+﻿
 
 namespace Tasty.Jobs
 {
     using System;
-    using System.Collections.Generic;
-    using System.Data;
-    using System.Data.Common;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
     using Tasty.Configuration;
 
     /// <summary>
-    /// Provides conviencence methods and a way to access the <see cref="IJobStore"/> 
-    /// currently in use.
+    /// Provides a way to access the currently configured <see cref="IJobStore"/> instance.
     /// </summary>
     public static class JobStore
     {
@@ -24,15 +14,8 @@ namespace Tasty.Jobs
         private static IJobStore current;
 
         /// <summary>
-        /// Gets or sets the current <see cref="IJobStore"/> implementation in use.
-        /// The setter on this property is primarily meant for testing purposes.
+        /// Gets the currently configured <see cref="IJobStore"/> instance.
         /// </summary>
-        /// <remarks>
-        /// It is not recommended to set this property during runtime. You should instead
-        /// set it during static initialization if you would rather not infer it from
-        /// the configuration. Setting it later could cause persistence errors if any
-        /// currently-executing jobs try to persist their update data to the new store.
-        /// </remarks>
         public static IJobStore Current
         {
             get
@@ -41,19 +24,30 @@ namespace Tasty.Jobs
                 {
                     if (current == null)
                     {
-                        current = (IJobStore)Activator.CreateInstance(Type.GetType(TastySettings.Section.Jobs.Store.JobStoreType));
+                        Type type = Type.GetType(TastySettings.Section.Jobs.Store.JobStoreType);
+                        current = (IJobStore)Activator.CreateInstance(type);
                     }
 
                     return current;
                 }
             }
+        }
 
-            set
+        /// <summary>
+        /// Sets the current <see cref="IJobStore"/> instance. This method is intended primarily for testing purposes.
+        /// </summary>
+        /// <remarks>
+        /// It is not recommended to set this property during runtime. You should instead
+        /// set it during static initialization if you would rather not infer it from
+        /// the configuration. Setting it later could cause persistence errors if any
+        /// currently-executing jobs try to persist their update data to the new store.
+        /// </remarks>
+        /// <param name="jobStore">The new <see cref="IJobStore"/> instance to set.</param>
+        public static void SetCurrent(IJobStore jobStore)
+        {
+            lock (locker)
             {
-                lock (locker)
-                {
-                    current = value;
-                }
+                current = jobStore;
             }
         }
     }

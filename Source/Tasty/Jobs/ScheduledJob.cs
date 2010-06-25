@@ -32,79 +32,26 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Creates a new <see cref="IJob"/> instance from the given scheduled job configuration.
-        /// If the created object extends from <see cref="ScheduledJob"/>, its <see cref="ScheduledJob.Metadata"/>
-        /// collection will be filled with any metadata defined in the configuration.
-        /// </summary>
-        /// <param name="config">The configuration to create the job from.</param>
-        /// <returns>The created job.</returns>
-        /// <exception cref="ConfigurationErrorsException">The configuration does not identify a valid type or the type identified does not implement <see cref="IJob"/>.</exception>
-        public static IJob CreateFromConfiguration(JobScheduledJobElement config)
-        {
-            IJob job = null;
-            Type concreteType = Type.GetType(config.JobType, false);
-
-            if (concreteType != null && typeof(IJob).IsAssignableFrom(concreteType))
-            {
-                try
-                {
-                    job = (IJob)Activator.CreateInstance(concreteType);
-                    ScheduledJob sj = job as ScheduledJob;
-
-                    if (sj != null)
-                    {
-                        sj.Metadata.FillWith(config.Metadata);
-                    }
-                }
-                catch (ArgumentException)
-                {
-                }
-                catch (NotSupportedException)
-                {
-                }
-                catch (TargetInvocationException)
-                {
-                }
-                catch (MethodAccessException)
-                {
-                }
-                catch (MemberAccessException)
-                {
-                }
-                catch (TypeLoadException)
-                {
-                }
-            }
-
-            if (job == null)
-            {
-                throw new ConfigurationErrorsException(String.Format(CultureInfo.InvariantCulture, "The type \"{0}\" could not be instantiated into an object implementing the Tasty.Jobs.IJob interface.", config.JobType));
-            }
-
-            return job;
-        }
-
-        /// <summary>
         /// Gets the next execution date for the given schedule and the given value of "now".
         /// </summary>
-        /// <param name="config">The configured job schedule to get the next execution date for.</param>
+        /// <param name="element">The configured job schedule to get the next execution date for.</param>
         /// <param name="now">The reference date to compare schedule dates to.</param>
         /// <returns>The schedule's next execution date.</returns>
-        public static DateTime GetNextExecuteDate(JobScheduleElement config, DateTime now)
+        public static DateTime GetNextExecuteDate(JobScheduleElement element, DateTime now)
         {
             if (now.Kind != DateTimeKind.Utc)
             {
                 throw new ArgumentException("now must be in UTC.", "now");
             }
 
-            DateTime startOn = config.StartOn.ToUniversalTime();
+            DateTime startOn = element.StartOn.ToUniversalTime();
 
             if (now < startOn)
             {
                 return startOn;
             }
 
-            switch (config.Repeat)
+            switch (element.Repeat)
             {
                 case JobScheduleRepeatType.Daily:
                     int days = (int)Math.Ceiling(now.Subtract(startOn).TotalDays);

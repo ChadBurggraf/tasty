@@ -1,96 +1,77 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="IJobStore.cs" company="Tasty Codes">
-//     Copyright (c) 2010 Tasty Codes.
-// </copyright>
-//-----------------------------------------------------------------------
+﻿
 
 namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using Tasty.Configuration;
 
     /// <summary>
-    /// Interface definition for persistent job stores.
+    /// Defines the interface for persistent job stores.
     /// </summary>
-    public interface IJobStore
+    public interface IJobStore : IDisposable
     {
         /// <summary>
-        /// Gets a collection of jobs that have been marked as <see cref="JobStatus.Canceling"/>.
-        /// Opens a new transaction, then calls the delegate to perform any work. The transaction
-        /// is committed when the delegate returns.
+        /// Commits the currently in-progress transaction.
         /// </summary>
-        /// <param name="ids">A collection of currently running job IDs.</param>
-        /// <param name="canceling">The function to call with the canceling job collection.</param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
-        void CancelingJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> canceling);
+        void CommitTransaction();
 
         /// <summary>
-        /// Creates a new job record.
-        /// </summary>
-        /// <param name="record">The record to create.</param>
-        /// <returns>The created record.</returns>
-        JobRecord CreateJob(JobRecord record);
-
-        /// <summary>
-        /// Deletes a job record from the job store.
+        /// Deletes a job by ID.
         /// </summary>
         /// <param name="id">The ID of the job to delete.</param>
         void DeleteJob(int id);
 
         /// <summary>
-        /// Gets a collection of queued jobs that can be dequeued right now.
-        /// Opens a new transaction, then calls the delegate to perform any work. The transaction
-        /// is committed when the delegate returns.
+        /// Gets a job by ID.
         /// </summary>
-        /// <param name="runsAvailable">The maximum number of job job runs currently available, as determined by
-        /// the <see cref="Tasty.Configuration.JobsElement.MaximumConcurrency"/> - the number of currently running jobs.</param>
-        /// <param name="dequeueing">The function to call with the dequeued job collection.</param>
-        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "I'd be happy to learn of an alternative spelling.")]
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
-        void DequeueingJobs(int runsAvailable, Action<IEnumerable<JobRecord>> dequeueing);
-
-        /// <summary>
-        /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>
-        /// and can be marked as finished. Opens a new transaction, then calls the delegate to perform any work. 
-        /// The transaction is committed when the delegate returns.
-        /// </summary>
-        /// <param name="ids">A collection of currently running job IDs.</param>
-        /// <param name="finishing">The function to call with the finishing job collection.</param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
-        void FinishingJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> finishing);
-
-        /// <summary>
-        /// Gets a single job record with the given ID.
-        /// </summary>
-        /// <param name="id">The ID of the job record to get.</param>
-        /// <returns>The job record with the given ID, or null if none was found.</returns>
+        /// <param name="id">The ID of the job to get.</param>
+        /// <returns>The job with the given ID.</returns>
         JobRecord GetJob(int id);
 
         /// <summary>
-        /// Gets the single most recently queued job for each unique schedule name in the system.
+        /// Gets a collection of jobs that match the given collection of IDs.
         /// </summary>
-        /// <returns>A collection of queued scheduled jobs.</returns>
-        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Property use is discouraged for performance reasons.")]
+        /// <param name="ids">The IDs of the jobs to get.</param>
+        /// <returns>A collection of jobs.</returns>
+        IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids);
+
+        /// <summary>
+        /// Gets a collection of jobs with the given status, returning
+        /// at most the number of jobs identified by <see cref="count"/>.
+        /// </summary>
+        /// <param name="status">The status of the jobs to get.</param>
+        /// <param name="count">The maximum number of jobs to get.</param>
+        /// <returns>A collection of jobs.</returns>
+        IEnumerable<JobRecord> GetJobs(JobStatus status, int count);
+
+        /// <summary>
+        /// Gets a collection of the most recently scheduled persisted job for each
+        /// scheduled job in the configuration.
+        /// </summary>
+        /// <returns>A collection of recently scheduled jobs.</returns>
         IEnumerable<JobRecord> GetLatestScheduledJobs();
 
         /// <summary>
-        /// Gets a collection of jobs that have a status of <see cref="JobStatus.Started"/>
-        /// and can be timed out. Opens a new transaction, then calls the delegate to perform any work.
-        /// The transaction is committed when the delegate returns.
+        /// Initializes the job store with the given configuration.
         /// </summary>
-        /// <param name="ids">A collection of currently running job IDs.</param>
-        /// <param name="timingOut">The function to call with the timing-out job collection.</param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "I'm not strongly typing a delegate when this will work just fine.")]
-        void TimingOutJobs(IEnumerable<int> ids, Action<IEnumerable<JobRecord>> timingOut);
+        /// <param name="configuration">The configuration to initialize the job store with.</param>
+        void Initialize(TastySettings configuration);
 
         /// <summary>
-        /// Updates a collection of jobs. Opens a new transaction, then calls the delegate to perform
-        /// any work on each record. The transaction is committed when all of the records have been iterated through.
+        /// Rolls back the currently in-progress transaction.
         /// </summary>
-        /// <param name="records">The records to update.</param>
-        /// <param name="updating">The function to call for each iteration, which should perform any updates necessary on the job record.</param>
-        void UpdateJobs(IEnumerable<JobRecord> records, Action<JobRecord> updating);
+        void RollbackTransaction();
+
+        /// <summary>
+        /// Saves the given job record, either creating it or updating it.
+        /// </summary>
+        /// <param name="record">The job to save.</param>
+        void SaveJob(JobRecord record);
+
+        /// <summary>
+        /// Starts a transaction.
+        /// </summary>
+        void StartTransaction();
     }
 }

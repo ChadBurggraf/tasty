@@ -7,9 +7,6 @@
 namespace Tasty.Jobs
 {
     using System;
-    using System.IO;
-    using System.Runtime.Serialization;
-    using System.Xml;
 
     /// <summary>
     /// Represents a job record in persistent storage.
@@ -36,7 +33,7 @@ namespace Tasty.Jobs
                 this.Exception = record.Exception;
                 this.FinishDate = record.FinishDate;
                 this.Id = record.Id;
-                this.JobType = record.JobType != null ? Type.GetType(record.JobType.AssemblyQualifiedName) : null;
+                this.JobType = record.JobType;
                 this.Name = record.Name;
                 this.QueueDate = record.QueueDate;
                 this.ScheduleName = record.ScheduleName;
@@ -70,23 +67,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Gets or sets the <see cref="IJob"/> implementor that the job is persisted for.
         /// </summary>
-        public Type JobType { get; set; }
-
-        /// <summary>
-        /// Gets this record's <see cref="JobType"/> as an assembly qualified name, without version or public key information.
-        /// </summary>
-        public string JobTypeString
-        {
-            get
-            {
-                if (this.JobType != null)
-                {
-                    return String.Concat(this.JobType.FullName, ", ", this.JobType.Assembly.GetName().Name);
-                }
-
-                return null;
-            }
-        }
+        public string JobType { get; set; }
 
         /// <summary>
         /// Gets or sets the job's display name (i.e., the value of <see cref="IJob.Name"/>).
@@ -112,32 +93,5 @@ namespace Tasty.Jobs
         /// Gets or sets the job's status.
         /// </summary>
         public JobStatus Status { get; set; }
-
-        /// <summary>
-        /// Converts this instance's <see cref="JobType"/> and <see cref="Data"/> properties into an <see cref="IJob"/> object.
-        /// </summary>
-        /// <returns>An <see cref="IJob"/> object.</returns>
-        public IJob ToJob()
-        {
-            if (this.JobType == null)
-            {
-                throw new InvalidOperationException("JobType must have a value in order to convert this instance's Data property into an IJob object.");
-            }
-
-            if (String.IsNullOrEmpty(this.Data))
-            {
-                throw new InvalidOperationException("Data must have a value to de-serialize an IJob object from.");
-            }
-
-            DataContractSerializer serializer = new DataContractSerializer(this.JobType);
-
-            using (StringReader sr = new StringReader(this.Data))
-            {
-                using (XmlReader xr = new XmlTextReader(sr))
-                {
-                    return (IJob)serializer.ReadObject(xr);
-                }
-            }
-        }
     }
 }

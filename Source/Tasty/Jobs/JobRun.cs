@@ -1,38 +1,27 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="JobRun.cs" company="Tasty Codes">
-//     Copyright (c) 2010 Tasty Codes.
-// </copyright>
-//-----------------------------------------------------------------------
+﻿
 
 namespace Tasty.Jobs
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Threading;
 
     /// <summary>
-    /// Represents a single job run.
+    /// Represents a single, individually-threaded job run.
     /// </summary>
     internal sealed class JobRun
     {
-        #region Private Fields
-
         private Thread executionThread;
-
-        #endregion
-
-        #region Construction
 
         /// <summary>
         /// Initializes a new instance of the JobRun class.
         /// </summary>
-        /// <param name="jobId">The ID of the job being run.</param>
+        /// <param name="jobId">The ID of the job to run.</param>
         /// <param name="job">The job to run.</param>
         public JobRun(int jobId, IJob job)
         {
             if (jobId < 1)
             {
-                throw new ArgumentException("jobId must be greater than 0.", "jobId");
+                throw new ArgumentOutOfRangeException("jobId", "jobId must be greater than 0.");
             }
 
             if (job == null)
@@ -44,22 +33,23 @@ namespace Tasty.Jobs
             this.Job = job;
         }
 
-        #endregion
-
-        #region Public Instance Properties
+        /// <summary>
+        /// Event fired when the job run has finished.
+        /// </summary>
+        public event EventHandler<JobRunEventArgs> Finished;
 
         /// <summary>
-        /// Gets an exception that occurred during job execution, if applicable.
+        /// Gets an exception that occurred during execution, if applicable.
         /// </summary>
         public Exception ExecutionException { get; private set; }
 
         /// <summary>
-        /// Gets the date the job finished executing, if applicable.
+        /// Gets the date the run was finished, if applicable.
         /// </summary>
-        public DateTime Finished { get; private set; }
+        public DateTime? FinishDate { get; private set; }
 
         /// <summary>
-        /// Gets a value indicating whether the job is currently running.
+        /// Gets a value indicating whether the run is currently in progress.
         /// </summary>
         public bool IsRunning { get; private set; }
 
@@ -74,38 +64,33 @@ namespace Tasty.Jobs
         public int JobId { get; private set; }
 
         /// <summary>
-        /// Gets the date the job run was started, if applicable.
+        /// Gets the date the job was started, if applicable.
         /// </summary>
-        public DateTime Started { get; private set; }
-
-        #endregion
-
-        #region Public Instance Methods
+        public DateTime? StartDate { get; private set; }
 
         /// <summary>
-        /// Aborts the job if it is running.
+        /// Aborts the job run if it is currently in progress.
         /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Abort is a best-try call; we don't want to kill the calling thread if it fails for any reason.")]
         public void Abort()
         {
             lock (this)
             {
                 if (this.IsRunning)
                 {
-                    this.IsRunning = false;
-                    this.Finished = DateTime.UtcNow;
-
                     try
                     {
-                        if (this.executionThread.IsAlive)
+                        if (this.executionThread != null && this.executionThread.IsAlive)
                         {
                             this.executionThread.Abort();
+                            this.executionThread = null;
                         }
                     }
                     catch
                     {
-                        // Eat it.
                     }
+
+                    this.IsRunning = false;
+                    this.FinishDate = DateTime.UtcNow;
                 }
             }
         }
@@ -117,10 +102,10 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
-                if (!this.IsRunning && this.Finished == DateTime.MinValue)
+                if (!this.IsRunning && this.FinishDate == null)
                 {
                     this.IsRunning = true;
-                    this.Started = DateTime.UtcNow;
+                    this.StartDate = DateTime.UtcNow;
 
                     this.executionThread = new Thread(this.RunInternal);
                     this.executionThread.Start();
@@ -128,14 +113,9 @@ namespace Tasty.Jobs
             }
         }
 
-        #endregion
-
-        #region Private Instance Methods
-
         /// <summary>
-        /// Internal concrete job execution.
+        /// Concrete job execution method.
         /// </summary>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to log any exceptions thrown during the job run instead of dying completely.")]
         private void RunInternal()
         {
             try
@@ -145,7 +125,12 @@ namespace Tasty.Jobs
                 lock (this)
                 {
                     this.IsRunning = false;
-                    this.Finished = DateTime.UtcNow;
+                    this.FinishDate = DateTime.UtcNow;
+
+                    if (this.Finished != null)
+                    {
+                        this.Finished(this, new JobRunEventArgs(this.JobId));
+                    }
                 }
             }
             catch (Exception ex)
@@ -154,11 +139,14 @@ namespace Tasty.Jobs
                 {
                     this.ExecutionException = ex;
                     this.IsRunning = false;
-                    this.Finished = DateTime.UtcNow;
+                    this.FinishDate = DateTime.UtcNow;
+
+                    if (this.Finished != null)
+                    {
+                        this.Finished(this, new JobRunEventArgs(this.JobId));
+                    }
                 }
             }
         }
-
-        #endregion
     }
 }

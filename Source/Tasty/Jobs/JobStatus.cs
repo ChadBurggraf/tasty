@@ -47,6 +47,12 @@ namespace Tasty.Jobs
         /// Identifies a job that has timed out.
         /// </summary>
         [Description("Timed Out")]
-        TimedOut
+        TimedOut,
+
+        /// <summary>
+        /// Identifies that a job type instance failed to load when deserialized from the job store.
+        /// </summary>
+        [Description("Failed to Load Type")]
+        FailedToLoadType
     }
 }

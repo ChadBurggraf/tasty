@@ -68,15 +68,20 @@ namespace Tasty.Jobs
         /// <returns>The job record that was persisted.</returns>
         public virtual JobRecord Enqueue(DateTime queueDate, string scheduleName)
         {
-            return JobStore.Current.CreateJob(new JobRecord()
+            Type type = GetType();
+
+            JobRecord record = new JobRecord()
             {
                 Data = this.Serialize(),
-                JobType = GetType(),
+                JobType = String.Concat(type.FullName, ", ", type.Assembly.GetName().Name),
                 Name = this.Name,
                 QueueDate = queueDate,
                 ScheduleName = scheduleName,
                 Status = JobStatus.Queued
-            });
+            };
+
+            JobStore.Current.SaveJob(record);
+            return record;
         }
 
         /// <summary>

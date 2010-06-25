@@ -97,12 +97,25 @@ namespace Tasty.Jobs
                 throw new ArgumentException("now must be in UTC.", "now");
             }
 
+            if (config.RepeatHours <= 0) 
+            {
+                throw new ConfigurationErrorsException("A job schedule's repeatHours must be greater than 0.", config.ElementInformation.Source, config.ElementInformation.LineNumber);
+            }
+
             DateTime startOn = config.StartOn.ToUniversalTime();
 
             if (now < startOn)
             {
                 return startOn;
             }
+
+            double hours = now.Subtract(startOn).TotalHours;
+            int repeats = (int)Math.Ceiling(hours / config.RepeatHours);
+
+            return startOn.AddHours(repeats * config.RepeatHours);
+
+            /*
+            double hours = now.Subtract(startOn).TotalHours;
 
             switch (config.Repeat)
             {
@@ -117,7 +130,7 @@ namespace Tasty.Jobs
                     return startOn.AddDays((int)Math.Ceiling((double)weekDays / 7));
                 default:
                     throw new NotImplementedException();
-            }
+            }*/
         }
     }
 }

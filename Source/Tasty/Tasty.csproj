@@ -122,7 +122,6 @@
     <Compile Include="Configuration\JobScheduledJobElementCollection.cs" />
     <Compile Include="Configuration\JobScheduleElement.cs" />
     <Compile Include="Configuration\JobScheduleElementCollection.cs" />
-    <Compile Include="Configuration\JobScheduleRepeatType.cs" />
     <Compile Include="Configuration\JobStoreElement.cs" />
     <Compile Include="Configuration\ServiceElement.cs" />
     <Compile Include="Configuration\ServiceElementCollection.cs" />

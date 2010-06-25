@@ -55,6 +55,15 @@ namespace Tasty.Configuration
         }
 
         /// <summary>
+        /// Gets the service model configuration element.
+        /// </summary>
+        [ConfigurationProperty("serviceModel", IsRequired = false)]
+        public ServiceModelElement ServiceModel
+        {
+            get { return (ServiceModelElement)(this["serviceModel"] ?? (this["serviceModel"] = new ServiceModelElement())); }
+        }
+
+        /// <summary>
         /// Gets the URL tokens configuration element.
         /// </summary>
         [ConfigurationProperty("urlTokens", IsRequired = false)]

@@ -43,7 +43,7 @@ namespace Tasty.Configuration
         /// </summary>
         /// <param name="element">The element to get the key of.</param>
         /// <returns>The given element's key.</returns>
-        protected override object GetElementKey(EndpointElement element)
+        protected override object GetElementKey(ConfigurationElement element)
         {
             return ((EndpointElement)element).Contract;
         }

@@ -29,10 +29,27 @@ namespace Tasty.Test
             DatabaseUserPassword = "tastypassword1234";
         }
 
-        [AssemblyInitialize]
-        public static void AssemblyInitialize(TestContext textContext)
+        public static void CleanTestDatabaseJobs()
         {
-            //CreateTestDatabase();
+            using (SqlConnection connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+
+                using (SqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "DELETE FROM [TastyJob]";
+                    command.CommandType = CommandType.Text;
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static void EnsureTestDatabase()
+        {
+            if (!SchemaUpgradeService.DatabaseExists(CreateDropConnectionString, DatabaseName))
+            {
+                CreateTestDatabase();
+            }
         }
 
         private static void CreateTestDatabase()
@@ -48,14 +65,6 @@ namespace Tasty.Test
         {
             SchemaUpgradeService.CreateDatabase(CreateDropConnectionString, DatabaseName, DatabaseFilesPath, DatabaseUserName, DatabaseUserPassword);
             SchemaUpgradeService.DropDatabase(CreateDropConnectionString, DatabaseName, DatabaseUserName);
-        }
-
-        public static void EnsureTestDatabase()
-        {
-            if (!SchemaUpgradeService.DatabaseExists(CreateDropConnectionString, DatabaseName))
-            {
-                CreateTestDatabase();
-            }
         }
 
         private static void RunEmbeddedSql(Assembly assembly, string name)

@@ -2,11 +2,14 @@
 <TestRunConfiguration name="Local Test Run" id="d7d79beb-52c0-4b91-bf84-3c80b647d0f3" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2006">
   <Description>This is a default test run configuration for a local test run.</Description>
   <Deployment>
-    <DeploymentItem filename="Tasty.Test\assets-test\" />
-    <DeploymentItem filename="SolutionVersionInfo.cs" />
-    <DeploymentItem filename="Tasty.Test\AssemblyInfo2.txt" />
     <DeploymentItem filename="Tasty.Test\S3Publish.proj" />
+    <DeploymentItem filename="Tasty.Test\TastyClient.pfx" />
     <DeploymentItem filename="Tasty.Test\AssemblyInfo1.txt" />
+    <DeploymentItem filename="Tasty.Test\assets-test\" />
+    <DeploymentItem filename="Tasty.Test\TastyClient.cer" />
+    <DeploymentItem filename="Tasty.Test\AssemblyInfo2.txt" />
+    <DeploymentItem filename="SolutionVersionInfo.cs" />
+    <DeploymentItem filename="Tasty.Test\TastyServer.pfx" />
   </Deployment>
   <TestTypeSpecific />
 </TestRunConfiguration>

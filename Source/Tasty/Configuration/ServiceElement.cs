@@ -36,11 +36,41 @@ namespace Tasty.Configuration
         /// <summary>
         /// Gets or sets the path of the server certificate file.
         /// </summary>
-        [ConfigurationProperty("serverCertificate", IsRequired = true)]
-        public string ServerCertificate
+        [ConfigurationProperty("serverCertificatePath", IsRequired = false)]
+        public string ServerCertificatePath
         {
-            get { return (string)this["serverCertificate"]; }
-            set { this["serverCertificate"] = value; }
+            get { return (string)this["serverCertificatePath"]; }
+            set { this["serverCertificatePath"] = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the password to use when loading the server certificate file.
+        /// </summary>
+        [ConfigurationProperty("serverCertificatePassword", IsRequired = false)]
+        public string ServerCertificatePassword
+        {
+            get { return (string)this["serverCertificatePassword"]; }
+            set { this["serverCertificatePassword"] = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the fully qualified name of the server certificate's embedded resource.
+        /// </summary>
+        [ConfigurationProperty("serverCertificateResourceName", IsRequired = false)]
+        public string ServerCertificateResourceName
+        {
+            get { return (string)this["serverCertificateResourceName"]; }
+            set { this["serverCertificateResourceName"] = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the type name identifying the assembly the server certificate is embedded into.
+        /// </summary>
+        [ConfigurationProperty("serverCertificateResourceType", IsRequired = false)]
+        public string ServerCertificateResourceType
+        {
+            get { return (string)this["serverCertificateResourceType"]; }
+            set { this["serverCertificateResourceType"] = value; }
         }
     }
 }

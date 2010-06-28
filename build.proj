@@ -14,6 +14,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <ConsoleDir>$(MSBuildProjectDirectory)\Source\Tasty.Console</ConsoleDir>
     <ILMergePath Condition="'$(ILMergePath)' == ''">$(ProgramFiles)\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
+    <LibDir>$(MSBuildProjectDirectory)\Lib</LibDir>
     <LibraryDir>$(MSBuildProjectDirectory)\Source\Tasty</LibraryDir>
     <BuildDir>$(MSBuildProjectDirectory)\Build</BuildDir>
     <SolutionVersionInfoPath>$(MSBuildProjectDirectory)\Source\SolutionVersionInfo.cs</SolutionVersionInfoPath>
@@ -37,8 +38,8 @@
     <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.xml" DestinationFiles="$(BuildDir)\Tasty.SqlServer.xml"/>
 
     <ItemGroup>
-      <OpenXml Include="$(MSBuildProjectDirectory)\Source\Dependencies\DocumentFormat.OpenXml.dll"/>
-      <OpenXml Include="$(MSBuildProjectDirectory)\Source\Dependencies\DocumentFormat.OpenXml.xml"/>
+      <OpenXml Include="$(LibDir)\DocumentFormat.OpenXml.dll"/>
+      <OpenXml Include="$(LibDir)\DocumentFormat.OpenXml.xml"/>
     </ItemGroup>
 
     <Copy SourceFiles="@(OpenXml)" DestinationFolder="$(BuildDir)"/>

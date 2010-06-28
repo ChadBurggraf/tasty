@@ -18,7 +18,7 @@ namespace Tasty.Web.UrlTokens
     /// </summary>
     public class HttpCacheUrlTokenStore : IUrlTokenStore
     {
-        #region Fields
+        #region Private Fields
 
         private const string CacheKey = "Tasty.Web.HttpCacheUrlTokenStore";
         private static readonly object locker = new object();

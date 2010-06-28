@@ -9,6 +9,7 @@
 namespace Tasty.ServiceModel
 {
     using System;
+    using System.Globalization;
     using System.IO;
     using System.ServiceModel;
     using System.Configuration;
@@ -22,8 +23,6 @@ namespace Tasty.ServiceModel
     /// </summary>
     public class X509CertificateWhitelistServiceHost : ServiceHost
     {
-        private string serverCertificatePassword;
-
         /// <summary>
         /// Initializes a new instance of the X509CertificateWhitelistServiceHost class.
         /// </summary>
@@ -32,18 +31,6 @@ namespace Tasty.ServiceModel
         public X509CertificateWhitelistServiceHost(Type serviceType, Uri[] baseAddresses)
             : base(serviceType, baseAddresses)
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the X509CertificateWhitelistServiceHost class.
-        /// </summary>
-        /// <param name="serviceType">The type of the service to host.</param>
-        /// <param name="baseAddresses">The service's base address collection.</param>
-        /// <param name="serverCertificatePassword">The password to use when loading the server certificate, if required.</param>
-        public X509CertificateWhitelistServiceHost(Type serviceType, Uri[] baseAddresses, string serverCertificatePassword)
-            : this(serviceType, baseAddresses)
-        {
-            this.serverCertificatePassword = serverCertificatePassword ?? String.Empty;
         }
 
         /// <summary>
@@ -57,31 +44,25 @@ namespace Tasty.ServiceModel
 
             if (element != null)
             {
-                string path = element.ServerCertificate;
-
-                if (!Path.IsPathRooted(path))
-                {
-                    path = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, path);
-                }
-
-                Credentials.ServiceCertificate.Certificate = new X509Certificate2(path, this.serverCertificatePassword);
                 Credentials.ClientCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.Custom;
+                Credentials.ServiceCertificate.Certificate = element.LoadCertificate();
 
                 X509CertificateWhitelistValidator validator = new X509CertificateWhitelistValidator();
 
                 foreach (ClientCertificateElement clientElement in element.ClientCertificates)
                 {
-                    path = clientElement.ClientCertificate;
-
-                    if (!Path.IsPathRooted(path))
-                    {
-                        path = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, path);
-                    }
-
-                    validator.Whitelist.Add(new X509Certificate2(path));
+                    validator.Whitelist.Add(clientElement.LoadCertificate());
                 }
 
                 Credentials.ClientCertificate.Authentication.CustomCertificateValidator = validator;
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    String.Format(
+                        CultureInfo.InvariantCulture,
+                        "You must configure a service with the name \"{0}\" under <tasty><serviceModel><services/></serviceModel></tasty>.",
+                        Description.Name));
             }
         }
     }

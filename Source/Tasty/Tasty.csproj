@@ -37,15 +37,15 @@
   <ItemGroup>
     <Reference Include="AWSSDK, Version=1.0.3.0, Culture=neutral, PublicKeyToken=498aea76c1205a29, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\AWSSDK.dll</HintPath>
+      <HintPath>..\..\Lib\AWSSDK.dll</HintPath>
     </Reference>
     <Reference Include="DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\DocumentFormat.OpenXml.dll</HintPath>
+      <HintPath>..\..\Lib\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip.Reduced, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\Ionic.Zip.Reduced.dll</HintPath>
+      <HintPath>..\..\Lib\Ionic.Zip.Reduced.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v3.5">
@@ -53,11 +53,11 @@
     </Reference>
     <Reference Include="Mono.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\Mono.Security.dll</HintPath>
+      <HintPath>..\..\Lib\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\Npgsql.dll</HintPath>
+      <HintPath>..\..\Lib\Npgsql.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -136,6 +136,7 @@
     <Compile Include="Jobs\JobRecordEventArgs.cs" />
     <Compile Include="Jobs\JobRunnerEventSink.cs" />
     <Compile Include="ServiceModel\Extensions.cs" />
+    <Compile Include="ServiceModel\X509CertificateLoader.cs" />
     <Compile Include="ServiceModel\X509CertificateWhitelistServiceHost.cs" />
     <Compile Include="ServiceModel\X509CertificateWhitelistServiceHostFactory.cs" />
     <Compile Include="ServiceModel\X509CertificateWhitelistValidator.cs" />

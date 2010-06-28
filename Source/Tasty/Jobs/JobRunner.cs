@@ -178,15 +178,19 @@ namespace Tasty.Jobs
         {
             lock (this.statusLocker)
             {
-                if (!this.IsShuttingDown)
+                if (!safely || !this.IsShuttingDown)
                 {
                     this.IsShuttingDown = true;
                     this.IsRunning = false;
 
-                    if (!safely && this.god != null && this.god.IsAlive)
+                    if (!safely)
                     {
-                        this.god.Abort();
-                        this.god = null;
+                        if (this.god != null && this.god.IsAlive)
+                        {
+                            this.god.Abort();
+                            this.god = null;
+                        }
+
                         this.IsShuttingDown = false;
                     }
                 }
@@ -339,6 +343,7 @@ namespace Tasty.Jobs
                         }
                         catch (ConfigurationErrorsException ex)
                         {
+                            throw;
                             /*if (this.Error != null)
                             {
                                 this.Error(this, new JobErrorEventArgs(new JobRecord(), ex));
@@ -430,8 +435,8 @@ namespace Tasty.Jobs
                 try
                 {
                     this.CancelJobs();
-                    this.FinishJobs();
                     this.TimeoutJobs();
+                    this.FinishJobs();
 
                     lock (this.statusLocker)
                     {
@@ -453,6 +458,7 @@ namespace Tasty.Jobs
                 }
                 catch (Exception ex)
                 {
+                    throw;
                     /*if (this.Error != null)
                     {
                         this.Error(this, new JobErrorEventArgs(new JobRecord(), ex));
@@ -469,7 +475,7 @@ namespace Tasty.Jobs
         private void TimeoutJobs()
         {
             var timedOutIds = (from r in this.runningJobs
-                               where r.IsRunning && DateTime.UtcNow.Subtract(r.Started).TotalMilliseconds > r.Job.Timeout
+                               where r.IsRunning && DateTime.UtcNow.Subtract(r.Started).TotalMilliseconds >= r.Job.Timeout
                                select r.JobId).ToArray();
 
             if (timedOutIds.Length > 0)

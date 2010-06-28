@@ -18,6 +18,7 @@ namespace Tasty.Test
         public static void ClassInitialize(TestContext testContext)
         {
             Bootstrapper.EnsureTestDatabase();
+            Bootstrapper.CleanTestDatabaseJobs();
         }
 
         [TestMethod]
@@ -36,7 +37,7 @@ namespace Tasty.Test
         {
             JobRunner.Instance.Start();
             Assert.IsTrue(JobRunner.Instance.IsRunning);
-            JobRunner.Instance.Stop(true);
+            JobRunner.Instance.Stop(false);
             Assert.IsFalse(JobRunner.Instance.IsRunning);
         }
 
@@ -49,9 +50,11 @@ namespace Tasty.Test
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
             var record = JobStore.Current.GetJob(id);
+            Assert.AreEqual(JobStatus.Started, record.Status);
+
             record.Status = JobStatus.Canceling;
             JobStore.Current.UpdateJobs(new JobRecord[] { record }, null);
-            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);
+            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
             Assert.AreEqual(JobStatus.Canceled, JobStore.Current.GetJob(id).Status);
         }

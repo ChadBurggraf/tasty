@@ -9,6 +9,7 @@ namespace Tasty.ServiceModel
     using System;
     using System.ServiceModel;
     using System.ServiceModel.Activation;
+    using Tasty.Configuration;
 
     /// <summary>
     /// Extends <see cref="ServiceHostFactory"/> to create <see cref="X509CertificateWhitelistServiceHost"/> instances.

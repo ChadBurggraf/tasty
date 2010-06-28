@@ -24,7 +24,7 @@ namespace Tasty.Configuration
         public override bool Contains(ClientCertificateElement item)
         {
             return 0 < (from e in this
-                        where item.ClientCertificate.Equals(e.ClientCertificate, StringComparison.OrdinalIgnoreCase)
+                        where item.Name.Equals(e.Name, StringComparison.OrdinalIgnoreCase)
                         select e).Count();
         }
 
@@ -33,9 +33,9 @@ namespace Tasty.Configuration
         /// </summary>
         /// <param name="element">The element to get the key of.</param>
         /// <returns>The given element's key.</returns>
-        protected override object GetElementKey(ClientCertificateElement element)
+        protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((ClientCertificateElement)element).ClientCertificate;
+            return ((ClientCertificateElement)element).Name;
         }
     }
 }

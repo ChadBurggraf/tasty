@@ -10,6 +10,7 @@ namespace Tasty.ServiceModel
 {
     using System;
     using System.Configuration;
+    using System.Globalization;
     using System.IO;
     using System.Security.Cryptography.X509Certificates;
     using System.ServiceModel;
@@ -33,6 +34,15 @@ namespace Tasty.ServiceModel
             if (element != null)
             {
                 client.ClientCredentials.ClientCertificate.Certificate = element.LoadCertificate();
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    String.Format(
+                        CultureInfo.InvariantCulture,
+                        "You must configure a client certificate for the service contract \"{0}\" under <tasty><serviceModel><endpoints/></serviceModel></tasty>.",
+                        client.Endpoint.Contract.ConfigurationName));
+
             }
         }
 

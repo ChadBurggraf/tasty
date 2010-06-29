@@ -137,7 +137,7 @@ namespace Tasty.ServiceModel
             byte[] rawData = new byte[this.stream.Length];
             this.stream.Read(rawData, 0, rawData.Length);
 
-            return new X509Certificate2(rawData, this.password, X509KeyStorageFlags.Exportable);
+            return new X509Certificate2(rawData, this.password, X509KeyStorageFlags.Exportable | X509KeyStorageFlags.MachineKeySet);
         }
 
         #endregion

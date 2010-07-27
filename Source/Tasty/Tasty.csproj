@@ -187,6 +187,7 @@
     <Compile Include="SpreadsheetWriter.cs" />
     <Compile Include="TastyFileSystemWatcher.cs" />
     <Compile Include="TastyFileSystemWatcherMode.cs" />
+    <Compile Include="Web\QueryStringMergeMode.cs" />
     <Compile Include="Web\UrlTokens\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\UrlTokens\IUrlToken.cs" />
     <Compile Include="Web\UrlTokens\IUrlTokenStore.cs" />

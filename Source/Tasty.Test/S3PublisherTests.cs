@@ -22,6 +22,7 @@ namespace Tasty.Test
         private static string secretAccessKeyId = ConfigurationManager.AppSettings["S3SecretAccessKeyId"];
         private static string bucketName = ConfigurationManager.AppSettings["S3BucketName"];
         private static AmazonS3 s3Client;
+        private bool assertPublished, skipFileDelegateCalled, skipPrefixDelegateCalled;
 
         static S3PublisherTests()
         {
@@ -32,6 +33,8 @@ namespace Tasty.Test
         [TestMethod]
         public void S3Publisher_Publisher()
         {
+            this.assertPublished = true;
+
             new S3Publisher(accessKeyId, secretAccessKeyId)
                 .WithBasePath(@".\")
                 .WithBucketName(bucketName)
@@ -46,7 +49,8 @@ namespace Tasty.Test
                 })
                 .WithPrefix(DateTime.UtcNow.ToIso8601UtcPathSafeString())
                 .WithPublisherDelegate(this) // Asserts are happening in the delegate.
-                .WithUseSsl(false).Publish();
+                .WithUseSsl(false)
+                .Publish();
         }
 
         [TestMethod]
@@ -55,31 +59,95 @@ namespace Tasty.Test
             Assert.IsTrue(Engine.GlobalEngine.BuildProjectFile("S3Publish.proj"));
         }
 
+        [TestMethod]
+        public void S3Publisher_SkipExistingFile()
+        {
+            this.assertPublished = false;
+            this.skipFileDelegateCalled = false;
+            this.skipPrefixDelegateCalled = false;
+
+            string prefix = DateTime.UtcNow.ToIso8601UtcPathSafeString();
+
+            var publisher = new S3Publisher(accessKeyId, secretAccessKeyId)
+                .WithBasePath(@".\")
+                .WithBucketName(bucketName)
+                .WithFiles(new string[] { @"css\yui-fonts-min.css" })
+                .WithOverwriteExisting(false)
+                .WithPrefix(prefix)
+                .WithPublisherDelegate(this) // Asserts are happening in the delegate.
+                .WithUseSsl(false);
+
+            publisher.Publish();
+
+            publisher
+                .WithFiles(new string[] { @"css\yui-fonts-min.css", @"css\yui-reset-min.css" })
+                .Publish();
+
+            Assert.IsFalse(this.skipPrefixDelegateCalled);
+            Assert.IsTrue(this.skipFileDelegateCalled);
+        }
+
+        [TestMethod]
+        public void S3Publisher_SkipExistingPrefix()
+        {
+            this.assertPublished = false;
+            this.skipPrefixDelegateCalled = false;
+
+            string prefix = DateTime.UtcNow.ToIso8601UtcPathSafeString();
+
+            var publisher = new S3Publisher(accessKeyId, secretAccessKeyId)
+                .WithBasePath(@".\")
+                .WithBucketName(bucketName)
+                .WithFiles(new string[] { @"css\yui-fonts-min.css" })
+                .WithOverwriteExistingPrefix(false)
+                .WithPrefix(prefix)
+                .WithPublisherDelegate(this) // Asserts are happening in the delegate.
+                .WithUseSsl(false);
+
+            publisher.Publish();
+            publisher.Publish();
+
+            Assert.IsTrue(this.skipPrefixDelegateCalled);
+        }
+
         #region IS3PublisherDelegate Members
 
         public void OnFilePublished(string path, string objectKey, bool withGzip)
         {
-            GetObjectMetadataRequest request = new GetObjectMetadataRequest()
-                .WithBucketName(bucketName)
-                .WithKey(objectKey);
-
-            using (GetObjectMetadataResponse response = s3Client.GetObjectMetadata(request))
+            if (this.assertPublished)
             {
-                Assert.AreEqual(MimeType.FromCommon(objectKey).ContentType, response.ContentType);
+                GetObjectMetadataRequest request = new GetObjectMetadataRequest()
+                    .WithBucketName(bucketName)
+                    .WithKey(objectKey);
 
-                if (withGzip)
+                using (GetObjectMetadataResponse response = s3Client.GetObjectMetadata(request))
                 {
-                    Assert.AreEqual("gzip", response.Headers["Content-Encoding"]);
+                    Assert.AreEqual(MimeType.FromCommon(objectKey).ContentType, response.ContentType);
+
+                    if (withGzip)
+                    {
+                        Assert.AreEqual("gzip", response.Headers["Content-Encoding"]);
+                    }
+                }
+
+                DeleteObjectRequest deleteRequest = new DeleteObjectRequest()
+                    .WithBucketName(bucketName)
+                    .WithKey(objectKey);
+
+                using (DeleteObjectResponse deleteResponse = s3Client.DeleteObject(deleteRequest))
+                {
                 }
             }
+        }
 
-            DeleteObjectRequest deleteRequest = new DeleteObjectRequest()
-                .WithBucketName(bucketName)
-                .WithKey(objectKey);
+        public void OnFileSkipped(string path, string objectKey)
+        {
+            this.skipFileDelegateCalled = true;
+        }
 
-            using (DeleteObjectResponse deleteResponse = s3Client.DeleteObject(deleteRequest))
-            {
-            }
+        public void OnPrefixSkipped(string prefix)
+        {
+            this.skipPrefixDelegateCalled = true;
         }
 
         #endregion

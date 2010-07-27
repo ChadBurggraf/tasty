@@ -11,6 +11,7 @@ namespace Tasty.Build
     using System.Collections.Specialized;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using Amazon;
     using Amazon.S3;
     using Amazon.S3.Model;
@@ -27,6 +28,8 @@ namespace Tasty.Build
         #region Private Fields
 
         private string accessKeyId, secretAccessKeyId;
+        private bool useSsl;
+        private AmazonS3 client;
         private IList<string> files;
         private IS3PublisherDelegate publisherDelegate;
 
@@ -53,6 +56,8 @@ namespace Tasty.Build
 
             this.accessKeyId = accessKeyId;
             this.secretAccessKeyId = secretAccessKeyId;
+            this.OverwriteExisting = true;
+            this.OverwriteExistingPrefix = true;
         }
 
         #endregion
@@ -78,6 +83,20 @@ namespace Tasty.Build
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to overwrite existing objects.
+        /// Defaults to true.
+        /// </summary>
+        public bool OverwriteExisting { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to overwrite objects
+        /// in the given prefix. If false and <see cref="Prefix"/> is set
+        /// and the prefix exists on the service, nothing will be written at all.
+        /// Defaults to true.
+        /// </summary>
+        public bool OverwriteExistingPrefix { get; set; }
+
+        /// <summary>
         /// Gets or sets the prefix to use as the root path for the published directory on S3.
         /// </summary>
         public string Prefix { get; set; }
@@ -94,7 +113,18 @@ namespace Tasty.Build
         /// <summary>
         /// Gets or sets a value indicating whether to use SSL when connecting to the service.
         /// </summary>
-        public bool UseSsl { get; set; }
+        public bool UseSsl
+        {
+            get 
+            { 
+                return this.useSsl; 
+            }
+            set
+            {
+                this.useSsl = value;
+                this.client = null;
+            }
+        }
 
         #endregion
 
@@ -111,6 +141,23 @@ namespace Tasty.Build
         }
 
         /// <summary>
+        /// Called when a file is skipped for publishing because it already exists.
+        /// </summary>
+        /// <param name="path">The path of the file that was skipped.</param>
+        /// <param name="objectKey">The object key of the file on the service.</param>
+        public void OnFileSkipped(string path, string objectKey)
+        {
+        }
+
+        /// <summary>
+        /// Called when an entire prefix is skipped for publishing because it already exists.
+        /// </summary>
+        /// <param name="prefix">The prefix that was skipped.</param>
+        public void OnPrefixSkipped(string prefix)
+        {
+        }
+
+        /// <summary>
         /// Publishes the currently-identified file set to Amazon S3.
         /// </summary>
         public void Publish()
@@ -120,9 +167,16 @@ namespace Tasty.Build
                 throw new InvalidOperationException("BucketName must have a value.");
             }
 
-            foreach (string filePath in this.Files)
+            if (this.OverwriteExistingPrefix || !this.PrefixExists())
             {
-                this.PublishFile(filePath);
+                foreach (string filePath in this.Files)
+                {
+                    this.PublishFile(filePath);
+                }
+            }
+            else
+            {
+                this.PublisherDelegate.OnPrefixSkipped(this.Prefix);
             }
         }
 
@@ -167,6 +221,28 @@ namespace Tasty.Build
         }
 
         /// <summary>
+        /// Sets the value of <see cref="OverwriteExisting"/> and returns this instance.
+        /// </summary>
+        /// <param name="overwriteExisting">The value to set.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithOverwriteExisting(bool overwriteExisting)
+        {
+            this.OverwriteExisting = overwriteExisting;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the value of <see cref="OverwriteExistingPrefix"/> and returns this instance.
+        /// </summary>
+        /// <param name="overwriteExistingPrefix">The value to set.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithOverwriteExistingPrefix(bool overwriteExistingPrefix)
+        {
+            this.OverwriteExistingPrefix = overwriteExistingPrefix;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the value of <see cref="Prefix"/> and returns this instance.
         /// </summary>
         /// <param name="prefix">The value to set.</param>
@@ -204,15 +280,51 @@ namespace Tasty.Build
         #region Private Instance Methods
 
         /// <summary>
-        /// Gets a new <see cref="AmazonS3"/> client base on this instance's current state.
+        /// Gets a <see cref="AmazonS3"/> client base on this instance's current state.
         /// </summary>
         /// <returns>An <see cref="AmazonS3"/> client.</returns>
         private AmazonS3 Client()
         {
-            AmazonS3Config config = new AmazonS3Config();
-            config.CommunicationProtocol = this.UseSsl ? Protocol.HTTPS : Protocol.HTTP;
+            if (this.client == null)
+            {
+                AmazonS3Config config = new AmazonS3Config();
+                config.CommunicationProtocol = this.UseSsl ? Protocol.HTTPS : Protocol.HTTP;
 
-            return AWSClientFactory.CreateAmazonS3Client(this.accessKeyId, this.secretAccessKeyId, config);
+                this.client = AWSClientFactory.CreateAmazonS3Client(this.accessKeyId, this.secretAccessKeyId, config);
+            }
+
+            return this.client;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the object with the given key exists on the service.
+        /// </summary>
+        /// <param name="key">The key to check the existence of.</param>
+        /// <returns>True if the object exists, false otherwise.</returns>
+        private bool ObjectExists(string key)
+        {
+            bool exists = false;
+
+            GetObjectMetadataRequest request = new GetObjectMetadataRequest()
+                .WithBucketName(this.BucketName)
+                .WithKey(key);
+
+            try
+            {
+                using (GetObjectMetadataResponse response = this.Client().GetObjectMetadata(request))
+                {
+                    exists = true;
+                }
+            }
+            catch (AmazonS3Exception ex)
+            {
+                if (ex.StatusCode != HttpStatusCode.NotFound || !"NoSuchKey".Equals(ex.ErrorCode, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw;
+                }
+            }
+
+            return exists;
         }
 
         /// <summary>
@@ -259,6 +371,31 @@ namespace Tasty.Build
         }
 
         /// <summary>
+        /// Gets a value indicating whether this instance's prefix exists.
+        /// </summary>
+        /// <returns>True if the prefix exists, false otherwise.</returns>
+        private bool PrefixExists()
+        {
+            bool exists = false;
+            string prefix = (this.Prefix ?? String.Empty).Trim();
+
+            if (!String.IsNullOrEmpty(prefix))
+            {
+                ListObjectsRequest request = new ListObjectsRequest()
+                    .WithBucketName(this.BucketName)
+                    .WithPrefix(prefix)
+                    .WithMaxKeys(1);
+
+                using (ListObjectsResponse response = this.Client().ListObjects(request))
+                {
+                    return response.S3Objects.Count > 0;
+                }
+            }
+
+            return exists;
+        }
+
+        /// <summary>
         /// Publishes a file to Amazon S3.
         /// </summary>
         /// <param name="filePath">The path of the file to publish.</param>
@@ -268,57 +405,64 @@ namespace Tasty.Build
             string contentType = MimeType.FromCommon(filePath).ContentType;
             string objectKey = this.ObjectKey(filePath);
 
-            PutObjectRequest request = new PutObjectRequest()
-                .WithBucketName(this.BucketName)
-                .WithCannedACL(S3CannedACL.PublicRead)
-                .WithContentType(contentType)
-                .WithKey(objectKey);
-
-            bool gzip = false;
-            string tempPath = null;
-
-            if (contentType.StartsWith("text", StringComparison.OrdinalIgnoreCase))
+            if (this.OverwriteExisting || !this.ObjectExists(objectKey))
             {
-                gzip = true;
-                tempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Path.GetRandomFileName());
+                PutObjectRequest request = new PutObjectRequest()
+                    .WithBucketName(this.BucketName)
+                    .WithCannedACL(S3CannedACL.PublicRead)
+                    .WithContentType(contentType)
+                    .WithKey(objectKey);
 
-                using (FileStream fs = File.OpenRead(filePath))
+                bool gzip = false;
+                string tempPath = null;
+
+                if (contentType.StartsWith("text", StringComparison.OrdinalIgnoreCase))
                 {
-                    using (FileStream temp = File.Create(tempPath))
-                    {
-                        using (GZipStream gz = new GZipStream(temp, CompressionMode.Compress))
-                        {
-                            byte[] buffer = new byte[4096];
-                            int count;
+                    gzip = true;
+                    tempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Path.GetRandomFileName());
 
-                            while (0 < (count = fs.Read(buffer, 0, buffer.Length)))
+                    using (FileStream fs = File.OpenRead(filePath))
+                    {
+                        using (FileStream temp = File.Create(tempPath))
+                        {
+                            using (GZipStream gz = new GZipStream(temp, CompressionMode.Compress))
                             {
-                                gz.Write(buffer, 0, count);
+                                byte[] buffer = new byte[4096];
+                                int count;
+
+                                while (0 < (count = fs.Read(buffer, 0, buffer.Length)))
+                                {
+                                    gz.Write(buffer, 0, count);
+                                }
                             }
                         }
                     }
+
+                    headers["Content-Encoding"] = "gzip";
+                    request = request.WithFilePath(tempPath);
+                }
+                else
+                {
+                    request = request.WithFilePath(filePath);
                 }
 
-                headers["Content-Encoding"] = "gzip";
-                request = request.WithFilePath(tempPath);
+                request.AddHeaders(headers);
+
+                using (PutObjectResponse response = this.Client().PutObject(request))
+                {
+                }
+
+                if (!String.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+
+                this.PublisherDelegate.OnFilePublished(filePath, objectKey, gzip);
             }
             else
             {
-                request = request.WithFilePath(filePath);
+                this.PublisherDelegate.OnFileSkipped(filePath, objectKey);
             }
-
-            request.AddHeaders(headers);
-
-            using (PutObjectResponse response = this.Client().PutObject(request))
-            {
-            }
-
-            if (!String.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
-            {
-                File.Delete(tempPath);
-            }
-
-            this.PublisherDelegate.OnFilePublished(filePath, objectKey, gzip);
         }
 
         #endregion

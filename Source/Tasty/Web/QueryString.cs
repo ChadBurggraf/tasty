@@ -8,6 +8,7 @@ namespace Tasty.Web
 {
     using System;
     using System.Collections;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Collections.Specialized;
     using System.Linq;
@@ -151,6 +152,21 @@ namespace Tasty.Web
         }
 
         /// <summary>
+        /// Adds the given set of values to the query string for the specified key.
+        /// </summary>
+        /// <param name="key">The key to add the values for.</param>
+        /// <param name="values">The set of values to add.</param>
+        public void Add(string key, IEnumerable<string> values)
+        {
+            foreach (string value in values)
+            {
+                this.innerCollection.Add(key, value);
+            }
+
+            this.keys = null;
+        }
+
+        /// <summary>
         /// Gets the value for the specified key.
         /// </summary>
         /// <param name="key">The key to get the value for.</param>
@@ -168,6 +184,44 @@ namespace Tasty.Web
         public string[] GetAll(string key)
         {
             return this.innerCollection.GetValues(key); 
+        }
+
+        /// <summary>
+        /// Merges this query string (as the destination) with the given source query string.
+        /// </summary>
+        /// <param name="source">The source query string to merge into this query string.</param>
+        /// <param name="mode">The merge mode to use.</param>
+        public void Merge(QueryString source, QueryStringMergeMode mode)
+        {
+            if (source != null)
+            {
+                switch (mode)
+                {
+                    case QueryStringMergeMode.SkipExisting:
+                        foreach (string key in source.Keys)
+                        {
+                            if (this.Keys.Where(k => k.Equals(key, StringComparison.OrdinalIgnoreCase)).Count() == 0)
+                            {
+                                this.Add(key, source.GetAll(key));
+                            }
+                        }
+                        break;
+                    case QueryStringMergeMode.AddToExisting:
+                        foreach (string key in source.Keys)
+                        {
+                            this.Add(key, source.GetAll(key));
+                        }
+                        break;
+                    case QueryStringMergeMode.OverwriteExisting:
+                        foreach (string key in source.Keys)
+                        {
+                            this.Set(key, source[key]);
+                        }
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
         }
 
         /// <summary>

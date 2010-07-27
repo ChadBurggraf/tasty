@@ -25,6 +25,20 @@ namespace Tasty.Build
 
         #endregion
 
+        #region Construction
+
+        /// <summary>
+        /// Initializes a new instance of the S3Publish class.
+        /// </summary>
+        public S3Publish()
+            : base()
+        {
+            this.OverwriteExisting = true;
+            this.OverwriteExistingPrefix = true;
+        }
+
+        #endregion
+
         #region Public Instance Properties
 
         /// <summary>
@@ -55,6 +69,20 @@ namespace Tasty.Build
         /// </summary>
         [Output]
         public ITaskItem[] FilesPublished { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to overwrite existing objects.
+        /// Defaults to true.
+        /// </summary>
+        public bool OverwriteExisting { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to overwrite objects
+        /// in the given prefix. If false and <see cref="Prefix"/> is set
+        /// and the prefix exists on the service, nothing will be written at all.
+        /// Defaults to true.
+        /// </summary>
+        public bool OverwriteExistingPrefix { get; set; }
 
         /// <summary>
         /// Gets or sets the object prefix to use for object keys when publishing files.
@@ -88,9 +116,12 @@ namespace Tasty.Build
                 .WithBasePath(this.BasePath)
                 .WithBucketName(this.BucketName)
                 .WithFiles(this.Files.Select(ti => ti.ItemSpec))
+                .WithOverwriteExisting(this.OverwriteExisting)
+                .WithOverwriteExistingPrefix(this.OverwriteExistingPrefix)
                 .WithPrefix(this.Prefix)
                 .WithPublisherDelegate(this)
-                .WithUseSsl(this.UseSsl).Publish();
+                .WithUseSsl(this.UseSsl)
+                .Publish();
 
             this.FilesPublished = this.filesPublished.ToArray();
 
@@ -115,6 +146,25 @@ namespace Tasty.Build
             message += ".";
 
             Log.LogMessage(message, path, objectKey);
+        }
+
+        /// <summary>
+        /// Called when a file is skipped for publishing because it already exists.
+        /// </summary>
+        /// <param name="path">The path of the file that was skipped.</param>
+        /// <param name="objectKey">The object key of the file on the service.</param>
+        public void OnFileSkipped(string path, string objectKey)
+        {
+            Log.LogMessage("{0} skipped because it exists at {1}.", path, objectKey);
+        }
+
+        /// <summary>
+        /// Called when an entire prefix is skipped for publishing because it already exists.
+        /// </summary>
+        /// <param name="prefix">The prefix that was skipped.</param>
+        public void OnPrefixSkipped(string prefix)
+        {
+            Log.LogMessage("Prefix \"{0}\" skipped because it already exists.", prefix);
         }
 
         #endregion

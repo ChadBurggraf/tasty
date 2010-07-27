@@ -388,7 +388,7 @@ namespace Tasty.Build
 
                 using (ListObjectsResponse response = this.Client().ListObjects(request))
                 {
-                    return response.S3Objects.Count > 0;
+                    return response.S3Objects != null && response.S3Objects.Count > 0;
                 }
             }
 

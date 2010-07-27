@@ -110,22 +110,33 @@ namespace Tasty.Build
         /// <returns>True if the task executed successfully, false otherwise.</returns>
         public override bool Execute()
         {
-            this.filesPublished = new List<ITaskItem>();
+            try
+            {
+                this.filesPublished = new List<ITaskItem>();
 
-            new S3Publisher(this.AccessKeyId, this.SecretAccessKeyId)
-                .WithBasePath(this.BasePath)
-                .WithBucketName(this.BucketName)
-                .WithFiles(this.Files.Select(ti => ti.ItemSpec))
-                .WithOverwriteExisting(this.OverwriteExisting)
-                .WithOverwriteExistingPrefix(this.OverwriteExistingPrefix)
-                .WithPrefix(this.Prefix)
-                .WithPublisherDelegate(this)
-                .WithUseSsl(this.UseSsl)
-                .Publish();
+                if (this.Files != null && this.Files.Length > 0)
+                {
+                    new S3Publisher(this.AccessKeyId, this.SecretAccessKeyId)
+                        .WithBasePath(this.BasePath)
+                        .WithBucketName(this.BucketName)
+                        .WithFiles(this.Files.Select(ti => ti.ItemSpec))
+                        .WithOverwriteExisting(this.OverwriteExisting)
+                        .WithOverwriteExistingPrefix(this.OverwriteExistingPrefix)
+                        .WithPrefix(this.Prefix)
+                        .WithPublisherDelegate(this)
+                        .WithUseSsl(this.UseSsl)
+                        .Publish();
+                }
 
-            this.FilesPublished = this.filesPublished.ToArray();
+                this.FilesPublished = this.filesPublished.ToArray();
 
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.LogMessage(MessageImportance.High, "Whoops:{0}\r\nStack trace:\r\n{1}", ex.Message, ex.StackTrace);
+                return false;
+            }
         }
 
         /// <summary>

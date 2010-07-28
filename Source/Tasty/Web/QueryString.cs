@@ -183,7 +183,7 @@ namespace Tasty.Web
         /// <returns>A collection of all of the key's values.</returns>
         public string[] GetAll(string key)
         {
-            return this.innerCollection.GetValues(key); 
+            return this.innerCollection.GetValues(key) ?? new string[0];
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace Tasty.Web
                     case QueryStringMergeMode.OverwriteExisting:
                         foreach (string key in source.Keys)
                         {
-                            this.Set(key, source[key]);
+                            this.SetAll(key, source.GetAll(key));
                         }
                         break;
                     default:
@@ -242,6 +242,26 @@ namespace Tasty.Web
         public void Set(string key, string value)
         {
             this.innerCollection[key] = value;
+            this.keys = null;
+        }
+
+        /// <summary>
+        /// Sets all of the values in the given collection for the specified key.
+        /// </summary>
+        /// <param name="key">The key to set the values for.</param>
+        /// <param name="values">The value collection to set.</param>
+        public void SetAll(string key, IEnumerable<string> values)
+        {
+            this.innerCollection.Remove(key);
+
+            if (values != null)
+            {
+                foreach (string value in values)
+                {
+                    this.innerCollection.Add(key, value);
+                }
+            }
+
             this.keys = null;
         }
 

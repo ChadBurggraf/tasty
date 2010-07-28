@@ -326,6 +326,41 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Converts the given number into a hex string.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The value as hex.</returns>
+        public static string ToHex(this int value)
+        {
+            return BitConverter.GetBytes(value).ToHex();
+        }
+
+        /// <summary>
+        /// Converts the given number into a hex string.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The value as hex.</returns>
+        public static string ToHex(this long value)
+        {
+            return BitConverter.GetBytes(value).ToHex();
+        }
+
+        /// <summary>
+        /// Converts the given string into hex.
+        /// </summary>
+        /// <param name="value">The value to convert.</param>
+        /// <returns>The value as hex.</returns>
+        public static string ToHex(this string value)
+        {
+            if (!String.IsNullOrEmpty(value))
+            {
+                return Encoding.UTF8.GetBytes(value).ToHex();
+            }
+
+            return String.Empty;
+        }
+
+        /// <summary>
         /// Converts the given byte array to a hex string.
         /// </summary>
         /// <param name="buffer">The byte array to convert.</param>

@@ -25,17 +25,6 @@ namespace Tasty.Configuration
         }
 
         /// <summary>
-        /// Gets or sets the scheduled job's override for the maximum number of times
-        /// a failed execution is re-tried.
-        /// </summary>
-        [ConfigurationProperty("maximumFailedRetries", IsRequired = false, DefaultValue = 3)]
-        public int MaximumFailedRetries
-        {
-            get { return (int)this["maximumFailedRetries"]; }
-            set { this["maximumFailedRetries"] = value; }
-        }
-
-        /// <summary>
         /// Gets any metadata configured for the scheduled job.
         /// </summary>
         [ConfigurationProperty("metadata", IsRequired = false)]

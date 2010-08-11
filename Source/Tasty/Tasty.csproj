@@ -123,15 +123,14 @@
     <Compile Include="Jobs\IJob.cs" />
     <Compile Include="Jobs\IJobStore.cs" />
     <Compile Include="Jobs\Job.cs" />
-    <Compile Include="Jobs\JobErrorEventArgs.cs" />
     <Compile Include="Jobs\JobRecord.cs" />
     <Compile Include="Jobs\JobRecordEventArgs.cs" />
     <Compile Include="Jobs\JobRun.cs" />
     <Compile Include="Jobs\JobRunEventArgs.cs" />
     <Compile Include="Jobs\JobRunner.cs" />
-    <Compile Include="Jobs\JobStore.cs" />
-    <Compile Include="Jobs\ScheduledJob.cs" />
-    <Compile Include="Jobs\SqlJobStore.cs" />
+    <Compile Include="Jobs\JobStatus.cs" />
+    <Compile Include="Jobs\MemoryJobStore.cs" />
+    <Compile Include="Jobs\RunningJobs.cs" />
     <Compile Include="TastyFileSystemEventType.cs" />
     <Compile Include="Geocode\GeocodeAddressDetails.cs" />
     <Compile Include="Geocode\GeocodeAdministrativeArea.cs" />
@@ -157,7 +156,6 @@
     <Compile Include="Http\HttpRedirectRuleMatcher.cs" />
     <Compile Include="Http\HttpRedirectType.cs" />
     <Compile Include="ISpreadsheetWriter.cs" />
-    <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="NameValueCollections.cs" />
     <Compile Include="OdsWriter.cs" />
     <Compile Include="Primitives.cs" />
@@ -190,12 +188,10 @@
     <EmbeddedResource Include="Build\Sql\DropLogin.sql" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Jobs\Sql\TastyJobs-SqlServer.sql" />
     <EmbeddedResource Include="Build\Sql\DatabaseExists.sql" />
     <EmbeddedResource Include="Web\UrlTokens\Sql\TastyUrlTokens-SqlServer.sql" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Jobs\Sql\TastyJobs-Postgres.sql" />
     <None Include="Tasty.snk" />
     <EmbeddedResource Include="Template.ods" />
     <EmbeddedResource Include="Web\UrlTokens\Sql\TastyUrlTokens-Postgres.sql" />

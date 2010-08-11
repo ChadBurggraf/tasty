@@ -38,6 +38,16 @@ namespace Tasty.Jobs
         public abstract string Name { get; }
 
         /// <summary>
+        /// Gets the number of times the job can be retried if it fails.
+        /// When not overridden, defaults to 0 (no retries).
+        /// </summary>
+        [IgnoreDataMember]
+        public int Retries
+        {
+            get { return 0; }
+        }
+
+        /// <summary>
         /// Gets the timeout, in miliseconds, the job is allowed to run for.
         /// When not overridden, defaults to 60,000 (1 minute).
         /// </summary>
@@ -50,6 +60,36 @@ namespace Tasty.Jobs
         #endregion
 
         #region Public Instance Methods
+
+        /// <summary>
+        /// Creates a new job record representing an enqueue-able state for this instance.
+        /// </summary>
+        /// <returns>The created job record.</returns>
+        public virtual JobRecord CreateRecord()
+        {
+            return this.CreateRecord(DateTime.UtcNow, null);
+        }
+
+        /// <summary>
+        /// Creates a new job record representing an enqueue-able state for this instance.
+        /// </summary>
+        /// <param name="queueDate">The date to queue the job for execution on.</param>
+        /// <param name="scheduleName">The name of the schedule to queue the job for, or null if not applicable.</param>
+        /// <returns>The created job record.</returns>
+        public virtual JobRecord CreateRecord(DateTime queueDate, string scheduleName)
+        {
+            Type type = GetType();
+
+            return new JobRecord()
+            {
+                Data = this.Serialize(),
+                JobType = String.Concat(type.FullName, ", ", type.Assembly.GetName().Name),
+                Name = this.Name,
+                QueueDate = queueDate,
+                ScheduleName = scheduleName,
+                Status = JobStatus.Queued
+            };
+        }
 
         /// <summary>
         /// Enqueues the job for execution.
@@ -68,20 +108,7 @@ namespace Tasty.Jobs
         /// <returns>The job record that was persisted.</returns>
         public virtual JobRecord Enqueue(DateTime queueDate, string scheduleName)
         {
-            Type type = GetType();
-
-            JobRecord record = new JobRecord()
-            {
-                Data = this.Serialize(),
-                JobType = String.Concat(type.FullName, ", ", type.Assembly.GetName().Name),
-                Name = this.Name,
-                QueueDate = queueDate,
-                ScheduleName = scheduleName,
-                Status = JobStatus.Queued
-            };
-
-            JobStore.Current.SaveJob(record);
-            return record;
+            throw new NotImplementedException();
         }
 
         /// <summary>

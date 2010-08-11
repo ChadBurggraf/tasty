@@ -69,19 +69,21 @@
     <Compile Include="GetVersionTests.cs" />
     <Compile Include="HttpCacheUrlTokenStoreTests.cs" />
     <Compile Include="HttpTests.cs" />
-    <Compile Include="JobRunnerTests.cs" />
-    <Compile Include="JobStoreTests.cs" />
-    <Compile Include="PostgresJobStoreTests.cs" />
+    <Compile Include="JobStoreTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="JobTests.cs" />
+    <Compile Include="MemoryJobStoreTests.cs" />
     <Compile Include="PostgresUrlTokenStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S3PublisherTests.cs" />
-    <Compile Include="ScheduledJobTests.cs" />
     <Compile Include="SetVersionTests.cs" />
     <Compile Include="SqlDateTimeAssert.cs" />
     <Compile Include="SqlServerClrTests.cs" />
-    <Compile Include="SqlServerJobStoreTests.cs" />
     <Compile Include="SqlServerUrlTokenStoreTests.cs" />
-    <Compile Include="TestJobs.cs" />
+    <Compile Include="TestJobs.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TestUrlTokens.cs" />
     <Compile Include="UrlTokenTests.cs" />
     <Compile Include="UtilityTests.cs" />

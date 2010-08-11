@@ -1,4 +1,8 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="IJobStore.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Tasty Codes.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Jobs
 {
@@ -38,7 +42,7 @@ namespace Tasty.Jobs
 
         /// <summary>
         /// Gets a collection of jobs with the given status, returning
-        /// at most the number of jobs identified by <see cref="count"/>.
+        /// at most the number of jobs identified by <paramref name="count"/>.
         /// </summary>
         /// <param name="status">The status of the jobs to get.</param>
         /// <param name="count">The maximum number of jobs to get.</param>

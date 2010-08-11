@@ -7,6 +7,7 @@
 namespace Tasty.Jobs
 {
     using System;
+    using System.Runtime.Serialization;
 
     /// <summary>
     /// Defines the interface for background jobs.
@@ -19,9 +20,28 @@ namespace Tasty.Jobs
         string Name { get; }
 
         /// <summary>
+        /// Gets the number of times the job can be retried if it fails.
+        /// </summary>
+        int Retries { get; }
+
+        /// <summary>
         /// Gets the timeout, in miliseconds, the job is allowed to run for.
         /// </summary>
         long Timeout { get; }
+
+        /// <summary>
+        /// Creates a new job record representing an enqueue-able state for this instance.
+        /// </summary>
+        /// <returns>The created job record.</returns>
+        JobRecord CreateRecord();
+
+        /// <summary>
+        /// Creates a new job record representing an enqueue-able state for this instance.
+        /// </summary>
+        /// <param name="queueDate">The date to queue the job for execution on.</param>
+        /// <param name="scheduleName">The name of the schedule to queue the job for, or null if not applicable.</param>
+        /// <returns>The created job record.</returns>
+        JobRecord CreateRecord(DateTime queueDate, string scheduleName);
 
         /// <summary>
         /// Enqueues the job for execution.

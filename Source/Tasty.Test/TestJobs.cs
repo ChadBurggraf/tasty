@@ -51,7 +51,7 @@ namespace Tasty.Test
         }
     }
 
-    [DataContract(Namespace = Job.XmlNamespace)]
+    /*[DataContract(Namespace = Job.XmlNamespace)]
     internal class TestScheduledJob : ScheduledJob
     {
         public override string Name
@@ -62,7 +62,7 @@ namespace Tasty.Test
         public override void Execute()
         {
         }
-    }
+    }*/
 
     [DataContract(Namespace = Job.XmlNamespace)]
     internal class TestSlowJob : Job

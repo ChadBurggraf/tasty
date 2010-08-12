@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Text.RegularExpressions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tasty.Configuration;
 using Tasty.Jobs;
@@ -14,51 +10,23 @@ namespace Tasty.Test
     [TestClass]
     public class SqlServerJobStoreTests : JobStoreTests
     {
+        private static string connectionString = ConfigurationManager.AppSettings["SqlServerConnectionString"];
+
         public SqlServerJobStoreTests()
-            : base(new SqlServerJobStore(ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString))
+            : base(!String.IsNullOrEmpty(connectionString) ? new SqlServerJobStore(connectionString) : null)
         {
-        }
-
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext testContext)
-        {
-            Bootstrapper.EnsureTestDatabase();
         }
 
         [TestMethod]
-        public void SqlServerJobStore_CancellingJobs()
+        public void SqlServerJobStore_DeleteJobs()
         {
-            base.CancellingJobs();
+            base.DeleteJobs();
         }
 
         [TestMethod]
-        public void SqlServerJobStore_CreateJob()
+        public void SqlServerJobStore_GetJobs()
         {
-            base.CreateJob();
-        }
-
-        [TestMethod]
-        public void SqlServerJobStore_DequeueingJobs()
-        {
-            base.DequeueingJobs();
-        }
-
-        [TestMethod]
-        public void SqlServerJobStore_EnqueueJob()
-        {
-            base.EnqueueJob();
-        }
-
-        [TestMethod]
-        public void SqlServerJobStore_FinishingJobs()
-        {
-            base.FinishingJobs();
-        }
-
-        [TestMethod]
-        public void SqlServerJobStore_GetJob()
-        {
-            base.GetJob();
+            base.GetJobs();
         }
 
         [TestMethod]
@@ -68,15 +36,9 @@ namespace Tasty.Test
         }
 
         [TestMethod]
-        public void SqlServerJobStore_TimingOutJobs()
+        public void SqlServerJobStore_SaveJobs()
         {
-            base.TimingOutJobs();
-        }
-
-        [TestMethod]
-        public void SqlServerJobStore_UpdateJob()
-        {
-            base.UpdateJob();
+            base.SaveJobs();
         }
     }
 }

@@ -9,26 +9,43 @@ using Tasty.Web.UrlTokens;
 namespace Tasty.Test
 {
     [TestClass]
-    public class SqlServerUrlTokenStoreTests
+    public class SqlServerUrlTokenStoreTests : UrlTokenStoreTests
     {
-        private static string ConnectionString = ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString;
+        private static string connectionString = ConfigurationManager.AppSettings["SqlServerConnectionString"];
+
+        public SqlServerUrlTokenStoreTests()
+            : base(!String.IsNullOrEmpty(connectionString) ? new SqlServerUrlTokenStore(connectionString) : null)
+        {
+        }
+
+        [TestMethod]
+        public void SqlServerUrlTokenStore_CurrentTokenStore()
+        {
+            base.CurrentTokenStore();
+        }
 
         [TestMethod]
         public void SqlServerUrlTokenStore_CreateUrlToken()
         {
-            UrlTokenTests.Store_CreateUrlToken(new SqlServerUrlTokenStore(ConnectionString));
+            base.CreateUrlToken();
         }
 
         [TestMethod]
         public void SqlServerUrlTokenStore_ExpireUrlToken()
         {
-            UrlTokenTests.Store_ExpireUrlToken(new SqlServerUrlTokenStore(ConnectionString));
+            base.ExpireUrlToken();
         }
 
         [TestMethod]
         public void SqlServerUrlTokenStore_GetUrlToken()
         {
-            UrlTokenTests.Store_GetUrlToken(new SqlServerUrlTokenStore(ConnectionString));
+            base.GetUrlToken();
+        }
+
+        [TestMethod]
+        public void SqlServerUrlTokenStore_QueryStringUrlTokenUrlProvider()
+        {
+            base.QueryStringUrlTokenUrlProvider();
         }
     }
 }

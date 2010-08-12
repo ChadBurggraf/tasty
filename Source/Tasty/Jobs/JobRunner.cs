@@ -225,91 +225,32 @@ namespace Tasty.Jobs
         /// </summary>
         private void CancelJobs()
         {
-            var trans = this.store.StartTransaction();
-
-            try
+            using (IJobStoreTransaction trans = this.store.StartTransaction())
             {
-                var runs = this.runs.GetRunning();
-                var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
-
-                var canceling = from run in runs
-                                join record in records on run.JobId equals record.Id.Value
-                                where record.Status == JobStatus.Canceling
-                                select new
-                                {
-                                    Run = run,
-                                    Record = record
-                                };
-
-                foreach (var job in canceling)
-                {
-                    job.Run.Abort();
-                    job.Record.Status = JobStatus.Canceled;
-                    job.Record.FinishDate = job.Run.FinishDate;
-
-                    this.store.SaveJob(job.Record, trans);
-                    this.runs.Remove(job.Record.Id.Value);
-
-                    this.RaiseEvent(this.CancelJob, new JobRecordEventArgs(job.Record));
-                }
-
-                this.runs.Flush();
-                trans.Commit();
-            }
-            catch
-            {
-                trans.Rollback();
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Dequeues pending jobs in the job store.
-        /// </summary>
-        private void DequeueJobs()
-        {
-            int count = TastySettings.Section.Jobs.MaximumConcurrency - this.ExecutingJobCount;
-
-            if (count > 0)
-            {
-                var trans = this.store.StartTransaction();
-
                 try
                 {
-                    foreach (var record in this.store.GetJobs(JobStatus.Queued, count, trans))
+                    var runs = this.runs.GetRunning();
+                    var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
+
+                    var canceling = from run in runs
+                                    join record in records on run.JobId equals record.Id.Value
+                                    where record.Status == JobStatus.Canceling
+                                    select new
+                                    {
+                                        Run = run,
+                                        Record = record
+                                    };
+
+                    foreach (var job in canceling)
                     {
-                        record.Status = JobStatus.Started;
-                        record.StartDate = DateTime.UtcNow;
+                        job.Run.Abort();
+                        job.Record.Status = JobStatus.Canceled;
+                        job.Record.FinishDate = job.Run.FinishDate;
 
-                        IJob job = null;
-                        Exception toJobEx = null;
+                        this.store.SaveJob(job.Record, trans);
+                        this.runs.Remove(job.Record.Id.Value);
 
-                        try
-                        {
-                            job = record.ToJob();
-                        }
-                        catch (InvalidOperationException ex)
-                        {
-                            toJobEx = ex.InnerException ?? ex;
-                            this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
-                        }
-
-                        if (job != null)
-                        {
-                            JobRun run = new JobRun(record.Id.Value, job);
-                            this.runs.Add(run);
-
-                            run.Start();
-                        }
-                        else
-                        {
-                            record.Status = JobStatus.FailedToLoadType;
-                            record.FinishDate = DateTime.UtcNow;
-                            record.Exception = new ExceptionXElement(toJobEx).ToString();
-                        }
-
-                        this.store.SaveJob(record, trans);
-                        this.RaiseEvent(this.DequeueJob, new JobRecordEventArgs(record));
+                        this.RaiseEvent(this.CancelJob, new JobRecordEventArgs(job.Record));
                     }
 
                     this.runs.Flush();
@@ -324,59 +265,121 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Dequeues pending jobs in the job store.
+        /// </summary>
+        private void DequeueJobs()
+        {
+            int count = TastySettings.Section.Jobs.MaximumConcurrency - this.ExecutingJobCount;
+
+            if (count > 0)
+            {
+                using (IJobStoreTransaction trans = this.store.StartTransaction())
+                {
+                    try
+                    {
+                        foreach (var record in this.store.GetJobs(JobStatus.Queued, count, trans))
+                        {
+                            record.Status = JobStatus.Started;
+                            record.StartDate = DateTime.UtcNow;
+
+                            IJob job = null;
+                            Exception toJobEx = null;
+
+                            try
+                            {
+                                job = record.ToJob();
+                            }
+                            catch (InvalidOperationException ex)
+                            {
+                                toJobEx = ex.InnerException ?? ex;
+                                this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
+                            }
+
+                            if (job != null)
+                            {
+                                JobRun run = new JobRun(record.Id.Value, job);
+                                this.runs.Add(run);
+
+                                run.Start();
+                            }
+                            else
+                            {
+                                record.Status = JobStatus.FailedToLoadType;
+                                record.FinishDate = DateTime.UtcNow;
+                                record.Exception = new ExceptionXElement(toJobEx).ToString();
+                            }
+
+                            this.store.SaveJob(record, trans);
+                            this.RaiseEvent(this.DequeueJob, new JobRecordEventArgs(record));
+                        }
+
+                        this.runs.Flush();
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Finishes any jobs that have completed by updating their records in the job store.
         /// </summary>
         private void FinishJobs()
         {
-            var trans = this.store.StartTransaction();
-
-            try
+            using (IJobStoreTransaction trans = this.store.StartTransaction())
             {
-                var runs = this.runs.GetNotRunning();
-                var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
-
-                var finishing = from run in runs
-                                join record in records on run.JobId equals record.Id.Value
-                                where record.Status == JobStatus.Started
-                                select new
-                                {
-                                    Run = run,
-                                    Record = record
-                                };
-
-                foreach (var job in finishing)
+                try
                 {
-                    job.Record.FinishDate = job.Run.FinishDate;
+                    var runs = this.runs.GetNotRunning();
+                    var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
 
-                    if (job.Run.ExecutionException != null)
+                    var finishing = from run in runs
+                                    join record in records on run.JobId equals record.Id.Value
+                                    where record.Status == JobStatus.Started
+                                    select new
+                                    {
+                                        Run = run,
+                                        Record = record
+                                    };
+
+                    foreach (var job in finishing)
                     {
-                        job.Record.Exception = new ExceptionXElement(job.Run.ExecutionException).ToString();
-                        job.Record.Status = JobStatus.Failed;
+                        job.Record.FinishDate = job.Run.FinishDate;
 
-                        this.RaiseEvent(this.Error, new JobErrorEventArgs(job.Record, job.Run.ExecutionException));
-                    }
-                    else if (job.Run.WasRecovered)
-                    {
-                        job.Record.Status = JobStatus.Interrupted;
-                    }
-                    else
-                    {
-                        job.Record.Status = JobStatus.Succeeded;
+                        if (job.Run.ExecutionException != null)
+                        {
+                            job.Record.Exception = new ExceptionXElement(job.Run.ExecutionException).ToString();
+                            job.Record.Status = JobStatus.Failed;
+
+                            this.RaiseEvent(this.Error, new JobErrorEventArgs(job.Record, job.Run.ExecutionException));
+                        }
+                        else if (job.Run.WasRecovered)
+                        {
+                            job.Record.Status = JobStatus.Interrupted;
+                        }
+                        else
+                        {
+                            job.Record.Status = JobStatus.Succeeded;
+                        }
+
+                        this.store.SaveJob(job.Record, trans);
+                        this.runs.Remove(job.Record.Id.Value);
+
+                        this.RaiseEvent(this.FinishJob, new JobRecordEventArgs(job.Record));
                     }
 
-                    this.store.SaveJob(job.Record, trans);
-                    this.runs.Remove(job.Record.Id.Value);
-
-                    this.RaiseEvent(this.FinishJob, new JobRecordEventArgs(job.Record));
+                    this.runs.Flush();
+                    trans.Commit();
                 }
-
-                this.runs.Flush();
-                trans.Commit();
-            }
-            catch
-            {
-                trans.Rollback();
-                throw;
+                catch
+                {
+                    trans.Rollback();
+                    throw;
+                }
             }
         }
 
@@ -389,11 +392,9 @@ namespace Tasty.Jobs
             {
                 try
                 {
-                    //this.CancelJobs();
-                    this.DequeueJobs();
-                    /*
-                    //this.TimeoutJobs();
-                    //this.FinishJobs();
+                    this.CancelJobs();
+                    this.TimeoutJobs();
+                    this.FinishJobs();
 
                     lock (this.statusLocker)
                     {
@@ -406,12 +407,11 @@ namespace Tasty.Jobs
                             this.IsShuttingDown = false;
                             this.RaiseEvent(this.AllFinished, EventArgs.Empty);
                         }
-                    }*/
+                    }
                 }
                 catch (Exception ex)
                 {
-                    throw;
-                    //this.RaiseEvent(this.Error, new JobErrorEventArgs(null, ex));
+                    this.RaiseEvent(this.Error, new JobErrorEventArgs(null, ex));
                 }
 
                 Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);
@@ -423,46 +423,47 @@ namespace Tasty.Jobs
         /// </summary>
         private void TimeoutJobs()
         {
-            var trans = this.store.StartTransaction();
-
-            try
+            using (IJobStoreTransaction trans = this.store.StartTransaction())
             {
-                var runs = this.runs.GetRunning();
-                var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
-
-                var timingOut = from run in runs
-                                join record in records on run.JobId equals record.Id.Value
-                                where run.Job != null 
-                                    && run.StartDate != null 
-                                    && DateTime.UtcNow.Subtract(run.StartDate.Value).TotalMilliseconds >= run.Job.Timeout
-                                    && record.Status == JobStatus.Started
-                                select new
-                                {
-                                    Run = run,
-                                    Record = record
-                                };
-
-                foreach (var job in timingOut)
+                try
                 {
-                    if (job.Run.Abort())
+                    var runs = this.runs.GetRunning();
+                    var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
+
+                    var timingOut = from run in runs
+                                    join record in records on run.JobId equals record.Id.Value
+                                    where run.Job != null
+                                        && run.StartDate != null
+                                        && DateTime.UtcNow.Subtract(run.StartDate.Value).TotalMilliseconds >= run.Job.Timeout
+                                        && record.Status == JobStatus.Started
+                                    select new
+                                    {
+                                        Run = run,
+                                        Record = record
+                                    };
+
+                    foreach (var job in timingOut)
                     {
-                        job.Record.Status = JobStatus.TimedOut;
-                        job.Record.FinishDate = job.Run.FinishDate;
+                        if (job.Run.Abort())
+                        {
+                            job.Record.Status = JobStatus.TimedOut;
+                            job.Record.FinishDate = job.Run.FinishDate;
 
-                        this.store.SaveJob(job.Record, trans);
-                        this.runs.Remove(job.Record.Id.Value);
+                            this.store.SaveJob(job.Record, trans);
+                            this.runs.Remove(job.Record.Id.Value);
 
-                        this.RaiseEvent(this.TimeoutJob, new JobRecordEventArgs(job.Record));
+                            this.RaiseEvent(this.TimeoutJob, new JobRecordEventArgs(job.Record));
+                        }
                     }
-                }
 
-                this.runs.Flush();
-                trans.Commit();
-            }
-            catch
-            {
-                trans.Rollback();
-                throw;
+                    this.runs.Flush();
+                    trans.Commit();
+                }
+                catch
+                {
+                    trans.Rollback();
+                    throw;
+                }
             }
         }
 

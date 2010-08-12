@@ -32,16 +32,7 @@ namespace Tasty.Jobs
         {
             if (record != null)
             {
-                this.Data = record.Data;
-                this.Exception = record.Exception;
-                this.FinishDate = record.FinishDate;
-                this.Id = record.Id;
-                this.JobType = record.JobType;
-                this.Name = record.Name;
-                this.QueueDate = record.QueueDate;
-                this.ScheduleName = record.ScheduleName;
-                this.StartDate = record.StartDate;
-                this.Status = record.Status;
+                record.CopyProperties(this);
             }
         }
 
@@ -69,6 +60,7 @@ namespace Tasty.Jobs
 
         /// <summary>
         /// Gets or sets the <see cref="IJob"/> implementor that the job is persisted for.
+        /// This property can be set using a <see cref="JobRecord.JobTypeString"/> overload.
         /// </summary>
         public string JobType { get; set; }
 
@@ -129,6 +121,41 @@ namespace Tasty.Jobs
             {
                 throw new InvalidOperationException("The JobType and Data values could not be converted into an IJob object.", ex);
             }
+        }
+
+        /// <summary>
+        /// Gets the string used when persisting the type of an <see cref="IJob"/> into a <see cref="JobRecord"/>.
+        /// </summary>
+        /// <param name="job">The job to get the type string from.</param>
+        /// <returns>A job type string.</returns>
+        public static string JobTypeString(IJob job)
+        {
+            if (job == null)
+            {
+                throw new ArgumentNullException("job", "job cannot be null.");
+            }
+
+            return JobTypeString(job.GetType());
+        }
+
+        /// <summary>
+        /// Gets the string used when persisting the type of an <see cref="IJob"/> into a <see cref="JobRecord"/>.
+        /// </summary>
+        /// <param name="jobType">The job type to get the type string from.</param>
+        /// <returns>A job type string.</returns>
+        public static string JobTypeString(Type jobType)
+        {
+            if (jobType == null)
+            {
+                throw new ArgumentNullException("jobType", "jobType cannot be null.");
+            }
+
+            if (!typeof(IJob).IsAssignableFrom(jobType))
+            {
+                throw new ArgumentException("jobType must be assignable from Tasty.Jobs.IJob.", "jobType");
+            }
+
+            return String.Concat(jobType.FullName, ", ", jobType.Assembly.GetName().Name);
         }
     }
 }

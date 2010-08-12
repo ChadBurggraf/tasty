@@ -8,24 +8,41 @@ using Tasty.Web.UrlTokens;
 namespace Tasty.Test
 {
     [TestClass]
-    public class HttpCacheUrlTokenStoreTests
+    public class HttpCacheUrlTokenStoreTests : UrlTokenStoreTests
     {
+        public HttpCacheUrlTokenStoreTests()
+            : base(new HttpCacheUrlTokenStore())
+        {
+        }
+
+        [TestMethod]
+        public void HttpCacheUrlTokenStore_CurrentTokenStore()
+        {
+            base.CurrentTokenStore();
+        }
+
         [TestMethod]
         public void HttpCacheUrlTokenStore_CreateUrlToken()
         {
-            UrlTokenTests.Store_CreateUrlToken(new HttpCacheUrlTokenStore());
+            base.CreateUrlToken();
         }
 
         [TestMethod]
         public void HttpCacheUrlTokenStore_ExpireUrlToken()
         {
-            UrlTokenTests.Store_ExpireUrlToken(new HttpCacheUrlTokenStore());
+            base.ExpireUrlToken();
         }
 
         [TestMethod]
         public void HttpCacheUrlTokenStore_GetUrlToken()
         {
-            UrlTokenTests.Store_GetUrlToken(new HttpCacheUrlTokenStore());
+            base.GetUrlToken();
+        }
+
+        [TestMethod]
+        public void HttpCacheUrlTokenStore_QueryStringUrlTokenUrlProvider()
+        {
+            base.QueryStringUrlTokenUrlProvider();
         }
     }
 }

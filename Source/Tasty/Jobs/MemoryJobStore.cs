@@ -16,8 +16,7 @@ namespace Tasty.Jobs
     /// </summary>
     public class MemoryJobStore : JobStore
     {
-        private Dictionary<int, JobRecord> committed = new Dictionary<int, JobRecord>();
-        private readonly object locker = new object();
+        private List<JobRecord> committed = new List<JobRecord>();
         
         /// <summary>
         /// Deletes a job by ID.
@@ -26,7 +25,7 @@ namespace Tasty.Jobs
         /// <param name="transaction">The transaction to execute the command in.</param>
         public override void DeleteJob(int id, IJobStoreTransaction transaction)
         {
-            lock (this.locker)
+            lock (this.committed)
             {
                 if (transaction != null)
                 {
@@ -34,7 +33,7 @@ namespace Tasty.Jobs
                 }
                 else
                 {
-                    this.committed.Remove(id);
+                    this.committed.RemoveAll(r => r.Id.Value == id);
                 }
             }
         }
@@ -47,14 +46,11 @@ namespace Tasty.Jobs
         /// <returns>The job with the given ID.</returns>
         public override JobRecord GetJob(int id, IJobStoreTransaction transaction)
         {
-            lock (this.locker)
+            lock (this.committed)
             {
-                if (this.committed.ContainsKey(id))
-                {
-                    return new JobRecord(this.committed[id]);
-                }
-
-                return null;
+                return (from r in this.committed
+                        where r.Id.Value == id
+                        select new JobRecord(r)).FirstOrDefault();
             }
         }
 
@@ -66,13 +62,13 @@ namespace Tasty.Jobs
         /// <returns>A collection of jobs.</returns>
         public override IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids, IJobStoreTransaction transaction)
         {
-            lock (this.locker)
+            lock (this.committed)
             {
-                if (ids != null)
+                if (ids != null && ids.Count() > 0)
                 {
-                    return (from r in this.committed.Values
-                            where ids.Contains(r.Id.Value)
-                            orderby r.QueueDate descending
+                    return (from r in this.committed
+                            join i in ids on r.Id.Value equals i
+                            orderby r.QueueDate
                             select new JobRecord(r)).ToArray();
                 }
 
@@ -90,11 +86,11 @@ namespace Tasty.Jobs
         /// <returns>A collection of jobs.</returns>
         public override IEnumerable<JobRecord> GetJobs(JobStatus status, int count, IJobStoreTransaction transaction)
         {
-            lock (this.locker)
+            lock (this.committed)
             {
-                var query = from r in this.committed.Values
+                var query = from r in this.committed
                             where r.Status == status
-                            orderby r.QueueDate descending
+                            orderby r.QueueDate
                             select new JobRecord(r);
 
                 if (count > 0)
@@ -114,21 +110,12 @@ namespace Tasty.Jobs
         /// <returns>A collection of recently scheduled jobs.</returns>
         public override IEnumerable<JobRecord> GetLatestScheduledJobs(IJobStoreTransaction transaction)
         {
-            lock (this.locker)
+            lock (this.committed)
             {
-                return (from r in this.committed.Values
-                        group r by r.ScheduleName into g
-                        where TastySettings.Section.Jobs.Schedules.Select(s => s.Name).Contains(g.Key)
+                return (from r in this.committed
+                        group r by new { r.JobType, r.ScheduleName } into g
                         select new JobRecord(g.OrderByDescending(gr => gr.QueueDate).First())).ToArray();
             }
-        }
-
-        /// <summary>
-        /// Initializes the job store with the given configuration.
-        /// </summary>
-        /// <param name="configuration">The configuration to initialize the job store with.</param>
-        public override void Initialize(TastySettings configuration)
-        {
         }
 
         /// <summary>
@@ -138,7 +125,7 @@ namespace Tasty.Jobs
         /// <param name="transaction">The transaction to execute the command in.</param>
         public override void SaveJob(JobRecord record, IJobStoreTransaction transaction)
         {
-            lock (this.locker)
+            lock (this.committed)
             {
                 if (record.Id == null)
                 {
@@ -151,7 +138,8 @@ namespace Tasty.Jobs
                 }
                 else
                 {
-                    this.committed[record.Id.Value] = new JobRecord(record);
+                    this.committed.RemoveAll(r => r.Id.Value == record.Id.Value);
+                    this.committed.Add(record);
                 }
             }
         }
@@ -161,10 +149,7 @@ namespace Tasty.Jobs
         /// </summary>
         public override IJobStoreTransaction StartTransaction()
         {
-            lock (this.locker)
-            {
-                return new MemoryJobStoreTransaction(this);
-            }
+            return new MemoryJobStoreTransaction(this);
         }
 
         /// <summary>

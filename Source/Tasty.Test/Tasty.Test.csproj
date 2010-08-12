@@ -63,7 +63,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bootstrapper.cs" />
     <Compile Include="DataSetsTests.cs" />
     <Compile Include="GeocodeTests.cs" />
     <Compile Include="GetVersionTests.cs" />
@@ -81,12 +80,13 @@
     <Compile Include="SetVersionTests.cs" />
     <Compile Include="SqlDateTimeAssert.cs" />
     <Compile Include="SqlServerClrTests.cs" />
+    <Compile Include="SqlServerJobStoreTests.cs" />
     <Compile Include="SqlServerUrlTokenStoreTests.cs" />
     <Compile Include="TestJobs.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="TestUrlTokens.cs" />
-    <Compile Include="UrlTokenTests.cs" />
+    <Compile Include="UrlTokenStoreTests.cs" />
     <Compile Include="UtilityTests.cs" />
   </ItemGroup>
   <ItemGroup>

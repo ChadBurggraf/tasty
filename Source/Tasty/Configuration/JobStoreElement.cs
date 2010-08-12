@@ -16,8 +16,9 @@ namespace Tasty.Configuration
     {
         /// <summary>
         /// Gets or sets the type of the <see cref="Tasty.Jobs.IJobStore"/> implementation to use when persisting jobs.
+        /// When not configured, defaults to "Tasty.Jobs.MemoryJobStore, Tasty".
         /// </summary>
-        [ConfigurationProperty("type", IsRequired = false, DefaultValue = "Tasty.Jobs.SqlServerJobStore, Tasty")]
+        [ConfigurationProperty("type", IsRequired = false, DefaultValue = "Tasty.Jobs.MemoryJobStore, Tasty")]
         public string JobStoreType
         {
             get { return (string)this["type"]; }

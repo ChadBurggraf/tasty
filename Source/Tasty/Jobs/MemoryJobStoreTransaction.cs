@@ -57,19 +57,29 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
-                foreach (var record in this.saving)
+                lock (this.jobStore)
                 {
-                    this.jobStore.SaveJob(record);
-                }
+                    foreach (var record in this.saving)
+                    {
+                        this.jobStore.SaveJob(record);
+                    }
 
-                foreach (var id in this.deleting)
-                {
-                    this.jobStore.DeleteJob(id);
+                    foreach (var id in this.deleting)
+                    {
+                        this.jobStore.DeleteJob(id);
+                    }
                 }
 
                 this.saving.Clear();
                 this.deleting.Clear();
             }
+        }
+
+        /// <summary>
+        /// Disposes of resources used by this instance.
+        /// </summary>
+        public void Dispose()
+        {
         }
 
         /// <summary>

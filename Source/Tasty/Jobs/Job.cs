@@ -78,12 +78,10 @@ namespace Tasty.Jobs
         /// <returns>The created job record.</returns>
         public virtual JobRecord CreateRecord(DateTime queueDate, string scheduleName)
         {
-            Type type = GetType();
-
             return new JobRecord()
             {
                 Data = this.Serialize(),
-                JobType = String.Concat(type.FullName, ", ", type.Assembly.GetName().Name),
+                JobType = JobRecord.JobTypeString(this),
                 Name = this.Name,
                 QueueDate = queueDate,
                 ScheduleName = scheduleName,

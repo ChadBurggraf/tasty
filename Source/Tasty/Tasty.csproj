@@ -135,6 +135,9 @@
     <Compile Include="Jobs\MemoryJobStore.cs" />
     <Compile Include="Jobs\MemoryJobStoreTransaction.cs" />
     <Compile Include="Jobs\RunningJobs.cs" />
+    <Compile Include="Jobs\SqlJobStore.cs" />
+    <Compile Include="Jobs\SqlJobStoreTransaction.cs" />
+    <Compile Include="Jobs\SqlServerJobStore.cs" />
     <Compile Include="ShaLevel.cs" />
     <Compile Include="Strings.cs" />
     <Compile Include="TastyFileSystemEventType.cs" />
@@ -198,6 +201,7 @@
     <EmbeddedResource Include="Web\UrlTokens\Sql\TastyUrlTokens-SqlServer.sql" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Jobs\Sql\TastyJobs-SqlServer.sql" />
     <None Include="Tasty.snk" />
     <EmbeddedResource Include="Template.ods" />
     <EmbeddedResource Include="Web\UrlTokens\Sql\TastyUrlTokens-Postgres.sql" />

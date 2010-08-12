@@ -11,7 +11,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Identifies the interface for <see cref="IJobStore"/> transactions.
     /// </summary>
-    public interface IJobStoreTransaction
+    public interface IJobStoreTransaction : IDisposable
     {
         /// <summary>
         /// Adds the given job ID for deletion to the transaction.

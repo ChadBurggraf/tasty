@@ -99,12 +99,6 @@ namespace Tasty.Jobs
         IEnumerable<JobRecord> GetLatestScheduledJobs(IJobStoreTransaction transaction);
 
         /// <summary>
-        /// Initializes the job store with the given configuration.
-        /// </summary>
-        /// <param name="configuration">The configuration to initialize the job store with.</param>
-        void Initialize(TastySettings configuration);
-
-        /// <summary>
         /// Saves the given job record, either creating it or updating it.
         /// </summary>
         /// <param name="record">The job to save.</param>

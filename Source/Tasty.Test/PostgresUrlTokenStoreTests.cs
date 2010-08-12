@@ -9,35 +9,43 @@ using Tasty.Web.UrlTokens;
 namespace Tasty.Test
 {
     [TestClass]
-    public class PostgresUrlTokenStoreTests
+    public class PostgresUrlTokenStoreTests : UrlTokenStoreTests
     {
-        private static string ConnectionString = ConfigurationManager.ConnectionStrings["Postgres"] != null ? ConfigurationManager.ConnectionStrings["Postgres"].ConnectionString : String.Empty;
+        private static string connectionString = ConfigurationManager.AppSettings["PostgresConnectionString"];
+
+        public PostgresUrlTokenStoreTests()
+            : base(!String.IsNullOrEmpty(connectionString) ? new PostgresUrlTokenStore(connectionString) : null)
+        {
+        }
+
+        [TestMethod]
+        public void PostgresUrlTokenStore_CurrentTokenStore()
+        {
+            base.CurrentTokenStore();
+        }
 
         [TestMethod]
         public void PostgresUrlTokenStore_CreateUrlToken()
         {
-            if (!String.IsNullOrEmpty(ConnectionString))
-            {
-                UrlTokenTests.Store_CreateUrlToken(new PostgresUrlTokenStore(ConnectionString));
-            }
+            base.CreateUrlToken();
         }
 
         [TestMethod]
         public void PostgresUrlTokenStore_ExpireUrlToken()
         {
-            if (!String.IsNullOrEmpty(ConnectionString))
-            {
-                UrlTokenTests.Store_ExpireUrlToken(new PostgresUrlTokenStore(ConnectionString));
-            }
+            base.ExpireUrlToken();
         }
 
         [TestMethod]
         public void PostgresUrlTokenStore_GetUrlToken()
         {
-            if (!String.IsNullOrEmpty(ConnectionString))
-            {
-                UrlTokenTests.Store_GetUrlToken(new PostgresUrlTokenStore(ConnectionString));
-            }
+            base.GetUrlToken();
+        }
+
+        [TestMethod]
+        public void PostgresUrlTokenStore_QueryStringUrlTokenUrlProvider()
+        {
+            base.QueryStringUrlTokenUrlProvider();
         }
     }
 }

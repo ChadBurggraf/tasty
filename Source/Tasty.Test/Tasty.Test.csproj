@@ -74,6 +74,7 @@
     </Compile>
     <Compile Include="JobTests.cs" />
     <Compile Include="MemoryJobStoreTests.cs" />
+    <Compile Include="PostgresJobStoreTests.cs" />
     <Compile Include="PostgresUrlTokenStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S3PublisherTests.cs" />

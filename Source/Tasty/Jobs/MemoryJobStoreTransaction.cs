@@ -57,21 +57,17 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
-                lock (this.jobStore)
+                while (this.saving.Count > 0) 
                 {
-                    foreach (var record in this.saving)
-                    {
-                        this.jobStore.SaveJob(record);
-                    }
-
-                    foreach (var id in this.deleting)
-                    {
-                        this.jobStore.DeleteJob(id);
-                    }
+                    this.jobStore.SaveJob(this.saving[0]);
+                    this.saving.RemoveAt(0);
                 }
 
-                this.saving.Clear();
-                this.deleting.Clear();
+                while (this.deleting.Count > 0)
+                {
+                    this.jobStore.DeleteJob(this.deleting[0]);
+                    this.deleting.RemoveAt(0);
+                }
             }
         }
 

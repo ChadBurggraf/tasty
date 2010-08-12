@@ -16,8 +16,8 @@ namespace Tasty.Jobs
     /// </summary>
     public class MemoryJobStore : JobStore
     {
-        private List<JobRecord> committed = new List<JobRecord>();
-        
+        private static List<JobRecord> committed = new List<JobRecord>();
+
         /// <summary>
         /// Deletes a job by ID.
         /// </summary>
@@ -25,7 +25,7 @@ namespace Tasty.Jobs
         /// <param name="transaction">The transaction to execute the command in.</param>
         public override void DeleteJob(int id, IJobStoreTransaction transaction)
         {
-            lock (this.committed)
+            lock (committed)
             {
                 if (transaction != null)
                 {
@@ -33,7 +33,7 @@ namespace Tasty.Jobs
                 }
                 else
                 {
-                    this.committed.RemoveAll(r => r.Id.Value == id);
+                    committed.RemoveAll(r => r.Id.Value == id);
                 }
             }
         }
@@ -46,9 +46,9 @@ namespace Tasty.Jobs
         /// <returns>The job with the given ID.</returns>
         public override JobRecord GetJob(int id, IJobStoreTransaction transaction)
         {
-            lock (this.committed)
+            lock (committed)
             {
-                return (from r in this.committed
+                return (from r in committed
                         where r.Id.Value == id
                         select new JobRecord(r)).FirstOrDefault();
             }
@@ -62,11 +62,11 @@ namespace Tasty.Jobs
         /// <returns>A collection of jobs.</returns>
         public override IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids, IJobStoreTransaction transaction)
         {
-            lock (this.committed)
+            lock (committed)
             {
                 if (ids != null && ids.Count() > 0)
                 {
-                    return (from r in this.committed
+                    return (from r in committed
                             join i in ids on r.Id.Value equals i
                             orderby r.QueueDate
                             select new JobRecord(r)).ToArray();
@@ -86,9 +86,9 @@ namespace Tasty.Jobs
         /// <returns>A collection of jobs.</returns>
         public override IEnumerable<JobRecord> GetJobs(JobStatus status, int count, IJobStoreTransaction transaction)
         {
-            lock (this.committed)
+            lock (committed)
             {
-                var query = from r in this.committed
+                var query = from r in committed
                             where r.Status == status
                             orderby r.QueueDate
                             select new JobRecord(r);
@@ -110,9 +110,9 @@ namespace Tasty.Jobs
         /// <returns>A collection of recently scheduled jobs.</returns>
         public override IEnumerable<JobRecord> GetLatestScheduledJobs(IJobStoreTransaction transaction)
         {
-            lock (this.committed)
+            lock (committed)
             {
-                return (from r in this.committed
+                return (from r in committed
                         group r by new { r.JobType, r.ScheduleName } into g
                         select new JobRecord(g.OrderByDescending(gr => gr.QueueDate).First())).ToArray();
             }
@@ -125,11 +125,12 @@ namespace Tasty.Jobs
         /// <param name="transaction">The transaction to execute the command in.</param>
         public override void SaveJob(JobRecord record, IJobStoreTransaction transaction)
         {
-            lock (this.committed)
+            lock (committed)
             {
                 if (record.Id == null)
                 {
-                    record.Id = GetNewId();
+                    // Not perfect, but probably good enough.
+                    record.Id = Math.Abs(Guid.NewGuid().GetHashCode());
                 }
 
                 if (transaction != null)
@@ -138,8 +139,8 @@ namespace Tasty.Jobs
                 }
                 else
                 {
-                    this.committed.RemoveAll(r => r.Id.Value == record.Id.Value);
-                    this.committed.Add(record);
+                    committed.RemoveAll(r => r.Id.Value == record.Id.Value);
+                    committed.Add(record);
                 }
             }
         }
@@ -150,15 +151,6 @@ namespace Tasty.Jobs
         public override IJobStoreTransaction StartTransaction()
         {
             return new MemoryJobStoreTransaction(this);
-        }
-
-        /// <summary>
-        /// Gets a new, unique ID.
-        /// </summary>
-        /// <returns>A new ID.</returns>
-        private static int GetNewId()
-        {
-            return Math.Abs(Guid.NewGuid().GetHashCode());
         }
     }
 }

@@ -134,6 +134,7 @@
     <Compile Include="Jobs\JobStore.cs" />
     <Compile Include="Jobs\MemoryJobStore.cs" />
     <Compile Include="Jobs\MemoryJobStoreTransaction.cs" />
+    <Compile Include="Jobs\PostgresJobStore.cs" />
     <Compile Include="Jobs\RunningJobs.cs" />
     <Compile Include="Jobs\SqlJobStore.cs" />
     <Compile Include="Jobs\SqlJobStoreTransaction.cs" />

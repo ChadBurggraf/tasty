@@ -23,7 +23,6 @@ namespace Tasty.Test
             TastySettings.Section.Jobs.Heartbeat = 1000;
 
             this.jobStore = new MemoryJobStore();
-            //this.jobStore = new SqlServerJobStore(ConfigurationManager.AppSettings["SqlServerConnectionString"]);
             this.jobRunner = JobRunner.GetInstance(this.jobStore);
             this.jobRunner.Error += new EventHandler<JobErrorEventArgs>(JobRunnerError);
             this.jobRunner.Start();

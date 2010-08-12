@@ -60,7 +60,7 @@ namespace Tasty.Jobs
 
         /// <summary>
         /// Gets or sets the <see cref="IJob"/> implementor that the job is persisted for.
-        /// This property can be set using a <see cref="JobRecord.JobTypeString"/> overload.
+        /// This property can be set using a <see cref="JobRecord.JobTypeString(IJob)"/> overload.
         /// </summary>
         public string JobType { get; set; }
 

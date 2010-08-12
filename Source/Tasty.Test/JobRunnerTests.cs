@@ -19,29 +19,25 @@ namespace Tasty.Test
 
         public JobRunnerTests()
         {
+            TastySettings.Section.Jobs.Heartbeat = 1000;
+
             this.jobStore = new MemoryJobStore();
             this.jobRunner = JobRunner.GetInstance(this.jobStore);
             this.jobRunner.Error += new EventHandler<JobErrorEventArgs>(JobRunnerError);
-        }
-
-        [TestMethod]
-        public void JobRunner_IsRunning()
-        {
             this.jobRunner.Start();
-            Assert.IsTrue(this.jobRunner.IsRunning);
-            this.jobRunner.Stop(false);
-            Assert.IsFalse(this.jobRunner.IsRunning);
         }
 
         [TestMethod]
         public void JobRunner_CancelJobs()
         {
-            this.jobRunner.Start();
+            //this.jobRunner.Start();
 
             var id = new TestSlowJob().Enqueue(this.jobStore).Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
             var record = this.jobStore.GetJob(id);
+            Assert.AreEqual(JobStatus.Started, record.Status);
+
             record.Status = JobStatus.Canceling;
             this.jobStore.SaveJob(record);
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
@@ -52,7 +48,7 @@ namespace Tasty.Test
         [TestMethod]
         public void JobRunner_DequeueJobs()
         {
-            this.jobRunner.Start();
+            //this.jobRunner.Start();
 
             var id = new TestSlowJob().Enqueue(this.jobStore).Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
@@ -63,10 +59,10 @@ namespace Tasty.Test
         [TestMethod]
         public void JobRunner_FinishJobs()
         {
-            this.jobRunner.Start();
+            //this.jobRunner.Start();
 
             var id = new TestQuickJob().Enqueue(this.jobStore).Id.Value;
-            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 3);
+            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
             Assert.AreEqual(JobStatus.Succeeded, this.jobStore.GetJob(id).Status);
         }
@@ -74,7 +70,7 @@ namespace Tasty.Test
         [TestMethod]
         public void JobRunner_TimeoutJobs()
         {
-            this.jobRunner.Start();
+            //this.jobRunner.Start();
 
             var id = new TestTimeoutJob().Enqueue(this.jobStore).Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 3);

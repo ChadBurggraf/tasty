@@ -32,14 +32,22 @@ namespace Tasty.Jobs
             this.jobStore = jobStore;
         }
 
-        public void AddForSave(JobRecord record)
-        {
-            this.saving.Add(record);
-        }
-
+        /// <summary>
+        /// Adds the given job ID for deletion to the transaction.
+        /// </summary>
+        /// <param name="jobId">The ID of the job to delete.</param>
         public void AddForDelete(int jobId)
         {
             this.deleting.Add(jobId);
+        }
+
+        /// <summary>
+        /// Adds the given record for saving to the transaction.
+        /// </summary>
+        /// <param name="record">The record to save.</param>
+        public void AddForSave(JobRecord record)
+        {
+            this.saving.Add(new JobRecord(record));
         }
 
         /// <summary>
@@ -47,18 +55,21 @@ namespace Tasty.Jobs
         /// </summary>
         public void Commit()
         {
-            foreach (var record in this.saving)
+            lock (this)
             {
-                this.jobStore.SaveJob(record);
-            }
+                foreach (var record in this.saving)
+                {
+                    this.jobStore.SaveJob(record);
+                }
 
-            foreach (var id in this.deleting)
-            {
-                this.jobStore.DeleteJob(id);
-            }
+                foreach (var id in this.deleting)
+                {
+                    this.jobStore.DeleteJob(id);
+                }
 
-            this.saving.Clear();
-            this.deleting.Clear();
+                this.saving.Clear();
+                this.deleting.Clear();
+            }
         }
 
         /// <summary>
@@ -66,8 +77,11 @@ namespace Tasty.Jobs
         /// </summary>
         public void Rollback()
         {
-            this.saving.Clear();
-            this.deleting.Clear();
+            lock (this)
+            {
+                this.saving.Clear();
+                this.deleting.Clear();
+            }
         }
     }
 }

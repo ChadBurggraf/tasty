@@ -26,8 +26,7 @@ namespace Tasty.Jobs
         public RunningJobs()
         {
             this.PersistencePath = Path.Combine(Environment.CurrentDirectory, GeneratePersistenceFileName(JobStore.Current));
-            //this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
-            this.runs = new List<JobRun>();
+            this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
         }
 
         /// <summary>
@@ -52,8 +51,7 @@ namespace Tasty.Jobs
             }
 
             this.PersistencePath = persistencPath;
-            //this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
-            this.runs = new List<JobRun>();
+            this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
         }
 
         /// <summary>

@@ -225,15 +225,16 @@ namespace Tasty.Jobs
         /// </summary>
         private void CancelJobs()
         {
-            this.store.StartTransaction();
+            var trans = this.store.StartTransaction();
 
             try
             {
                 var runs = this.runs.GetRunning();
-                var records = this.store.GetJobs(runs.Select(r => r.JobId));
+                var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
 
                 var canceling = from run in runs
                                 join record in records on run.JobId equals record.Id.Value
+                                where record.Status == JobStatus.Canceling
                                 select new
                                 {
                                     Run = run,
@@ -242,24 +243,22 @@ namespace Tasty.Jobs
 
                 foreach (var job in canceling)
                 {
-                    if (job.Run.Abort())
-                    {
-                        job.Record.Status = JobStatus.Canceled;
-                        job.Record.FinishDate = job.Run.FinishDate;
+                    job.Run.Abort();
+                    job.Record.Status = JobStatus.Canceled;
+                    job.Record.FinishDate = job.Run.FinishDate;
 
-                        this.store.SaveJob(job.Record);
-                        this.runs.Remove(job.Record.Id.Value);
+                    this.store.SaveJob(job.Record, trans);
+                    this.runs.Remove(job.Record.Id.Value);
 
-                        this.RaiseEvent(this.CancelJob, new JobRecordEventArgs(job.Record));
-                    }
+                    this.RaiseEvent(this.CancelJob, new JobRecordEventArgs(job.Record));
                 }
 
                 this.runs.Flush();
-                this.store.CommitTransaction();
+                trans.Commit();
             }
             catch
             {
-                this.store.RollbackTransaction();
+                trans.Rollback();
                 throw;
             }
         }
@@ -269,17 +268,15 @@ namespace Tasty.Jobs
         /// </summary>
         private void DequeueJobs()
         {
-            int count = TastySettings.Section.Jobs.MaximumConcurrency - this.runs.Count;
+            int count = TastySettings.Section.Jobs.MaximumConcurrency - this.ExecutingJobCount;
 
             if (count > 0)
             {
-                this.store.StartTransaction();
+                var trans = this.store.StartTransaction();
 
                 try
                 {
-                    var records = this.store.GetJobs(JobStatus.Queued, count);
-
-                    foreach (var record in records)
+                    foreach (var record in this.store.GetJobs(JobStatus.Queued, count, trans))
                     {
                         record.Status = JobStatus.Started;
                         record.StartDate = DateTime.UtcNow;
@@ -307,19 +304,20 @@ namespace Tasty.Jobs
                         else
                         {
                             record.Status = JobStatus.FailedToLoadType;
+                            record.FinishDate = DateTime.UtcNow;
                             record.Exception = new ExceptionXElement(toJobEx).ToString();
                         }
 
-                        this.store.SaveJob(record);
+                        this.store.SaveJob(record, trans);
                         this.RaiseEvent(this.DequeueJob, new JobRecordEventArgs(record));
                     }
 
                     this.runs.Flush();
-                    this.store.CommitTransaction();
+                    trans.Commit();
                 }
                 catch
                 {
-                    this.store.RollbackTransaction();
+                    trans.Rollback();
                     throw;
                 }
             }
@@ -330,15 +328,16 @@ namespace Tasty.Jobs
         /// </summary>
         private void FinishJobs()
         {
-            this.store.StartTransaction();
+            var trans = this.store.StartTransaction();
 
             try
             {
                 var runs = this.runs.GetNotRunning();
-                var records = this.store.GetJobs(runs.Select(r => r.JobId));
+                var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
 
                 var finishing = from run in runs
                                 join record in records on run.JobId equals record.Id.Value
+                                where record.Status == JobStatus.Started
                                 select new
                                 {
                                     Run = run,
@@ -365,18 +364,18 @@ namespace Tasty.Jobs
                         job.Record.Status = JobStatus.Succeeded;
                     }
 
-                    this.store.SaveJob(job.Record);
+                    this.store.SaveJob(job.Record, trans);
                     this.runs.Remove(job.Record.Id.Value);
 
                     this.RaiseEvent(this.FinishJob, new JobRecordEventArgs(job.Record));
                 }
 
                 this.runs.Flush();
-                this.store.CommitTransaction();
+                trans.Commit();
             }
             catch
             {
-                this.store.RollbackTransaction();
+                trans.Rollback();
                 throw;
             }
         }
@@ -390,9 +389,11 @@ namespace Tasty.Jobs
             {
                 try
                 {
-                    this.CancelJobs();
-                    this.TimeoutJobs();
-                    this.FinishJobs();
+                    //this.CancelJobs();
+                    this.DequeueJobs();
+                    /*
+                    //this.TimeoutJobs();
+                    //this.FinishJobs();
 
                     lock (this.statusLocker)
                     {
@@ -405,11 +406,12 @@ namespace Tasty.Jobs
                             this.IsShuttingDown = false;
                             this.RaiseEvent(this.AllFinished, EventArgs.Empty);
                         }
-                    }
+                    }*/
                 }
                 catch (Exception ex)
                 {
-                    this.RaiseEvent(this.Error, new JobErrorEventArgs(null, ex));
+                    throw;
+                    //this.RaiseEvent(this.Error, new JobErrorEventArgs(null, ex));
                 }
 
                 Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);
@@ -421,18 +423,19 @@ namespace Tasty.Jobs
         /// </summary>
         private void TimeoutJobs()
         {
-            this.store.StartTransaction();
+            var trans = this.store.StartTransaction();
 
             try
             {
                 var runs = this.runs.GetRunning();
-                var records = this.store.GetJobs(runs.Select(r => r.JobId));
+                var records = this.store.GetJobs(runs.Select(r => r.JobId), trans);
 
                 var timingOut = from run in runs
                                 join record in records on run.JobId equals record.Id.Value
                                 where run.Job != null 
                                     && run.StartDate != null 
                                     && DateTime.UtcNow.Subtract(run.StartDate.Value).TotalMilliseconds >= run.Job.Timeout
+                                    && record.Status == JobStatus.Started
                                 select new
                                 {
                                     Run = run,
@@ -446,7 +449,7 @@ namespace Tasty.Jobs
                         job.Record.Status = JobStatus.TimedOut;
                         job.Record.FinishDate = job.Run.FinishDate;
 
-                        this.store.SaveJob(job.Record);
+                        this.store.SaveJob(job.Record, trans);
                         this.runs.Remove(job.Record.Id.Value);
 
                         this.RaiseEvent(this.TimeoutJob, new JobRecordEventArgs(job.Record));
@@ -454,11 +457,12 @@ namespace Tasty.Jobs
                 }
 
                 this.runs.Flush();
-                this.store.CommitTransaction();
+                trans.Commit();
             }
             catch
             {
-                this.store.RollbackTransaction();
+                trans.Rollback();
+                throw;
             }
         }
 

@@ -14,6 +14,18 @@ namespace Tasty.Jobs
     public interface IJobStoreTransaction
     {
         /// <summary>
+        /// Adds the given job ID for deletion to the transaction.
+        /// </summary>
+        /// <param name="jobId">The ID of the job to delete.</param>
+        void AddForDelete(int jobId);
+
+        /// <summary>
+        /// Adds the given record for saving to the transaction.
+        /// </summary>
+        /// <param name="record">The record to save.</param>
+        void AddForSave(JobRecord record);
+
+        /// <summary>
         /// Commits the transaction.
         /// </summary>
         void Commit();

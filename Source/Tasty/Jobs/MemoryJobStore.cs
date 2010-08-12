@@ -18,7 +18,7 @@ namespace Tasty.Jobs
     {
         private Dictionary<int, JobRecord> committed = new Dictionary<int, JobRecord>();
         private readonly object locker = new object();
-
+        
         /// <summary>
         /// Deletes a job by ID.
         /// </summary>
@@ -30,11 +30,7 @@ namespace Tasty.Jobs
             {
                 if (transaction != null)
                 {
-                    transaction.Add
-                }
-                if (this.isInTransaction)
-                {
-                    this.deleting.Add(id);
+                    transaction.AddForDelete(id);
                 }
                 else
                 {
@@ -47,14 +43,15 @@ namespace Tasty.Jobs
         /// Gets a job by ID.
         /// </summary>
         /// <param name="id">The ID of the job to get.</param>
+        /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>The job with the given ID.</returns>
-        public override JobRecord GetJob(int id)
+        public override JobRecord GetJob(int id, IJobStoreTransaction transaction)
         {
             lock (this.locker)
             {
                 if (this.committed.ContainsKey(id))
                 {
-                    return this.committed[id];
+                    return new JobRecord(this.committed[id]);
                 }
 
                 return null;
@@ -65,8 +62,9 @@ namespace Tasty.Jobs
         /// Gets a collection of jobs that match the given collection of IDs.
         /// </summary>
         /// <param name="ids">The IDs of the jobs to get.</param>
+        /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>A collection of jobs.</returns>
-        public override IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids)
+        public override IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids, IJobStoreTransaction transaction)
         {
             lock (this.locker)
             {
@@ -75,7 +73,7 @@ namespace Tasty.Jobs
                     return (from r in this.committed.Values
                             where ids.Contains(r.Id.Value)
                             orderby r.QueueDate descending
-                            select r).ToArray();
+                            select new JobRecord(r)).ToArray();
                 }
 
                 return new JobRecord[0];
@@ -88,15 +86,16 @@ namespace Tasty.Jobs
         /// </summary>
         /// <param name="status">The status of the jobs to get.</param>
         /// <param name="count">The maximum number of jobs to get.</param>
+        /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>A collection of jobs.</returns>
-        public override IEnumerable<JobRecord> GetJobs(JobStatus status, int count)
+        public override IEnumerable<JobRecord> GetJobs(JobStatus status, int count, IJobStoreTransaction transaction)
         {
             lock (this.locker)
             {
                 var query = from r in this.committed.Values
                             where r.Status == status
                             orderby r.QueueDate descending
-                            select r;
+                            select new JobRecord(r);
 
                 if (count > 0)
                 {
@@ -111,15 +110,16 @@ namespace Tasty.Jobs
         /// Gets a collection of the most recently scheduled persisted job for each
         /// scheduled job in the configuration.
         /// </summary>
+        /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>A collection of recently scheduled jobs.</returns>
-        public override IEnumerable<JobRecord> GetLatestScheduledJobs()
+        public override IEnumerable<JobRecord> GetLatestScheduledJobs(IJobStoreTransaction transaction)
         {
             lock (this.locker)
             {
                 return (from r in this.committed.Values
                         group r by r.ScheduleName into g
                         where TastySettings.Section.Jobs.Schedules.Select(s => s.Name).Contains(g.Key)
-                        select g.OrderByDescending(gr => gr.QueueDate).First()).ToArray();
+                        select new JobRecord(g.OrderByDescending(gr => gr.QueueDate).First())).ToArray();
             }
         }
 
@@ -132,41 +132,26 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Rolls back the currently in-progress transaction.
-        /// </summary>
-        public override void RollbackTransaction()
-        {
-            lock (this.locker)
-            {
-                if (this.isInTransaction)
-                {
-                    this.saving.Clear();
-                    this.deleting.Clear();
-                    this.isInTransaction = false;
-                }
-            }
-        }
-
-        /// <summary>
         /// Saves the given job record, either creating it or updating it.
         /// </summary>
         /// <param name="record">The job to save.</param>
-        public override void SaveJob(JobRecord record)
+        /// <param name="transaction">The transaction to execute the command in.</param>
+        public override void SaveJob(JobRecord record, IJobStoreTransaction transaction)
         {
             lock (this.locker)
             {
-                if (this.isInTransaction)
+                if (record.Id == null)
                 {
-                    this.saving.Add(record);
+                    record.Id = GetNewId();
+                }
+
+                if (transaction != null)
+                {
+                    transaction.AddForSave(record);
                 }
                 else
                 {
-                    if (record.Id == null)
-                    {
-                        record.Id = GetNewId();
-                    }
-
-                    this.committed[record.Id.Value] = record;
+                    this.committed[record.Id.Value] = new JobRecord(record);
                 }
             }
         }
@@ -174,11 +159,11 @@ namespace Tasty.Jobs
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        public override void StartTransaction()
+        public override IJobStoreTransaction StartTransaction()
         {
             lock (this.locker)
             {
-                this.isInTransaction = true;
+                return new MemoryJobStoreTransaction(this);
             }
         }
 

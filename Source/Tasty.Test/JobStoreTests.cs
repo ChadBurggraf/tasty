@@ -22,6 +22,8 @@ namespace Tasty.Test
 
         protected virtual void DeleteJobs()
         {
+            IJobStoreTransaction trans;
+
             var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
             this.Store.SaveJob(job1);
             Assert.IsNotNull(this.Store.GetJob(job1.Id.Value));
@@ -30,16 +32,16 @@ namespace Tasty.Test
 
             var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
             this.Store.SaveJob(job2);
-            this.Store.StartTransaction();
-            this.Store.DeleteJob(job2.Id.Value);
-            this.Store.RollbackTransaction();
+            trans = this.Store.StartTransaction();
+            this.Store.DeleteJob(job2.Id.Value, trans);
+            trans.Rollback();
             Assert.IsNotNull(this.Store.GetJob(job2.Id.Value));
 
             var job3 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
             this.Store.SaveJob(job3);
-            this.Store.StartTransaction();
-            this.Store.DeleteJob(job3.Id.Value);
-            this.Store.CommitTransaction();
+            trans = this.Store.StartTransaction();
+            this.Store.DeleteJob(job3.Id.Value, trans);
+            trans.Commit();
             Assert.IsNull(this.Store.GetJob(job3.Id.Value));
         }
 
@@ -54,7 +56,12 @@ namespace Tasty.Test
             this.Store.SaveJob(job1);
             this.Store.SaveJob(job2);
 
-            Assert.AreEqual(2, this.Store.GetJobs(new int[] { job1.Id.Value, job2.Id.Value }).Count());
+            var jobs = this.Store.GetJobs(new int[] { job1.Id.Value, job2.Id.Value });
+
+            Assert.AreEqual(2, jobs.Count());
+            Assert.IsTrue(jobs.Any(j => j.Id.Value == job1.Id.Value));
+            Assert.IsTrue(jobs.Any(j => j.Id.Value == job2.Id.Value));
+
             Assert.AreEqual(queuedCount + 1, this.Store.GetJobs(JobStatus.Queued, 0).Count());
             Assert.AreEqual(finishedCount + 1, this.Store.GetJobs(JobStatus.Succeeded, 0).Count());
         }
@@ -66,6 +73,8 @@ namespace Tasty.Test
 
         protected virtual void SaveJobs()
         {
+            IJobStoreTransaction trans;
+
             var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
             Assert.IsNull(job1.Id);
             this.Store.SaveJob(job1);
@@ -73,9 +82,9 @@ namespace Tasty.Test
             Assert.IsNotNull(this.Store.GetJob(job1.Id.Value));
 
             var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
-            this.Store.StartTransaction();
-            this.Store.SaveJob(job2);
-            this.Store.RollbackTransaction();
+            trans = this.Store.StartTransaction();
+            this.Store.SaveJob(job2, trans);
+            trans.Rollback();
 
             if (job2.Id != null)
             {
@@ -83,9 +92,9 @@ namespace Tasty.Test
             }
 
             var job3 = this.CreateRecord(new TestIdJob(), DateTime.Now, JobStatus.Queued, null);
-            this.Store.StartTransaction();
-            this.Store.SaveJob(job3);
-            this.Store.CommitTransaction();
+            trans = this.Store.StartTransaction();
+            this.Store.SaveJob(job3, trans);
+            trans.Commit();
             Assert.IsNotNull(job3.Id);
             Assert.IsNotNull(this.Store.GetJob(job3.Id.Value));
         }

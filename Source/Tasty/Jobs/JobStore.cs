@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="IJobStore.cs" company="Tasty Codes">
+// <copyright file="JobStore.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -8,38 +8,107 @@ namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
+    using System.Data.Common;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
     using Tasty.Configuration;
 
     /// <summary>
-    /// Defines the interface for persistent job stores.
+    /// Provides a base <see cref="IJobStore"/> implementation.
     /// </summary>
-    public interface IJobStore : IDisposable
+    public abstract class JobStore : IJobStore
     {
+        private static readonly object locker = new object();
+        private static IJobStore current;
+        private string typeKey;
+
         /// <summary>
+        /// Gets or sets the current <see cref="IJobStore"/> implementation in use.
+        /// The setter on this property is primarily meant for testing purposes.
+        /// </summary>
+        /// <remarks>
+        /// It is not recommended to set this property during runtime. You should instead
+        /// set it during static initialization if you would rather not infer it from
+        /// the configuration. Setting it later could cause persistence errors if any
+        /// currently-executing jobs try to persist their update data to the new store.
+        /// </remarks>
+        public static IJobStore Current
+        {
+            get
+            {
+                lock (locker)
+                {
+                    if (current == null)
+                    {
+                        current = (IJobStore)Activator.CreateInstance(Type.GetType(TastySettings.Section.Jobs.Store.JobStoreType));
+                    }
+
+                    return current;
+                }
+            }
+
+            set
+            {
+                lock (locker)
+                {
+                    current = value;
+                }
+            }
+        }
+            /// <summary>
         /// Gets a unique identifier for this <see cref="IJobStore"/> implementation that
         /// can be used to isolation job runners and running jobs peristence providers.
         /// </summary>
-        string TypeKey { get; }
+        public string TypeKey 
+        {
+            get
+            {
+                lock (this)
+                {
+                    if (this.typeKey == null)
+                    {
+                        Type type = GetType();
+                        this.typeKey = String.Concat(type.FullName, ", ", type.Assembly.GetName().Name);
+                    }
+
+                    return this.typeKey;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Disposes of resources used by this instance.
+        /// </summary>
+        public virtual void Dispose()
+        {
+        }
 
         /// <summary>
         /// Deletes a job by ID.
         /// </summary>
         /// <param name="id">The ID of the job to delete.</param>
-        void DeleteJob(int id);
+        public virtual void DeleteJob(int id)
+        {
+            this.DeleteJob(id, null);
+        }
 
         /// <summary>
         /// Deletes a job by ID.
         /// </summary>
         /// <param name="id">The ID of the job to delete.</param>
         /// <param name="transaction">The transaction to execute the command in.</param>
-        void DeleteJob(int id, IJobStoreTransaction transaction);
+        public abstract void DeleteJob(int id, IJobStoreTransaction transaction);
 
         /// <summary>
         /// Gets a job by ID.
         /// </summary>
         /// <param name="id">The ID of the job to get.</param>
         /// <returns>The job with the given ID.</returns>
-        JobRecord GetJob(int id);
+        public virtual JobRecord GetJob(int id)
+        {
+            return this.GetJob(id, null);
+        }
 
         /// <summary>
         /// Gets a job by ID.
@@ -47,14 +116,17 @@ namespace Tasty.Jobs
         /// <param name="id">The ID of the job to get.</param>
         /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>The job with the given ID.</returns>
-        JobRecord GetJob(int id, IJobStoreTransaction transaction);
+        public abstract JobRecord GetJob(int id, IJobStoreTransaction transaction);
 
         /// <summary>
         /// Gets a collection of jobs that match the given collection of IDs.
         /// </summary>
         /// <param name="ids">The IDs of the jobs to get.</param>
         /// <returns>A collection of jobs.</returns>
-        IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids);
+        public virtual IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids)
+        {
+            return this.GetJobs(ids, null);
+        }
 
         /// <summary>
         /// Gets a collection of jobs that match the given collection of IDs.
@@ -62,7 +134,7 @@ namespace Tasty.Jobs
         /// <param name="ids">The IDs of the jobs to get.</param>
         /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>A collection of jobs.</returns>
-        IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids, IJobStoreTransaction transaction);
+        public abstract IEnumerable<JobRecord> GetJobs(IEnumerable<int> ids, IJobStoreTransaction transaction);
 
         /// <summary>
         /// Gets a collection of jobs with the given status, returning
@@ -71,7 +143,10 @@ namespace Tasty.Jobs
         /// <param name="status">The status of the jobs to get.</param>
         /// <param name="count">The maximum number of jobs to get.</param>
         /// <returns>A collection of jobs.</returns>
-        IEnumerable<JobRecord> GetJobs(JobStatus status, int count);
+        public virtual IEnumerable<JobRecord> GetJobs(JobStatus status, int count)
+        {
+            return this.GetJobs(status, count, null);
+        }
 
         /// <summary>
         /// Gets a collection of jobs with the given status, returning
@@ -81,14 +156,17 @@ namespace Tasty.Jobs
         /// <param name="count">The maximum number of jobs to get.</param>
         /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>A collection of jobs.</returns>
-        IEnumerable<JobRecord> GetJobs(JobStatus status, int count, IJobStoreTransaction transaction);
+        public abstract IEnumerable<JobRecord> GetJobs(JobStatus status, int count, IJobStoreTransaction transaction);
 
         /// <summary>
         /// Gets a collection of the most recently scheduled persisted job for each
         /// scheduled job in the configuration.
         /// </summary>
         /// <returns>A collection of recently scheduled jobs.</returns>
-        IEnumerable<JobRecord> GetLatestScheduledJobs();
+        public virtual IEnumerable<JobRecord> GetLatestScheduledJobs()
+        {
+            return this.GetLatestScheduledJobs(null);
+        }
 
         /// <summary>
         /// Gets a collection of the most recently scheduled persisted job for each
@@ -96,30 +174,33 @@ namespace Tasty.Jobs
         /// </summary>
         /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>A collection of recently scheduled jobs.</returns>
-        IEnumerable<JobRecord> GetLatestScheduledJobs(IJobStoreTransaction transaction);
+        public abstract IEnumerable<JobRecord> GetLatestScheduledJobs(IJobStoreTransaction transaction);
 
         /// <summary>
         /// Initializes the job store with the given configuration.
         /// </summary>
         /// <param name="configuration">The configuration to initialize the job store with.</param>
-        void Initialize(TastySettings configuration);
+        public abstract void Initialize(TastySettings configuration);
 
         /// <summary>
         /// Saves the given job record, either creating it or updating it.
         /// </summary>
         /// <param name="record">The job to save.</param>
-        void SaveJob(JobRecord record);
+        public virtual void SaveJob(JobRecord record)
+        {
+            this.SaveJob(record, null);
+        }
 
         /// <summary>
         /// Saves the given job record, either creating it or updating it.
         /// </summary>
         /// <param name="record">The job to save.</param>
         /// <param name="transaction">The transaction to execute the command in.</param>
-        void SaveJob(JobRecord record, IJobStoreTransaction transaction);
+        public abstract void SaveJob(JobRecord record, IJobStoreTransaction transaction);
 
         /// <summary>
         /// Starts a transaction.
         /// </summary>
-        IJobStoreTransaction StartTransaction();
+        public abstract IJobStoreTransaction StartTransaction();
     }
 }

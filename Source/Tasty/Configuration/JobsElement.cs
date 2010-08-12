@@ -39,9 +39,9 @@ namespace Tasty.Configuration
 
         /// <summary>
         /// Gets or sets the maximum number of jobs that are allowed to be
-        /// running simultaneously. When not configured, defaults to 4.
+        /// running simultaneously. When not configured, defaults to 25.
         /// </summary>
-        [ConfigurationProperty("maximumConcurrency", IsRequired = false, DefaultValue = 4)]
+        [ConfigurationProperty("maximumConcurrency", IsRequired = false, DefaultValue = 25)]
         public int MaximumConcurrency
         {
             get { return (int)this["maximumConcurrency"]; }

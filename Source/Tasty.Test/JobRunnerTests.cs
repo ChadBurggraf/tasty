@@ -14,79 +14,82 @@ namespace Tasty.Test
     [TestClass]
     public class JobRunnerTests
     {
-        [ClassInitialize]
-        public static void ClassInitialize(TestContext testContext)
-        {
-            Bootstrapper.EnsureTestDatabase();
-        }
+        private IJobStore jobStore;
+        private JobRunner jobRunner;
 
-        [TestMethod]
-        [ExpectedException(typeof(SerializationException))]
-        public void JobRunner_Serialize()
+        public JobRunnerTests()
         {
-            new JobRecord()
-            {
-                Data = Guid.NewGuid().ToString(),
-                JobType = typeof(TestQuickJob)
-            }.ToJob();
+            this.jobStore = new MemoryJobStore();
+            this.jobRunner = JobRunner.GetInstance(this.jobStore);
+            this.jobRunner.Error += new EventHandler<JobErrorEventArgs>(JobRunnerError);
         }
 
         [TestMethod]
         public void JobRunner_IsRunning()
         {
-            JobRunner.Instance.Start();
-            Assert.IsTrue(JobRunner.Instance.IsRunning);
-            JobRunner.Instance.Stop(true);
-            Assert.IsFalse(JobRunner.Instance.IsRunning);
+            this.jobRunner.Start();
+            Assert.IsTrue(this.jobRunner.IsRunning);
+            this.jobRunner.Stop(false);
+            Assert.IsFalse(this.jobRunner.IsRunning);
         }
 
         [TestMethod]
         public void JobRunner_CancelJobs()
         {
-            JobRunner.Instance.Start();
+            this.jobRunner.Start();
 
-            var id = new TestSlowJob().Enqueue().Id.Value;
+            var id = new TestSlowJob().Enqueue(this.jobStore).Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
-            var record = JobStore.Current.GetJob(id);
+            var record = this.jobStore.GetJob(id);
             record.Status = JobStatus.Canceling;
-            JobStore.Current.UpdateJobs(new JobRecord[] { record }, null);
-            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);
+            this.jobStore.SaveJob(record);
+            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
-            Assert.AreEqual(JobStatus.Canceled, JobStore.Current.GetJob(id).Status);
+            Assert.AreEqual(JobStatus.Canceled, this.jobStore.GetJob(id).Status);
         }
 
         [TestMethod]
         public void JobRunner_DequeueJobs()
         {
-            JobRunner.Instance.Start();
+            this.jobRunner.Start();
 
-            var id = new TestSlowJob().Enqueue().Id.Value;
+            var id = new TestSlowJob().Enqueue(this.jobStore).Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
-            Assert.AreEqual(JobStatus.Started, JobStore.Current.GetJob(id).Status);
+            Assert.AreEqual(JobStatus.Started, this.jobStore.GetJob(id).Status);
         }
 
         [TestMethod]
         public void JobRunner_FinishJobs()
         {
-            JobRunner.Instance.Start();
+            this.jobRunner.Start();
 
-            var id = new TestQuickJob().Enqueue().Id.Value;
+            var id = new TestQuickJob().Enqueue(this.jobStore).Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 3);
 
-            Assert.AreEqual(JobStatus.Succeeded, JobStore.Current.GetJob(id).Status);
+            Assert.AreEqual(JobStatus.Succeeded, this.jobStore.GetJob(id).Status);
         }
 
         [TestMethod]
         public void JobRunner_TimeoutJobs()
         {
-            JobRunner.Instance.Start();
+            this.jobRunner.Start();
 
-            var id = new TestTimeoutJob().Enqueue().Id.Value;
+            var id = new TestTimeoutJob().Enqueue(this.jobStore).Id.Value;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 3);
 
-            Assert.AreEqual(JobStatus.TimedOut, JobStore.Current.GetJob(id).Status);
+            Assert.AreEqual(JobStatus.TimedOut, this.jobStore.GetJob(id).Status);
+        }
+
+        private void JobRunnerError(object sender, JobErrorEventArgs e)
+        {
+            if (e.Exception != null)
+            {
+                throw e.Exception;
+            }
+
+            throw new Exception(Environment.StackTrace);
         }
     }
 }

@@ -25,8 +25,35 @@ namespace Tasty.Jobs
         /// </summary>
         public RunningJobs()
         {
-            this.PersistencePath = Path.Combine(Environment.CurrentDirectory, "running.xml");
-            this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
+            this.PersistencePath = Path.Combine(Environment.CurrentDirectory, GeneratePersistenceFileName(JobStore.Current));
+            //this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
+            this.runs = new List<JobRun>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the RunningJobs class.
+        /// </summary>
+        /// <param name="persistencPath">The persistence path to use when persisting run data.</param>
+        public RunningJobs(string persistencPath)
+        {
+            if (String.IsNullOrEmpty(persistencPath))
+            {
+                throw new ArgumentNullException("persistencPath", "persistencPath must contain a value.");
+            }
+
+            if (!Path.IsPathRooted(persistencPath))
+            {
+                persistencPath = Path.GetFullPath(persistencPath);
+            }
+
+            if (!persistencPath.StartsWith(Environment.CurrentDirectory, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException("persistencPath must point to a path inside the current application directory.", "persistencPath");
+            }
+
+            this.PersistencePath = persistencPath;
+            //this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
+            this.runs = new List<JobRun>();
         }
 
         /// <summary>
@@ -123,21 +150,33 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Generates a stable persistence file name for the given job store.
+        /// The name will be unique for the type, and remain the same as long as the type's
+        /// name and assembly name (not including version number or public key) do not change.
+        /// </summary>
+        /// <param name="store">The job store to generate the persistence file name for.</param>
+        /// <returns>The generated persistence file name.</returns>
+        public static string GeneratePersistenceFileName(IJobStore store)
+        {
+            return String.Concat(store.TypeKey.Hash(), ".xml");
+        }
+
+        /// <summary>
         /// Loads a collection of job runs from the given persistence path.
         /// </summary>
-        /// <param name="persistencePath">The path of the persistence file to load job runs from.</param>
+        /// <param name="persistencPath">The persistenc path to load job runs from.</param>
         /// <returns>The loaded job run collection.</returns>
-        private static IEnumerable<JobRun> LoadFromPersisted(string persistencePath)
+        private static IEnumerable<JobRun> LoadFromPersisted(string persistencPath)
         {
             IEnumerable<JobRun> runs;
 
-            if (File.Exists(persistencePath))
+            if (File.Exists(persistencPath))
             {
                 DataContractSerializer serializer = new DataContractSerializer(typeof(JobRun[]));
 
                 try
                 {
-                    using (FileStream stream = File.OpenRead(persistencePath))
+                    using (FileStream stream = File.OpenRead(persistencPath))
                     {
                         runs = (JobRun[])serializer.ReadObject(stream);
                     }

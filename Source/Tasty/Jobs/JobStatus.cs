@@ -29,6 +29,11 @@ namespace Tasty.Jobs
         Failed,
 
         /// <summary>
+        /// Identifies a job that was interrupted during execution.
+        /// </summary>
+        Interrupted,
+
+        /// <summary>
         /// Identifies a queued job.
         /// </summary>
         Queued,

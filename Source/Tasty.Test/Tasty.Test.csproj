@@ -69,6 +69,7 @@
     <Compile Include="GetVersionTests.cs" />
     <Compile Include="HttpCacheUrlTokenStoreTests.cs" />
     <Compile Include="HttpTests.cs" />
+    <Compile Include="JobRunnerTests.cs" />
     <Compile Include="JobStoreTests.cs">
       <SubType>Code</SubType>
     </Compile>

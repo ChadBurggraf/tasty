@@ -81,12 +81,23 @@ namespace Tasty.Jobs
         public DateTime? StartDate { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether this instance was created via
+        /// recovery from the running jobs persistenc file.
+        /// </summary>
+        [DataMember]
+        public bool WasRecovered { get; private set; }
+
+        /// <summary>
         /// Aborts the job run if it is currently in progress.
         /// </summary>
-        public void Abort()
+        /// <returns>True if the job was running and was aborted, false if 
+        /// the job was not running and no abort was necessary.</returns>
+        public bool Abort()
         {
             lock (this)
             {
+                bool aborted = false;
+
                 if (this.IsRunning)
                 {
                     try
@@ -103,25 +114,10 @@ namespace Tasty.Jobs
 
                     this.IsRunning = false;
                     this.FinishDate = DateTime.UtcNow;
+                    aborted = true;
                 }
-            }
-        }
 
-        /// <summary>
-        /// Runs the job if it has not already been run and it is not currently running.
-        /// </summary>
-        public void Run()
-        {
-            lock (this)
-            {
-                if (!this.IsRunning && this.FinishDate == null)
-                {
-                    this.IsRunning = true;
-                    this.StartDate = DateTime.UtcNow;
-
-                    this.executionThread = new Thread(this.RunInternal);
-                    this.executionThread.Start();
-                }
+                return aborted;
             }
         }
 
@@ -134,6 +130,7 @@ namespace Tasty.Jobs
         public void SetStateForRecovery(DateTime now)
         {
             this.IsRunning = false;
+            this.WasRecovered = true;
 
             if (this.FinishDate == null)
             {
@@ -142,9 +139,27 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Starts the job if it has not already been run and it is not currently running.
+        /// </summary>
+        public void Start()
+        {
+            lock (this)
+            {
+                if (!this.IsRunning && this.FinishDate == null)
+                {
+                    this.IsRunning = true;
+                    this.StartDate = DateTime.UtcNow;
+
+                    this.executionThread = new Thread(this.StartInternal);
+                    this.executionThread.Start();
+                }
+            }
+        }
+
+        /// <summary>
         /// Concrete job execution method.
         /// </summary>
-        private void RunInternal()
+        private void StartInternal()
         {
             try
             {

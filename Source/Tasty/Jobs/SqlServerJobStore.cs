@@ -48,6 +48,39 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Creates a command that can be used to fetch the number of records matching the given filter parameters.
+        /// </summary>
+        /// <param name="connection">The connection to create the command with.</param>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <returns>A select command.</returns>
+        public override DbCommand CreateCountCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule)
+        {
+            SqlCommand command = ((SqlConnection)connection).CreateCommand();
+            command.CommandType = CommandType.Text;
+
+            StringBuilder sb = new StringBuilder(@"SELECT COUNT([Id]) FROM [TastyJob] WHERE [Name] LIKE @Name");
+
+            if (withStatus != null)
+            {
+                sb.Append(@" AND [Status]=@Status");
+                command.Parameters.Add(new SqlParameter("@Status", withStatus.Value.ToString()));
+            }
+
+            if (!String.IsNullOrEmpty(inSchedule))
+            {
+                sb.Append(" AND [ScheduleName]=@ScheduleName");
+                command.Parameters.Add(new SqlParameter("@ScheduleName", inSchedule));
+            }
+
+            command.CommandText = sb.ToString();
+            command.Parameters.Add(new SqlParameter("@Name", String.Concat("%", (likeName ?? String.Empty).Trim(), "%")));
+
+            return command;
+        }
+
+        /// <summary>
         /// Creates a connection.
         /// </summary>
         /// <returns>The created connection.</returns>
@@ -279,6 +312,85 @@ namespace Tasty.Jobs
             }
 
             command.Parameters.Add(new SqlParameter("@Status", status.ToString()));
+
+            return command;
+        }
+
+        /// <summary>
+        /// Creates a select command.
+        /// </summary>
+        /// <param name="connection">The connection to create the command with.</param>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <param name="orderBy">A field to order the resultset by.</param>
+        /// <param name="sortDescending">A value indicating whether to order the resultset in descending order.</param>
+        /// <param name="pageNumber">The page number to get.</param>
+        /// <param name="pageSize">The size of the pages to get.</param>
+        /// <returns></returns>
+        public override DbCommand CreateSelectCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize)
+        {
+            SqlCommand command = ((SqlConnection)connection).CreateCommand();
+            command.CommandType = CommandType.Text;
+
+            StringBuilder sb = new StringBuilder();
+            string orderByColumn = null;
+
+            switch (orderBy)
+            {
+                case JobRecordResultsOrderBy.FinishDate:
+                    orderByColumn = "[FinishDate]";
+                    break;
+                case JobRecordResultsOrderBy.JobType:
+                    orderByColumn = "[Type]";
+                    break;
+                case JobRecordResultsOrderBy.Name:
+                    orderByColumn = "[Name]";
+                    break;
+                case JobRecordResultsOrderBy.QueueDate:
+                    orderByColumn = "[QueueDate]";
+                    break;
+                case JobRecordResultsOrderBy.ScheduleName:
+                    orderByColumn = "[ScheduleName]";
+                    break;
+                case JobRecordResultsOrderBy.StartDate:
+                    orderByColumn = "[StartDate]";
+                    break;
+                case JobRecordResultsOrderBy.Status:
+                    orderByColumn = "[Status]";
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
+            sb.AppendFormat(
+                CultureInfo.InvariantCulture,
+                @"SELECT * FROM (
+                    SELECT *, ROW_NUMBER() OVER(ORDER BY {0} {1}) AS [RowNumber]
+                    FROM [TastyJob] WHERE [Name] LIKE @Name",
+                orderByColumn,
+                sortDescending ? "DESC" : "ASC");
+
+            if (withStatus != null)
+            {
+                sb.Append(" AND [Status]=@Status");
+                command.Parameters.Add(new SqlParameter("@Status", withStatus.Value.ToString()));
+            }
+
+            if (!String.IsNullOrEmpty(inSchedule))
+            {
+                sb.Append(" AND [ScheduleName]=@ScheduleName");
+                command.Parameters.Add(new SqlParameter("@ScheduleName", inSchedule));
+            }
+
+            sb.Append(@") t WHERE [RowNumber] > @SkipFrom AND [RowNumber] <= @SkipTo");
+            command.CommandText = sb.ToString();
+
+            int skipFrom = (pageNumber - 1) * pageSize;
+
+            command.Parameters.Add(new SqlParameter("@Name", String.Concat("%", (likeName ?? String.Empty).Trim(), "%")));
+            command.Parameters.Add(new SqlParameter("@SkipFrom", skipFrom));
+            command.Parameters.Add(new SqlParameter("@SkipTo", skipFrom + pageSize));
 
             return command;
         }

@@ -49,6 +49,7 @@ namespace Tasty.Test
             {
                 int queuedCount = this.Store.GetJobs(JobStatus.Queued, 0).Count();
                 int finishedCount = this.Store.GetJobs(JobStatus.Succeeded, 0).Count();
+                int testIdJobCount = this.Store.GetJobCount(new TestIdJob().Name, null, null);
 
                 var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
                 var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Succeeded);
@@ -66,6 +67,10 @@ namespace Tasty.Test
                 Assert.AreEqual(finishedCount + 1, this.Store.GetJobs(JobStatus.Succeeded, 0).Count());
                 Assert.IsNotNull(this.Store.GetJob(job1.Id.Value));
                 Assert.AreEqual(0, this.Store.GetJobs(new int[0]).Count());
+
+                Assert.AreEqual(1, this.Store.GetJobs(null, null, null, JobRecordResultsOrderBy.QueueDate, true, 1, 1).Count());
+                Assert.IsTrue(1 < this.Store.GetJobs(null, null, null, JobRecordResultsOrderBy.QueueDate, true, 1, 50).Count());
+                Assert.AreEqual(testIdJobCount + 2, this.Store.GetJobCount(new TestIdJob().Name, null, null));
             }
         }
 

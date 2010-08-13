@@ -11,11 +11,13 @@ namespace Tasty.Jobs
     using System.Configuration;
     using System.Globalization;
     using System.Reflection;
+    using System.Runtime.Serialization;
     using Tasty.Configuration;
 
     /// <summary>
     /// Base <see cref="IJob"/> implementation for scheduled jobs.
     /// </summary>
+    [DataContract(Namespace = Job.XmlNamespace)]
     public abstract class ScheduledJob : Job
     {
         private NameValueCollection metadata;
@@ -174,7 +176,7 @@ namespace Tasty.Jobs
 
             if (date == lastExecuteDate.Value)
             {
-                date.AddHours(element.RepeatHours);
+                date = date.AddHours(element.RepeatHours);
             }
 
             return date;

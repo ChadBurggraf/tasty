@@ -57,6 +57,7 @@ namespace Tasty.Test
             Assert.AreEqual(JobStatus.Started, this.jobStore.GetJob(id).Status);
         }
 
+        [TestMethod]
         public void JobRunner_ExecuteScheduledJobs()
         {
             this.jobRunner.Start();
@@ -65,7 +66,7 @@ namespace Tasty.Test
 
             JobScheduleElement sched1 = new JobScheduleElement() 
             {
-                Name = Guid.NewGuid().ToString(),
+                Name = "___TEST_SCHED_1___" + Guid.NewGuid().ToString(),
                 RepeatHours = 24,
                 StartOn = DateTime.UtcNow.AddYears(-1)
             };
@@ -74,7 +75,7 @@ namespace Tasty.Test
 
             JobScheduleElement sched2 = new JobScheduleElement()
             {
-                Name = Guid.NewGuid().ToString(),
+                Name = "___TEST_SCHED_2___" + Guid.NewGuid().ToString(),
                 RepeatHours = .5,
                 StartOn = DateTime.UtcNow.AddDays(-1)
             };
@@ -83,12 +84,12 @@ namespace Tasty.Test
 
             JobScheduleElement sched3 = new JobScheduleElement()
             {
-                Name = Guid.NewGuid().ToString(),
+                Name = "___TEST_SCHED_3___" + Guid.NewGuid().ToString(),
                 RepeatHours = .5,
                 StartOn = DateTime.UtcNow.AddDays(1)
             };
 
-            schedules.Add(sched2);
+            schedules.Add(sched3);
 
             JobScheduledJobElement job1 = new JobScheduledJobElement()
             {
@@ -108,7 +109,9 @@ namespace Tasty.Test
             this.jobRunner.Schedules = schedules;
             Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
 
-            
+            Assert.AreEqual(2, this.jobStore.GetJobCount(null, null, sched1.Name));
+            Assert.AreEqual(1, this.jobStore.GetJobCount(null, null, sched2.Name));
+            Assert.AreEqual(0, this.jobStore.GetJobCount(null, null, sched3.Name));
         }
 
         [TestMethod]

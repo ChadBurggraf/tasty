@@ -20,6 +20,19 @@ namespace Tasty
     public static class Strings
     {
         /// <summary>
+        /// Alias of <see cref="String.IndexOf(String)"/> to get a value indicating whether the string contains
+        /// the given string value using the specified comparison type.
+        /// </summary>
+        /// <param name="original">The original string to compare.</param>
+        /// <param name="value">The string value to find in the original string.</param>
+        /// <param name="comparisonType">The comparison type to use.</param>
+        /// <returns>True if the value is found in the original string, false otherwise.</returns>
+        public static bool Contains(this string original, string value, StringComparison comparisonType)
+        {
+            return original.IndexOf(value, comparisonType) >= 0;
+        }
+
+        /// <summary>
         /// Escapes the given string for use in a filesystem or URL path.
         /// </summary>
         /// <param name="pathPart">The path part to escape</param>

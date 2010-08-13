@@ -59,6 +59,16 @@ namespace Tasty.Jobs
         public abstract DataAdapter CreateAdapter(DbCommand command);
 
         /// <summary>
+        /// Creates a command that can be used to fetch the number of records matching the given filter parameters.
+        /// </summary>
+        /// <param name="connection">The connection to create the command with.</param>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <returns>A select command.</returns>
+        public abstract DbCommand CreateCountCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule);
+
+        /// <summary>
         /// Creates a connection.
         /// </summary>
         /// <returns>The created connection.</returns>
@@ -123,6 +133,20 @@ namespace Tasty.Jobs
         public abstract DbCommand CreateSelectCommand(DbConnection connection, JobStatus status, int count);
 
         /// <summary>
+        /// Creates a select command.
+        /// </summary>
+        /// <param name="connection">The connection to create the command with.</param>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <param name="orderBy">A field to order the resultset by.</param>
+        /// <param name="sortDescending">A value indicating whether to order the resultset in descending order.</param>
+        /// <param name="pageNumber">The page number to get.</param>
+        /// <param name="pageSize">The size of the pages to get.</param>
+        /// <returns></returns>
+        public abstract DbCommand CreateSelectCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize);
+
+        /// <summary>
         /// Deletes a job by ID.
         /// </summary>
         /// <param name="id">The ID of the job to delete.</param>
@@ -166,6 +190,31 @@ namespace Tasty.Jobs
                 {
                     connection.Open();
                     return this.GetJob(id, connection, null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the number of jobs in the store that match the given filter.
+        /// </summary>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <param name="transaction">The transaction to execute the command in.</param>
+        /// <returns>The number of jobs that match the given filter.</returns>
+        public override int GetJobCount(string likeName, JobStatus? withStatus, string inSchedule, IJobStoreTransaction transaction)
+        {
+            if (transaction != null)
+            {
+                SqlJobStoreTransaction concreteTransaction = (SqlJobStoreTransaction)transaction;
+                return this.GetJobCount(likeName, withStatus, inSchedule, concreteTransaction.Connection, concreteTransaction.Transaction);
+            }
+            else
+            {
+                using (DbConnection connection = this.CreateConnection())
+                {
+                    connection.Open();
+                    return this.GetJobCount(likeName, withStatus, inSchedule, connection, null);
                 }
             }
         }
@@ -219,6 +268,35 @@ namespace Tasty.Jobs
                 {
                     connection.Open();
                     return this.GetJobs(status, count, connection, null);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a collection of jobs that match the given filter parameters, ordered by the given sort parameters.
+        /// </summary>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <param name="orderBy">A field to order the resultset by.</param>
+        /// <param name="sortDescending">A value indicating whether to order the resultset in descending order.</param>
+        /// <param name="pageNumber">The page number to get.</param>
+        /// <param name="pageSize">The size of the pages to get.</param>
+        /// <param name="transaction">The transaction to execute the command in.</param>
+        /// <returns>A collection of jobs.</returns>
+        public override IEnumerable<JobRecord> GetJobs(string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize, IJobStoreTransaction transaction)
+        {
+            if (transaction != null)
+            {
+                SqlJobStoreTransaction concreteTransaction = (SqlJobStoreTransaction)transaction;
+                return this.GetJobs(likeName, withStatus, inSchedule, orderBy, sortDescending, pageNumber, pageSize, concreteTransaction.Connection, concreteTransaction.Transaction);
+            }
+            else
+            {
+                using (DbConnection connection = this.CreateConnection())
+                {
+                    connection.Open();
+                    return this.GetJobs(likeName, withStatus, inSchedule, orderBy, sortDescending, pageNumber, pageSize, connection, null);
                 }
             }
         }
@@ -358,6 +436,33 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Gets the number of jobs in the store that match the given filter.
+        /// </summary>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <param name="connection">The concrete connection to use.</param>
+        /// <param name="transaction">The concrete transaction to use.</param>
+        /// <returns>The number of jobs that match the given filter.</returns>
+        protected virtual int GetJobCount(string likeName, JobStatus? withStatus, string inSchedule, DbConnection connection, DbTransaction transaction)
+        {
+            using (DbCommand command = this.CreateCountCommand(connection, likeName, withStatus, inSchedule))
+            {
+                command.Transaction = transaction;
+
+                using (DbDataReader reader = command.ExecuteReader())
+                {
+                    if (reader.Read())
+                    {
+                        return Convert.ToInt32(reader[0], CultureInfo.InvariantCulture);
+                    }
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>
         /// Gets a collection of jobs that match the given collection of IDs.
         /// </summary>
         /// <param name="ids">The IDs of the jobs to get.</param>
@@ -392,6 +497,35 @@ namespace Tasty.Jobs
         protected virtual IEnumerable<JobRecord> GetJobs(JobStatus status, int count, DbConnection connection, DbTransaction transaction)
         {
             using (DbCommand command = this.CreateSelectCommand(connection, status, count))
+            {
+                command.Transaction = transaction;
+
+                using (DataAdapter adapter = this.CreateAdapter(command))
+                {
+                    DataSet results = new DataSet() { Locale = CultureInfo.InvariantCulture };
+                    adapter.Fill(results);
+
+                    return this.CreateRecordCollection(results);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets a collection of jobs that match the given filter parameters, ordered by the given sort parameters.
+        /// </summary>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <param name="orderBy">A field to order the resultset by.</param>
+        /// <param name="sortDescending">A value indicating whether to order the resultset in descending order.</param>
+        /// <param name="pageNumber">The page number to get.</param>
+        /// <param name="pageSize">The size of the pages to get.</param>
+        /// <param name="connection">The concrete connection to use.</param>
+        /// <param name="transaction">The concrete transaction to use.</param>
+        /// <returns>A collection of jobs.</returns>
+        protected virtual IEnumerable<JobRecord> GetJobs(string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize, DbConnection connection, DbTransaction transaction)
+        {
+            using (DbCommand command = this.CreateSelectCommand(connection, likeName, withStatus, inSchedule, orderBy, sortDescending, pageNumber, pageSize))
             {
                 command.Transaction = transaction;
 

@@ -25,6 +25,7 @@ namespace Tasty.Jobs
         private readonly object stateLocker = new object();
         private static Dictionary<string, JobRunner> instances = new Dictionary<string, JobRunner>();
         private JobScheduleElementCollection schedules;
+        private IEnumerable<ScheduledJobTuple> scheduledJobs;
         private RunningJobs runs;
         private IJobStore store;
         private Thread god;
@@ -76,6 +77,11 @@ namespace Tasty.Jobs
         /// or the <see cref="Exception"/> may be null, or both.
         /// </summary>
         public event EventHandler<JobErrorEventArgs> Error;
+
+        /// <summary>
+        /// Event raised when a sceduled job loaded for execution.
+        /// </summary>
+        public event EventHandler<JobRecordEventArgs> ExecuteScheduledJob;
 
         /// <summary>
         /// Event raised when a job has finished execution.
@@ -166,6 +172,39 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Gets a collection of tuples representing scheduled jobs.
+        /// </summary>
+        public IEnumerable<ScheduledJobTuple> ScheduledJobs
+        {
+            get
+            {
+                lock (this.stateLocker)
+                {
+                    if (this.scheduledJobs == null)
+                    {
+                        List<ScheduledJobTuple> list = new List<ScheduledJobTuple>();
+
+                        foreach (var schedule in this.Schedules)
+                        {
+                            foreach (var scheduledJob in schedule.ScheduledJobs)
+                            {
+                                list.Add(new ScheduledJobTuple()
+                                {
+                                    Schedule = schedule,
+                                    ScheduledJob = scheduledJob
+                                });
+                            }
+                        }
+
+                        this.scheduledJobs = list.ToArray();
+                    }
+
+                    return this.scheduledJobs;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the schedule collection to use when processing scheduled jobs.
         /// TODO: Clone this when set.
         /// </summary>
@@ -183,6 +222,7 @@ namespace Tasty.Jobs
                 lock (this.stateLocker)
                 {
                     this.schedules = value;
+                    this.scheduledJobs = null;
                 }
             }
         }
@@ -425,17 +465,14 @@ namespace Tasty.Jobs
                         var scheduleNames = this.Schedules.Select(s => s.Name);
                         var records = this.store.GetLatestScheduledJobs(scheduleNames, trans);
 
-                        var tuples = from s in this.Schedules
-                                     from sj in s.ScheduledJobs
+                        var tuples = from sj in this.ScheduledJobs
                                      from r in
                                          (from r in records
-                                          where s.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
-                                                sj.JobType.Equals(r.JobType, StringComparison.OrdinalIgnoreCase)
+                                          where sj.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
+                                                sj.ScheduledJob.JobType.Equals(r.JobType, StringComparison.OrdinalIgnoreCase)
                                           select r).DefaultIfEmpty()
-                                     select new
+                                     select new ScheduledJobTuple(sj)
                                      {
-                                         Schedule = s,
-                                         ScheduledJob = sj,
                                          Record = r
                                      };
 
@@ -469,6 +506,7 @@ namespace Tasty.Jobs
                                 {
                                     record.JobType = JobRecord.JobTypeString(job);
                                     record.Data = job.Serialize();
+                                    this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
 
                                     JobRun run = new JobRun(record.Id.Value, job);
                                     this.runs.Add(run);
@@ -481,6 +519,9 @@ namespace Tasty.Jobs
                                     record.FinishDate = now;
                                     record.Exception = new ExceptionXElement(toJobEx).ToString();
                                 }
+
+                                trans.AddForSave(record);
+                                this.RaiseEvent(this.ExecuteScheduledJob, new JobRecordEventArgs(record));
                             }
                         }
 

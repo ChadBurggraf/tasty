@@ -55,6 +55,39 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Gets the number of jobs in the store that match the given filter.
+        /// </summary>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <param name="transaction">The transaction to execute the command in.</param>
+        /// <returns>The number of jobs that match the given filter.</returns>
+        public override int GetJobCount(string likeName, JobStatus? withStatus, string inSchedule, IJobStoreTransaction transaction)
+        {
+            lock (committed)
+            {
+                var query = committed.AsQueryable();
+
+                if (!String.IsNullOrEmpty(likeName))
+                {
+                    query = query.Where(r => r.Name.Contains(likeName, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (withStatus != null)
+                {
+                    query = query.Where(r => r.Status == withStatus.Value);
+                }
+
+                if (!String.IsNullOrEmpty(inSchedule))
+                {
+                    query = query.Where(r => inSchedule.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase));
+                }
+
+                return query.Count();
+            }
+        }
+
+        /// <summary>
         /// Gets a collection of jobs that match the given collection of IDs.
         /// </summary>
         /// <param name="ids">The IDs of the jobs to get.</param>
@@ -99,6 +132,83 @@ namespace Tasty.Jobs
                 }
 
                 return query.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Gets a collection of jobs that match the given filter parameters, ordered by the given sort parameters.
+        /// </summary>
+        /// <param name="likeName">A string representing a full or partial job name to filter on.</param>
+        /// <param name="withStatus">A <see cref="JobStatus"/> to filter on, or null if not applicable.</param>
+        /// <param name="inSchedule">A schedule name to filter on, if applicable.</param>
+        /// <param name="orderBy">A field to order the resultset by.</param>
+        /// <param name="sortDescending">A value indicating whether to order the resultset in descending order.</param>
+        /// <param name="pageNumber">The page number to get.</param>
+        /// <param name="pageSize">The size of the pages to get.</param>
+        /// <param name="transaction">The transaction to execute the command in.</param>
+        /// <returns>A collection of jobs.</returns>
+        public override IEnumerable<JobRecord> GetJobs(string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize, IJobStoreTransaction transaction)
+        {
+            if (pageNumber < 1)
+            {
+                throw new ArgumentException("pageNumber must be greater than 0.", "pageNumber");
+            }
+
+            if (pageSize < 1)
+            {
+                throw new ArgumentException("pageSize must be greater than 0.", "pageSize");
+            }
+
+            lock (committed)
+            {
+                var query = committed.AsQueryable();
+
+                if (!String.IsNullOrEmpty(likeName))
+                {
+                    query = query.Where(r => r.Name.Contains(likeName, StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (withStatus != null)
+                {
+                    query = query.Where(r => r.Status == withStatus.Value);
+                }
+
+                if (!String.IsNullOrEmpty(inSchedule))
+                {
+                    query = query.Where(r => r.ScheduleName.Equals(inSchedule, StringComparison.OrdinalIgnoreCase));
+                }
+
+                Func<JobRecord, object> sorter;
+
+                switch (orderBy)
+                {
+                    case JobRecordResultsOrderBy.FinishDate:
+                        sorter = r => r.FinishDate;
+                        break;
+                    case JobRecordResultsOrderBy.JobType:
+                        sorter = r => r.JobType;
+                        break;
+                    case JobRecordResultsOrderBy.Name:
+                        sorter = r => r.Name;
+                        break;
+                    case JobRecordResultsOrderBy.QueueDate:
+                        sorter = r => r.QueueDate;
+                        break;
+                    case JobRecordResultsOrderBy.ScheduleName:
+                        sorter = r => r.ScheduleName;
+                        break;
+                    case JobRecordResultsOrderBy.StartDate:
+                        sorter = r => r.StartDate;
+                        break;
+                    case JobRecordResultsOrderBy.Status:
+                        sorter = r => r.Status;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+
+                var sorted = sortDescending ? query.OrderByDescending(sorter) : query.OrderBy(sorter);
+                return sorted.Skip((pageNumber - 1) * pageSize).Take(pageSize);
             }
         }
 

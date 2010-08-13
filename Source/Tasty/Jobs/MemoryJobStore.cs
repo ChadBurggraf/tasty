@@ -70,7 +70,7 @@ namespace Tasty.Jobs
 
                 if (!String.IsNullOrEmpty(likeName))
                 {
-                    query = query.Where(r => r.Name.Contains(likeName, StringComparison.OrdinalIgnoreCase));
+                    query = query.Where(r => likeName.Contains(r.Name, StringComparison.OrdinalIgnoreCase));
                 }
 
                 if (withStatus != null)

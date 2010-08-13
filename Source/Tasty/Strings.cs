@@ -29,7 +29,7 @@ namespace Tasty
         /// <returns>True if the value is found in the original string, false otherwise.</returns>
         public static bool Contains(this string original, string value, StringComparison comparisonType)
         {
-            return original.IndexOf(value, comparisonType) >= 0;
+            return !String.IsNullOrEmpty(value) && original.IndexOf(value, comparisonType) >= 0;
         }
 
         /// <summary>

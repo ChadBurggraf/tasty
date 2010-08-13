@@ -123,6 +123,7 @@
     <Compile Include="Jobs\IJobStore.cs" />
     <Compile Include="Jobs\IJobStoreTransaction.cs" />
     <Compile Include="Jobs\Job.cs" />
+    <Compile Include="Jobs\JobRunnerBootstraps.cs" />
     <Compile Include="Jobs\JobErrorEventArgs.cs" />
     <Compile Include="Jobs\JobRecord.cs" />
     <Compile Include="Jobs\JobRecordEventArgs.cs" />
@@ -130,6 +131,8 @@
     <Compile Include="Jobs\JobRun.cs" />
     <Compile Include="Jobs\JobRunEventArgs.cs" />
     <Compile Include="Jobs\JobRunner.cs" />
+    <Compile Include="Jobs\JobRunnerEventSink.cs" />
+    <Compile Include="Jobs\JobRunnerProxy.cs" />
     <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="Jobs\JobStore.cs" />
     <Compile Include="Jobs\MemoryJobStore.cs" />

@@ -23,6 +23,7 @@ namespace Tasty.Jobs
 
         private static readonly object instanceLocker = new object();
         private readonly object stateLocker = new object();
+        private readonly object runLocker = new object();
         private static Dictionary<string, JobRunner> instances = new Dictionary<string, JobRunner>();
         private JobScheduleElementCollection schedules;
         private IEnumerable<ScheduledJobTuple> scheduledJobs;
@@ -106,7 +107,13 @@ namespace Tasty.Jobs
         /// </summary>
         public int ExecutingJobCount
         {
-            get { return this.runs.Count; }
+            get 
+            {
+                lock (this.runLocker)
+                {
+                    return this.runs.Count;
+                }
+            }
         }
 
         /// <summary>
@@ -422,6 +429,7 @@ namespace Tasty.Jobs
                             if (job != null)
                             {
                                 JobRun run = new JobRun(record.Id.Value, job);
+                                run.Finished += new EventHandler<JobRunEventArgs>(this.JobRunFinished);
                                 this.runs.Add(run);
 
                                 run.Start();
@@ -509,6 +517,7 @@ namespace Tasty.Jobs
                                     this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
 
                                     JobRun run = new JobRun(record.Id.Value, job);
+                                    run.Finished += new EventHandler<JobRunEventArgs>(this.JobRunFinished);
                                     this.runs.Add(run);
 
                                     run.Start();
@@ -537,6 +546,38 @@ namespace Tasty.Jobs
             }
         }
 
+        /*/// <summary>
+        /// Performs the concrete finishing of the given job run.
+        /// </summary>
+        /// <param name="run">A job run to finish.</param>
+        /// <param name="record">The run's related record.</param>
+        /// <param name="trans">The transaction to access the job store in.</param>
+        private void FinishJobRun(JobRun run, JobRecord record, IJobStoreTransaction trans)
+        {
+            record.FinishDate = run.FinishDate;
+
+            if (run.ExecutionException != null)
+            {
+                record.Exception = new ExceptionXElement(run.ExecutionException).ToString();
+                record.Status = JobStatus.Failed;
+
+                this.RaiseEvent(this.Error, new JobErrorEventArgs(record, run.ExecutionException));
+            }
+            else if (run.WasRecovered)
+            {
+                record.Status = JobStatus.Interrupted;
+            }
+            else
+            {
+                record.Status = JobStatus.Succeeded;
+            }
+
+            this.store.SaveJob(record, trans);
+            this.runs.Remove(record.Id.Value);
+
+            this.RaiseEvent(this.FinishJob, new JobRecordEventArgs(record));
+        }*/
+
         /// <summary>
         /// Finishes any jobs that have completed by updating their records in the job store.
         /// </summary>
@@ -560,28 +601,33 @@ namespace Tasty.Jobs
 
                     foreach (var job in finishing)
                     {
-                        job.Record.FinishDate = job.Run.FinishDate;
+                        var record = job.Record;
+                        var run = job.Run;
 
-                        if (job.Run.ExecutionException != null)
+                        record.FinishDate = run.FinishDate;
+
+                        if (run.ExecutionException != null)
                         {
-                            job.Record.Exception = new ExceptionXElement(job.Run.ExecutionException).ToString();
-                            job.Record.Status = JobStatus.Failed;
+                            record.Exception = new ExceptionXElement(run.ExecutionException).ToString();
+                            record.Status = JobStatus.Failed;
 
-                            this.RaiseEvent(this.Error, new JobErrorEventArgs(job.Record, job.Run.ExecutionException));
+                            this.RaiseEvent(this.Error, new JobErrorEventArgs(record, run.ExecutionException));
                         }
-                        else if (job.Run.WasRecovered)
+                        else if (run.WasRecovered)
                         {
-                            job.Record.Status = JobStatus.Interrupted;
+                            record.Status = JobStatus.Interrupted;
                         }
                         else
                         {
-                            job.Record.Status = JobStatus.Succeeded;
+                            record.Status = JobStatus.Succeeded;
                         }
 
-                        this.store.SaveJob(job.Record, trans);
-                        this.runs.Remove(job.Record.Id.Value);
+                        this.store.SaveJob(record, trans);
+                        this.runs.Remove(record.Id.Value);
 
-                        this.RaiseEvent(this.FinishJob, new JobRecordEventArgs(job.Record));
+                        this.RaiseEvent(this.FinishJob, new JobRecordEventArgs(record));
+
+                        //this.FinishJobRun(job.Run, job.Record, trans);
                     }
 
                     this.runs.Flush();
@@ -596,6 +642,43 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Raises a JobRun's Finished event.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void JobRunFinished(object sender, JobRunEventArgs e)
+        {
+            /*lock (this.runLocker)
+            {
+                using (IJobStoreTransaction trans = this.store.StartTransaction())
+                {
+                    try
+                    {
+                        var run = this.runs.GetAll().Where(r => r.JobId == e.JobId).FirstOrDefault();
+
+                        if (run != null)
+                        {
+                            var record = this.store.GetJob(e.JobId, trans);
+
+                            if (record != null)
+                            {
+                                this.FinishJobRun(run, record, trans);
+                            }
+                        }
+
+                        trans.Commit();
+                        this.runs.Flush();
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                        throw;
+                    }
+                }
+            }*/
+        }
+
+        /// <summary>
         /// Main God thread run loop.
         /// </summary>
         private void SmiteThee()
@@ -604,21 +687,24 @@ namespace Tasty.Jobs
             {
                 try
                 {
-                    this.CancelJobs();
-                    this.TimeoutJobs();
-                    this.FinishJobs();
-
-                    lock (this.stateLocker)
+                    lock (this.runLocker)
                     {
-                        if (this.IsRunning)
+                        this.CancelJobs();
+                        this.TimeoutJobs();
+                        this.FinishJobs();
+
+                        lock (this.stateLocker)
                         {
-                            this.ExecuteScheduledJobs();
-                            this.DequeueJobs();
-                        }
-                        else if (this.IsShuttingDown && this.ExecutingJobCount == 0)
-                        {
-                            this.IsShuttingDown = false;
-                            this.RaiseEvent(this.AllFinished, EventArgs.Empty);
+                            if (this.IsRunning)
+                            {
+                                this.ExecuteScheduledJobs();
+                                this.DequeueJobs();
+                            }
+                            else if (this.IsShuttingDown && this.ExecutingJobCount == 0)
+                            {
+                                this.IsShuttingDown = false;
+                                this.RaiseEvent(this.AllFinished, EventArgs.Empty);
+                            }
                         }
                     }
                 }

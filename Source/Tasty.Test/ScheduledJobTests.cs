@@ -44,6 +44,7 @@ namespace Tasty.Test
 
             DateTime now = DateTime.UtcNow;
             DateTime nowPlusOneHour = now.AddHours(1);
+            DateTime nowPlusOneDay = now.AddDays(1);
             DateTime nowPlusOneWeek = now.AddDays(7);
             DateTime nowMinusOneWeek = now.AddDays(-7);
             DateTime nowMinusOneDay = now.AddDays(-1);
@@ -73,13 +74,7 @@ namespace Tasty.Test
                 RepeatHours = 168
             }, null, now));
 
-            Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
-            {
-                StartOn = now,
-                RepeatHours = 24
-            }, null, now));
-
-            Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
+            Assert.AreEqual(nowPlusOneDay, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = now,
                 RepeatHours = 24
@@ -89,7 +84,7 @@ namespace Tasty.Test
             {
                 StartOn = now,
                 RepeatHours = 168
-            }, null, now));
+            }, null, nowMinusOneHour));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {

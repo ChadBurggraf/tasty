@@ -65,6 +65,7 @@ namespace Tasty.Test
 
             JobScheduleElement sched1 = new JobScheduleElement() 
             {
+                Name = Guid.NewGuid().ToString(),
                 RepeatHours = 24,
                 StartOn = DateTime.UtcNow.AddYears(-1)
             };
@@ -73,6 +74,7 @@ namespace Tasty.Test
 
             JobScheduleElement sched2 = new JobScheduleElement()
             {
+                Name = Guid.NewGuid().ToString(),
                 RepeatHours = .5,
                 StartOn = DateTime.UtcNow.AddDays(-1)
             };
@@ -81,7 +83,8 @@ namespace Tasty.Test
 
             JobScheduleElement sched3 = new JobScheduleElement()
             {
-                RepeatHours = .1,
+                Name = Guid.NewGuid().ToString(),
+                RepeatHours = .5,
                 StartOn = DateTime.UtcNow.AddDays(1)
             };
 
@@ -100,8 +103,12 @@ namespace Tasty.Test
             sched1.ScheduledJobs.Add(job1);
             sched1.ScheduledJobs.Add(job2);
             sched2.ScheduledJobs.Add(job2);
+            sched3.ScheduledJobs.Add(job1);
 
             this.jobRunner.Schedules = schedules;
+            Thread.Sleep(TastySettings.Section.Jobs.Heartbeat * 2);
+
+            
         }
 
         [TestMethod]

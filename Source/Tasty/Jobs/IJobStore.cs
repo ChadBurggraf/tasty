@@ -83,6 +83,8 @@ namespace Tasty.Jobs
         /// <returns>A collection of jobs.</returns>
         IEnumerable<JobRecord> GetJobs(JobStatus status, int count, IJobStoreTransaction transaction);
 
+        IEnumerable<JobRecord>
+
         /// <summary>
         /// Gets a collection of the most recently scheduled persisted job for each
         /// scheduled job in the given collection.

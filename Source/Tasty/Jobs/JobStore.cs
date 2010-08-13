@@ -160,21 +160,23 @@ namespace Tasty.Jobs
 
         /// <summary>
         /// Gets a collection of the most recently scheduled persisted job for each
-        /// scheduled job in the configuration.
+        /// scheduled job in the given collection.
         /// </summary>
+        /// <param name="scheduleNames">A collection of schedule names to get the latest persisted jobs for.</param>
         /// <returns>A collection of recently scheduled jobs.</returns>
-        public virtual IEnumerable<JobRecord> GetLatestScheduledJobs()
+        public virtual IEnumerable<JobRecord> GetLatestScheduledJobs(IEnumerable<string> scheduleNames)
         {
-            return this.GetLatestScheduledJobs(null);
+            return this.GetLatestScheduledJobs(scheduleNames, null);
         }
 
         /// <summary>
         /// Gets a collection of the most recently scheduled persisted job for each
-        /// scheduled job in the configuration.
+        /// scheduled job in the given collection.
         /// </summary>
+        /// <param name="scheduleNames">A collection of schedule names to get the latest persisted jobs for.</param>
         /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>A collection of recently scheduled jobs.</returns>
-        public abstract IEnumerable<JobRecord> GetLatestScheduledJobs(IJobStoreTransaction transaction);
+        public abstract IEnumerable<JobRecord> GetLatestScheduledJobs(IEnumerable<string> scheduleNames, IJobStoreTransaction transaction);
 
         /// <summary>
         /// Saves the given job record, either creating it or updating it.

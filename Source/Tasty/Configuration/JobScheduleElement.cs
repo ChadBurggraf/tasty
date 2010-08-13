@@ -25,13 +25,13 @@ namespace Tasty.Configuration
         }
 
         /// <summary>
-        /// Gets or sets the repeat type the schedule uses.
+        /// Gets or sets the number of hours the schedule's repeat cycle is on.
         /// </summary>
-        [ConfigurationProperty("repeat", IsRequired = true)]
-        public JobScheduleRepeatType Repeat
+        [ConfigurationProperty("repeatHours", IsRequired = true)]
+        public double RepeatHours
         {
-            get { return (JobScheduleRepeatType)this["repeat"]; }
-            set { this["repeat"] = value; }
+            get { return (double)this["repeatHours"]; }
+            set { this["repeatHours"] = value; }
         }
 
         /// <summary>

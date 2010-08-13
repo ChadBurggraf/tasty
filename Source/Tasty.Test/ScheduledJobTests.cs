@@ -47,42 +47,55 @@ namespace Tasty.Test
             DateTime nowPlusOneWeek = now.AddDays(7);
             DateTime nowMinusOneWeek = now.AddDays(-7);
             DateTime nowMinusOneDay = now.AddDays(-1);
+            DateTime nowMinusOneHour = now.AddHours(-1);
 
             Assert.AreEqual(nowPlusOneHour, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = nowPlusOneHour,
-                Repeat = JobScheduleRepeatType.Daily
-            }, now));
+                RepeatHours = 24
+            }, null, now));
+
+            Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
+            {
+                StartOn = nowPlusOneHour,
+                RepeatHours = 1
+            }, nowMinusOneHour, now));
+
+            Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
+            {
+                StartOn = nowPlusOneHour,
+                RepeatHours = 1
+            }, nowMinusOneDay, now));
 
             Assert.AreEqual(nowPlusOneWeek, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = nowPlusOneWeek,
-                Repeat = JobScheduleRepeatType.Weekly
-            }, now));
+                RepeatHours = 168
+            }, null, now));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = now,
-                Repeat = JobScheduleRepeatType.Daily
-            }, now));
+                RepeatHours = 24
+            }, null, now));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = now,
-                Repeat = JobScheduleRepeatType.Hourly
-            }, now));
+                RepeatHours = 24
+            }, null, now));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = now,
-                Repeat = JobScheduleRepeatType.Weekly
-            }, now));
+                RepeatHours = 168
+            }, null, now));
 
             Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
             {
                 StartOn = nowMinusOneDay,
-                Repeat = JobScheduleRepeatType.Daily
-            }, now));
+                RepeatHours = 24
+            }, null, now));
         }
     }
 }

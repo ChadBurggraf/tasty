@@ -8,6 +8,7 @@ namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.IO;
     using System.Linq;
     using System.Threading;
@@ -21,11 +22,13 @@ namespace Tasty.Jobs
         #region Private Fields
 
         private static readonly object instanceLocker = new object();
-        private readonly object statusLocker = new object();
+        private readonly object stateLocker = new object();
         private static Dictionary<string, JobRunner> instances = new Dictionary<string, JobRunner>();
+        private JobScheduleElementCollection schedules;
         private RunningJobs runs;
         private IJobStore store;
         private Thread god;
+        private int heartbeat, maximumConcurrency;
 
         #endregion
 
@@ -37,9 +40,9 @@ namespace Tasty.Jobs
         /// <param name="store">The <see cref="IJobStore"/> to use when accessing job data.</param>
         private JobRunner(IJobStore store)
         {
-            if (TastySettings.Section.Jobs.Heartbeat < 1)
+            if (store == null)
             {
-                throw new InvalidOperationException("The configured job heartbeat must be greater than 0.");
+                throw new ArgumentNullException("store", "store cannot be null.");
             }
 
             this.runs = new RunningJobs(Path.Combine(Environment.CurrentDirectory, RunningJobs.GeneratePersistenceFileName(store)));
@@ -101,6 +104,32 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Gets or sets the run loop heartbeat, in miliseconds.
+        /// </summary>
+        public int Heartbeat
+        {
+            get
+            {
+                lock (this.stateLocker)
+                {
+                    return this.heartbeat;
+                }
+            }
+            set
+            {
+                lock (this.stateLocker)
+                {
+                    if (value < 0)
+                    {
+                        throw new ArgumentException("value must be greater than 0.", "value");
+                    }
+
+                    this.heartbeat = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the runner is currently running.
         /// </summary>
         public bool IsRunning { get; private set; }
@@ -109,6 +138,54 @@ namespace Tasty.Jobs
         /// Gets a value indicating whether the running is in the process of shutting down.
         /// </summary>
         public bool IsShuttingDown { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the maximum number of simultaneous jobs to run.
+        /// </summary>
+        public int MaximumConcurrency
+        {
+            get
+            {
+                lock (this.stateLocker)
+                {
+                    return this.maximumConcurrency;
+                }
+            }
+            set
+            {
+                lock (this.stateLocker)
+                {
+                    if (value < 0)
+                    {
+                        throw new ArgumentException("value must be greater than 0.", "value");
+                    }
+
+                    this.maximumConcurrency = value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the schedule collection to use when processing scheduled jobs.
+        /// TODO: Clone this when set.
+        /// </summary>
+        public JobScheduleElementCollection Schedules
+        {
+            get
+            {
+                lock (this.stateLocker)
+                {
+                    return this.schedules ?? (this.schedules = new JobScheduleElementCollection());
+                }
+            }
+            set
+            {
+                lock (this.stateLocker)
+                {
+                    this.schedules = value;
+                }
+            }
+        }
 
         #endregion
 
@@ -139,7 +216,12 @@ namespace Tasty.Jobs
             {
                 if (!instances.ContainsKey(store.TypeKey))
                 {
-                    instances[store.TypeKey] = new JobRunner(store);
+                    JobRunner runner = new JobRunner(store);
+                    runner.Heartbeat = TastySettings.Section.Jobs.Heartbeat;
+                    runner.MaximumConcurrency = TastySettings.Section.Jobs.MaximumConcurrency;
+                    runner.Schedules = TastySettings.Section.Jobs.Schedules;
+
+                    instances[store.TypeKey] = runner;
                 }
 
                 return instances[store.TypeKey];
@@ -156,7 +238,7 @@ namespace Tasty.Jobs
         /// </summary>
         public void Pause()
         {
-            lock (this.statusLocker)
+            lock (this.stateLocker)
             {
                 this.IsRunning = false;
             }
@@ -167,7 +249,7 @@ namespace Tasty.Jobs
         /// </summary>
         public void Start()
         {
-            lock (this.statusLocker)
+            lock (this.stateLocker)
             {
                 if (!this.IsShuttingDown)
                 {
@@ -189,7 +271,7 @@ namespace Tasty.Jobs
         /// running jobs to complete, or immediately terminate all running jobs.</param>
         public void Stop(bool safely)
         {
-            lock (this.statusLocker)
+            lock (this.stateLocker)
             {
                 if (!safely || !this.IsShuttingDown)
                 {
@@ -269,10 +351,12 @@ namespace Tasty.Jobs
         /// </summary>
         private void DequeueJobs()
         {
-            int count = TastySettings.Section.Jobs.MaximumConcurrency - this.ExecutingJobCount;
+            int count = this.MaximumConcurrency - this.ExecutingJobCount;
 
             if (count > 0)
             {
+                DateTime now = DateTime.UtcNow;
+
                 using (IJobStoreTransaction trans = this.store.StartTransaction())
                 {
                     try
@@ -280,7 +364,7 @@ namespace Tasty.Jobs
                         foreach (var record in this.store.GetJobs(JobStatus.Queued, count, trans))
                         {
                             record.Status = JobStatus.Started;
-                            record.StartDate = DateTime.UtcNow;
+                            record.StartDate = now;
 
                             IJob job = null;
                             Exception toJobEx = null;
@@ -305,12 +389,99 @@ namespace Tasty.Jobs
                             else
                             {
                                 record.Status = JobStatus.FailedToLoadType;
-                                record.FinishDate = DateTime.UtcNow;
+                                record.FinishDate = now;
                                 record.Exception = new ExceptionXElement(toJobEx).ToString();
                             }
 
                             this.store.SaveJob(record, trans);
                             this.RaiseEvent(this.DequeueJob, new JobRecordEventArgs(record));
+                        }
+
+                        this.runs.Flush();
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Executes any scheduled jobs that are due.
+        /// </summary>
+        private void ExecuteScheduledJobs()
+        {
+            int count = this.MaximumConcurrency - this.ExecutingJobCount;
+
+            if (count > 0)
+            {
+                using (IJobStoreTransaction trans = this.store.StartTransaction())
+                {
+                    try
+                    {
+                        var scheduleNames = this.Schedules.Select(s => s.Name);
+                        var records = this.store.GetLatestScheduledJobs(scheduleNames, trans);
+
+                        var tuples = from s in this.Schedules
+                                     from sj in s.ScheduledJobs
+                                     from r in
+                                         (from r in records
+                                          where s.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
+                                                sj.JobType.Equals(r.JobType, StringComparison.OrdinalIgnoreCase)
+                                          select r).DefaultIfEmpty()
+                                     select new
+                                     {
+                                         Schedule = s,
+                                         ScheduledJob = sj,
+                                         Record = r
+                                     };
+
+                        DateTime now = DateTime.UtcNow;
+
+                        foreach (var tuple in tuples)
+                        {
+                            DateTime runOn = ScheduledJob.GetNextExecuteDate(
+                                tuple.Schedule,
+                                tuple.Record != null ? tuple.Record.StartDate : null,
+                                now);
+
+                            if (runOn <= now)
+                            {
+                                JobRecord record = ScheduledJob.CreateRecord(tuple.Schedule, tuple.ScheduledJob, now);
+
+                                IJob job = null;
+                                Exception toJobEx = null;
+
+                                try
+                                {
+                                    job = ScheduledJob.CreateFromConfiguration(tuple.ScheduledJob);
+                                }
+                                catch (ConfigurationErrorsException ex)
+                                {
+                                    toJobEx = ex;
+                                    this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
+                                }
+
+                                if (job != null)
+                                {
+                                    record.JobType = JobRecord.JobTypeString(job);
+                                    record.Data = job.Serialize();
+
+                                    JobRun run = new JobRun(record.Id.Value, job);
+                                    this.runs.Add(run);
+
+                                    run.Start();
+                                }
+                                else
+                                {
+                                    record.Status = JobStatus.FailedToLoadType;
+                                    record.FinishDate = now;
+                                    record.Exception = new ExceptionXElement(toJobEx).ToString();
+                                }
+                            }
                         }
 
                         this.runs.Flush();
@@ -396,10 +567,11 @@ namespace Tasty.Jobs
                     this.TimeoutJobs();
                     this.FinishJobs();
 
-                    lock (this.statusLocker)
+                    lock (this.stateLocker)
                     {
                         if (this.IsRunning)
                         {
+                            this.ExecuteScheduledJobs();
                             this.DequeueJobs();
                         }
                         else if (this.IsShuttingDown && this.ExecutingJobCount == 0)
@@ -414,7 +586,7 @@ namespace Tasty.Jobs
                     this.RaiseEvent(this.Error, new JobErrorEventArgs(null, ex));
                 }
 
-                Thread.Sleep(TastySettings.Section.Jobs.Heartbeat);
+                Thread.Sleep(this.Heartbeat);
             }
         }
 

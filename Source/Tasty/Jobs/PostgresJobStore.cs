@@ -12,6 +12,7 @@ namespace Tasty.Jobs
     using System.Data.Common;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
     using Npgsql;
 
     /// <summary>
@@ -79,19 +80,36 @@ namespace Tasty.Jobs
         /// <summary>
         /// Creates a select command that can be used to fetch a collection of each scheduled job's latest record.
         /// </summary>
+        /// <param name="scheduleNames">A collection of schedule names to get the latest persisted jobs for.</param>
         /// <param name="connection">The connection to create the command with.</param>
         /// <returns>A select command.</returns>
-        public override DbCommand CreateLatestScheduledJobsSelectCommand(DbConnection connection)
+        public override DbCommand CreateLatestScheduledJobsSelectCommand(IEnumerable<string> scheduleNames, DbConnection connection)
         {
-            const string sql =
+            StringBuilder sb = new StringBuilder(
                 @"SELECT * FROM (
 	                SELECT *, rank() OVER (PARTITION BY ""type"", ""schedule_name"" ORDER BY ""queue_date"" DESC)
-	                FROM ""tasty_job"" WHERE ""schedule_name"" IS NOT NULL
-                ) AS t WHERE ""rank"" = 1";
+	                FROM ""tasty_job"" WHERE ""schedule_name"" IN (");
 
             NpgsqlCommand command = ((NpgsqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
-            command.CommandText = sql;
+
+            int i = 0;
+
+            foreach (string scheduleName in scheduleNames)
+            {
+                if (i > 0)
+                {
+                    sb.Append(",");
+                }
+
+                string paramName = String.Concat(":sn", i++);
+                sb.Append(paramName);
+
+                command.Parameters.Add(new NpgsqlParameter(paramName, scheduleName));
+            }
+
+            sb.Append(@")) AS t WHERE ""rank"" = 1");
+            command.CommandText = sb.ToString();
 
             return command;
         }

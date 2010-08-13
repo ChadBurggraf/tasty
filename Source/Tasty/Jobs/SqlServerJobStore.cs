@@ -13,6 +13,7 @@ namespace Tasty.Jobs
     using System.Data.SqlClient;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
 
     /// <summary>
     /// Implements <see cref="IJobStore"/> for Microsoft SQL Server.
@@ -79,19 +80,36 @@ namespace Tasty.Jobs
         /// <summary>
         /// Creates a select command that can be used to fetch a collection of each scheduled job's latest record.
         /// </summary>
+        /// <param name="scheduleNames">A collection of schedule names to get the latest persisted jobs for.</param>
         /// <param name="connection">The connection to create the command with.</param>
         /// <returns>A select command.</returns>
-        public override DbCommand CreateLatestScheduledJobsSelectCommand(DbConnection connection)
+        public override DbCommand CreateLatestScheduledJobsSelectCommand(IEnumerable<string> scheduleNames, DbConnection connection)
         {
-            const string sql =
+            StringBuilder sb = new StringBuilder(
                 @"SELECT * FROM (
 	                SELECT *, RANK() OVER (PARTITION BY [Type],[ScheduleName] ORDER BY [QueueDate] DESC) AS [Rank]
-	                FROM [TastyJob] WHERE [ScheduleName] IS NOT NULL
-                ) t WHERE [Rank] = 1";
+	                FROM [TastyJob] WHERE [ScheduleName] IN (");
 
             SqlCommand command = ((SqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
-            command.CommandText = sql;
+
+            int i = 0;
+
+            foreach (string scheduleName in scheduleNames)
+            {
+                if (i > 0)
+                {
+                    sb.Append(",");
+                }
+
+                string paramName = String.Concat("@SN", i++);
+                sb.Append(paramName);
+
+                command.Parameters.Add(new SqlParameter(paramName, scheduleName));
+            }
+
+            sb.Append(@")) t WHERE [Rank] = 1");
+            command.CommandText = sb.ToString();
 
             return command;
         }

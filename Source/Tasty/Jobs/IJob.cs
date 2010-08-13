@@ -39,9 +39,8 @@ namespace Tasty.Jobs
         /// Creates a new job record representing an enqueue-able state for this instance.
         /// </summary>
         /// <param name="queueDate">The date to queue the job for execution on.</param>
-        /// <param name="scheduleName">The name of the schedule to queue the job for, or null if not applicable.</param>
         /// <returns>The created job record.</returns>
-        JobRecord CreateRecord(DateTime queueDate, string scheduleName);
+        JobRecord CreateRecord(DateTime queueDate);
 
         /// <summary>
         /// Enqueues the job for execution.
@@ -60,18 +59,16 @@ namespace Tasty.Jobs
         /// Enqueues the job for execution on a certin date and for a specific schedule.
         /// </summary>
         /// <param name="queueDate">The date to queue the job for execution on.</param>
-        /// <param name="scheduleName">The name of the schedule to queue the job for, or null if not applicable.</param>
         /// <returns>The job record that was persisted.</returns>
-        JobRecord Enqueue(DateTime queueDate, string scheduleName);
+        JobRecord Enqueue(DateTime queueDate);
 
         /// <summary>
         /// Enqueues the job for execution on a certin date and for a specific schedule.
         /// </summary>
         /// <param name="queueDate">The date to queue the job for execution on.</param>
-        /// <param name="scheduleName">The name of the schedule to queue the job for, or null if not applicable.</param>
         /// <param name="store">The job store to use when queueing the job.</param>
         /// <returns>The job record that was persisted.</returns>
-        JobRecord Enqueue(DateTime queueDate, string scheduleName, IJobStore store);
+        JobRecord Enqueue(DateTime queueDate, IJobStore store);
 
         /// <summary>
         /// Executes the job.

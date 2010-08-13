@@ -76,9 +76,10 @@ namespace Tasty.Jobs
         /// <summary>
         /// Creates a select command that can be used to fetch a collection of each scheduled job's latest record.
         /// </summary>
+        /// <param name="scheduleNames">A collection of schedule names to get the latest persisted jobs for.</param>
         /// <param name="connection">The connection to create the command with.</param>
         /// <returns>A select command.</returns>
-        public abstract DbCommand CreateLatestScheduledJobsSelectCommand(DbConnection connection);
+        public abstract DbCommand CreateLatestScheduledJobsSelectCommand(IEnumerable<string> scheduleNames, DbConnection connection);
 
         /// <summary>
         /// Creates an insert or update command.
@@ -224,25 +225,33 @@ namespace Tasty.Jobs
 
         /// <summary>
         /// Gets a collection of the most recently scheduled persisted job for each
-        /// scheduled job in the configuration.
+        /// scheduled job in the given collection.
         /// </summary>
+        /// <param name="scheduleNames">A collection of schedule names to get the latest persisted jobs for.</param>
         /// <param name="transaction">The transaction to execute the command in.</param>
         /// <returns>A collection of recently scheduled jobs.</returns>
-        public override IEnumerable<JobRecord> GetLatestScheduledJobs(IJobStoreTransaction transaction)
+        public override IEnumerable<JobRecord> GetLatestScheduledJobs(IEnumerable<string> scheduleNames, IJobStoreTransaction transaction)
         {
-            if (transaction != null)
+            string[] names = scheduleNames != null ? scheduleNames.ToArray() : new string[0];
+
+            if (names.Length > 0)
             {
-                SqlJobStoreTransaction concreteTransaction = (SqlJobStoreTransaction)transaction;
-                return this.GetLatestScheduledJobs(concreteTransaction.Connection, concreteTransaction.Transaction);
-            }
-            else
-            {
-                using (DbConnection connection = this.CreateConnection())
+                if (transaction != null)
                 {
-                    connection.Open();
-                    return this.GetLatestScheduledJobs(connection, null);
+                    SqlJobStoreTransaction concreteTransaction = (SqlJobStoreTransaction)transaction;
+                    return this.GetLatestScheduledJobs(names, concreteTransaction.Connection, concreteTransaction.Transaction);
+                }
+                else
+                {
+                    using (DbConnection connection = this.CreateConnection())
+                    {
+                        connection.Open();
+                        return this.GetLatestScheduledJobs(names, connection, null);
+                    }
                 }
             }
+
+            return new JobRecord[0];
         }
 
         /// <summary>
@@ -400,12 +409,13 @@ namespace Tasty.Jobs
         /// Gets a collection of the most recently scheduled persisted job for each
         /// scheduled job in the configuration.
         /// </summary>
+        /// <param name="scheduleNames">A collection of schedule names to get the latest persisted jobs for.</param>
         /// <param name="connection">The concrete connection to use.</param>
         /// <param name="transaction">The concrete transaction to use.</param>
         /// <returns>A collection of recently scheduled jobs.</returns>
-        protected virtual IEnumerable<JobRecord> GetLatestScheduledJobs(DbConnection connection, DbTransaction transaction)
+        protected virtual IEnumerable<JobRecord> GetLatestScheduledJobs(IEnumerable<string> scheduleNames, DbConnection connection, DbTransaction transaction)
         {
-            using (DbCommand command = this.CreateLatestScheduledJobsSelectCommand(connection))
+            using (DbCommand command = this.CreateLatestScheduledJobsSelectCommand(scheduleNames, connection))
             {
                 command.Transaction = transaction;
 

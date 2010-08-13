@@ -21,20 +21,20 @@ namespace Tasty.Test
             {
                 IJobStoreTransaction trans;
 
-                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
+                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
                 this.Store.SaveJob(job1);
                 Assert.IsNotNull(this.Store.GetJob(job1.Id.Value));
                 this.Store.DeleteJob(job1.Id.Value);
                 Assert.IsNull(this.Store.GetJob(job1.Id.Value));
 
-                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
+                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
                 this.Store.SaveJob(job2);
                 trans = this.Store.StartTransaction();
                 this.Store.DeleteJob(job2.Id.Value, trans);
                 trans.Rollback();
                 Assert.IsNotNull(this.Store.GetJob(job2.Id.Value));
 
-                var job3 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
+                var job3 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
                 this.Store.SaveJob(job3);
                 trans = this.Store.StartTransaction();
                 this.Store.DeleteJob(job3.Id.Value, trans);
@@ -50,8 +50,8 @@ namespace Tasty.Test
                 int queuedCount = this.Store.GetJobs(JobStatus.Queued, 0).Count();
                 int finishedCount = this.Store.GetJobs(JobStatus.Succeeded, 0).Count();
 
-                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
-                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Succeeded, null);
+                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
+                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Succeeded);
 
                 this.Store.SaveJob(job1);
                 this.Store.SaveJob(job2);
@@ -80,19 +80,19 @@ namespace Tasty.Test
                 string c = Guid.NewGuid().ToString();
                 string d = Guid.NewGuid().ToString();
 
-                var idA1 = this.CreateSucceeded(new TestIdJob(), DateTime.Parse("2/1/10"), a).Id.Value;
-                var idA2 = this.CreateSucceeded(new TestIdJob(), DateTime.Parse("2/2/10"), a).Id.Value;
-                var idA3 = this.CreateSucceeded(new TestIdJob(), DateTime.Parse("2/3/10"), a).Id.Value;
+                var idA1 = this.CreateAndSaveScheduledSucceeded(new TestIdJob(), DateTime.Parse("2/1/10"), a).Id.Value;
+                var idA2 = this.CreateAndSaveScheduledSucceeded(new TestIdJob(), DateTime.Parse("2/2/10"), a).Id.Value;
+                var idA3 = this.CreateAndSaveScheduledSucceeded(new TestIdJob(), DateTime.Parse("2/3/10"), a).Id.Value;
 
-                var slowA1 = this.CreateSucceeded(new TestSlowJob(), DateTime.Parse("2/2/10"), a).Id.Value;
-                var slowA2 = this.CreateSucceeded(new TestSlowJob(), DateTime.Parse("2/3/10"), a).Id.Value;
+                var slowA1 = this.CreateAndSaveScheduledSucceeded(new TestSlowJob(), DateTime.Parse("2/2/10"), a).Id.Value;
+                var slowA2 = this.CreateAndSaveScheduledSucceeded(new TestSlowJob(), DateTime.Parse("2/3/10"), a).Id.Value;
 
-                var slowB1 = this.CreateSucceeded(new TestSlowJob(), DateTime.Parse("2/2/10"), b).Id.Value;
-                var slowB2 = this.CreateSucceeded(new TestSlowJob(), DateTime.Parse("2/3/10"), b).Id.Value;
+                var slowB1 = this.CreateAndSaveScheduledSucceeded(new TestSlowJob(), DateTime.Parse("2/2/10"), b).Id.Value;
+                var slowB2 = this.CreateAndSaveScheduledSucceeded(new TestSlowJob(), DateTime.Parse("2/3/10"), b).Id.Value;
 
-                var timeoutC1 = this.CreateSucceeded(new TestTimeoutJob(), DateTime.Parse("2/3/10"), c).Id.Value;
+                var timeoutC1 = this.CreateAndSaveScheduledSucceeded(new TestTimeoutJob(), DateTime.Parse("2/3/10"), c).Id.Value;
 
-                var latest = Store.GetLatestScheduledJobs();
+                var latest = Store.GetLatestScheduledJobs(new string[] { a, b, c, d });
 
                 string idJobType = JobRecord.JobTypeString(typeof(TestIdJob));
                 string slowJobType = JobRecord.JobTypeString(typeof(TestSlowJob));
@@ -110,13 +110,13 @@ namespace Tasty.Test
             {
                 IJobStoreTransaction trans;
 
-                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
+                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
                 Assert.IsNull(job1.Id);
                 this.Store.SaveJob(job1);
                 Assert.IsNotNull(job1.Id);
                 Assert.IsNotNull(this.Store.GetJob(job1.Id.Value));
 
-                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued, null);
+                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
                 trans = this.Store.StartTransaction();
                 this.Store.SaveJob(job2, trans);
                 trans.Rollback();
@@ -126,7 +126,7 @@ namespace Tasty.Test
                     Assert.IsNull(this.Store.GetJob(job2.Id.Value));
                 }
 
-                var job3 = this.CreateRecord(new TestIdJob(), DateTime.Now, JobStatus.Queued, null);
+                var job3 = this.CreateRecord(new TestIdJob(), DateTime.Now, JobStatus.Queued);
                 trans = this.Store.StartTransaction();
                 this.Store.SaveJob(job3, trans);
                 trans.Commit();
@@ -135,17 +135,19 @@ namespace Tasty.Test
             }
         }
 
-        private JobRecord CreateRecord(IJob job, DateTime queueDate, JobStatus status, string scheduleName)
+        private JobRecord CreateRecord(IJob job, DateTime queueDate, JobStatus status)
         {
-            JobRecord record = job.CreateRecord(queueDate, scheduleName);
+            JobRecord record = job.CreateRecord(queueDate);
             record.Status = status;
 
             return record;
         }
 
-        private JobRecord CreateSucceeded(IJob job, DateTime queueDate, string scheduleName)
+        private JobRecord CreateAndSaveScheduledSucceeded(IJob job, DateTime queueDate, string scheduleName)
         {
-            JobRecord record = this.CreateRecord(job, queueDate, JobStatus.Succeeded, scheduleName);
+            JobRecord record = this.CreateRecord(job, queueDate, JobStatus.Succeeded);
+            record.StartDate = queueDate;
+            record.ScheduleName = scheduleName;
             this.Store.SaveJob(record);
 
             return record;

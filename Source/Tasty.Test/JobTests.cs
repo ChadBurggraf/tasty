@@ -9,10 +9,12 @@ namespace Tasty.Test
     [TestClass]
     public class JobTests
     {
+        private string persistencPath = Path.Combine(Environment.CurrentDirectory, Guid.NewGuid().ToString().Hash() + ".xml");
+
         [TestMethod]
         public void Jobs_RunningJobsFlush()
         {
-            RunningJobs runs = new RunningJobs();
+            RunningJobs runs = new RunningJobs(this.persistencPath);
 
             if (File.Exists(runs.PersistencePath))
             {
@@ -29,7 +31,7 @@ namespace Tasty.Test
         [TestMethod]
         public void Jobs_RunningJobsLoad()
         {
-            RunningJobs runs = new RunningJobs();
+            RunningJobs runs = new RunningJobs(this.persistencPath);
 
             if (File.Exists(runs.PersistencePath))
             {
@@ -40,7 +42,7 @@ namespace Tasty.Test
             runs.Add(new JobRun(2, new TestIdJob()));
             runs.Flush();
 
-            runs = new RunningJobs();
+            runs = new RunningJobs(this.persistencPath);
             Assert.AreEqual(2, runs.Count);
         }
 

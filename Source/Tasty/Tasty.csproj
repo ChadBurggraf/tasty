@@ -207,6 +207,7 @@
     <EmbeddedResource Include="Web\UrlTokens\Sql\TastyUrlTokens-SqlServer.sql" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Jobs\Sql\TastyJobs-Postgres.sql" />
     <None Include="Jobs\Sql\TastyJobs-SqlServer.sql" />
     <None Include="Tasty.snk" />
     <EmbeddedResource Include="Template.ods" />

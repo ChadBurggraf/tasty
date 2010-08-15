@@ -18,7 +18,7 @@ namespace Tasty.Jobs
         /// Initializes a new instance of the ScheduledJobTuple class.
         /// </summary>
         public ScheduledJobTuple()
-            : this(null)
+            : this(null, null)
         {
         }
 
@@ -27,13 +27,16 @@ namespace Tasty.Jobs
         /// Does not copy over the <see cref="ScheduledJobTuple.Record"/> property.
         /// </summary>
         /// <param name="tuple">The tuple instance to create this instance from.</param>
-        public ScheduledJobTuple(ScheduledJobTuple tuple)
+        /// <param name="record">The new tuple's <see cref="JobRecord"/>.</param>
+        public ScheduledJobTuple(ScheduledJobTuple tuple, JobRecord record)
         {
             if (tuple != null)
             {
                 this.Schedule = tuple.Schedule;
                 this.ScheduledJob = tuple.ScheduledJob;
             }
+
+            this.Record = record;
         }
 
         /// <summary>

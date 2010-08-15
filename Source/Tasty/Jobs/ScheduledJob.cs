@@ -69,6 +69,7 @@ namespace Tasty.Jobs
 
             return new JobRecord()
             {
+                Name = scheduleElement.Name,
                 JobType = jobElement.JobType,
                 QueueDate = now,
                 ScheduleName = scheduleElement.Name,

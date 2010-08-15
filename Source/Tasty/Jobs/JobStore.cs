@@ -21,7 +21,7 @@ namespace Tasty.Jobs
     {
         private static readonly object locker = new object();
         private static IJobStore current;
-        private string typeKey;
+        private string typeName;
 
         /// <summary>
         /// Gets or sets the current <see cref="IJobStore"/> implementation in use.
@@ -56,23 +56,24 @@ namespace Tasty.Jobs
                 }
             }
         }
-            /// <summary>
-        /// Gets a unique identifier for this <see cref="IJobStore"/> implementation that
-        /// can be used to isolation job runners and running jobs peristence providers.
+
+        /// <summary>
+        /// Gets this instance's full type name, including the assembly name but not including
+        /// version or public key information.
         /// </summary>
-        public string TypeKey 
+        protected string TypeName
         {
             get
             {
                 lock (this)
                 {
-                    if (this.typeKey == null)
+                    if (this.typeName == null)
                     {
                         Type type = GetType();
-                        this.typeKey = String.Concat(type.FullName, ", ", type.Assembly.GetName().Name);
+                        this.typeName = String.Concat(type.FullName, ", ", type.Assembly.GetName().Name);
                     }
 
-                    return this.typeKey;
+                    return this.typeName;
                 }
             }
         }
@@ -99,6 +100,26 @@ namespace Tasty.Jobs
         /// <param name="id">The ID of the job to delete.</param>
         /// <param name="transaction">The transaction to execute the command in.</param>
         public abstract void DeleteJob(int id, IJobStoreTransaction transaction);
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is equal to the given object.
+        /// Overridden to only compare on hash codes.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True if the object is equal to this instance, false otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            return obj != null && obj is IJobStore && obj.GetHashCode() == this.GetHashCode();
+        }
+
+        /// <summary>
+        /// Gets the hash code for this instance.
+        /// </summary>
+        /// <returns>This instance's hash code.</returns>
+        public override int GetHashCode()
+        {
+            return this.TypeName.GetHashCode();
+        }
 
         /// <summary>
         /// Gets a job by ID.

@@ -24,7 +24,7 @@ namespace Tasty.Jobs
         private static readonly object instanceLocker = new object();
         private readonly object stateLocker = new object();
         private readonly object runLocker = new object();
-        private static Dictionary<string, JobRunner> instances = new Dictionary<string, JobRunner>();
+        private static Dictionary<int, JobRunner> instances = new Dictionary<int, JobRunner>();
         private JobScheduleElementCollection schedules;
         private IEnumerable<ScheduledJobTuple> scheduledJobs;
         private RunningJobs runs;
@@ -261,17 +261,19 @@ namespace Tasty.Jobs
 
             lock (instanceLocker)
             {
-                if (!instances.ContainsKey(store.TypeKey))
+                int key = store.GetHashCode();
+
+                if (!instances.ContainsKey(key))
                 {
                     JobRunner runner = new JobRunner(store);
                     runner.Heartbeat = TastySettings.Section.Jobs.Heartbeat;
                     runner.MaximumConcurrency = TastySettings.Section.Jobs.MaximumConcurrency;
                     runner.Schedules = TastySettings.Section.Jobs.Schedules;
 
-                    instances[store.TypeKey] = runner;
+                    instances[key] = runner;
                 }
 
-                return instances[store.TypeKey];
+                return instances[key];
             }
         }
 
@@ -479,10 +481,7 @@ namespace Tasty.Jobs
                                           where sj.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
                                                 sj.ScheduledJob.JobType.Equals(r.JobType, StringComparison.OrdinalIgnoreCase)
                                           select r).DefaultIfEmpty()
-                                     select new ScheduledJobTuple(sj)
-                                     {
-                                         Record = r
-                                     };
+                                     select new ScheduledJobTuple(sj, r);
 
                         DateTime now = DateTime.UtcNow;
 
@@ -512,6 +511,7 @@ namespace Tasty.Jobs
 
                                 if (job != null)
                                 {
+                                    record.Name = job.Name;
                                     record.JobType = JobRecord.JobTypeString(job);
                                     record.Data = job.Serialize();
                                     this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
@@ -546,7 +546,7 @@ namespace Tasty.Jobs
             }
         }
 
-        /*/// <summary>
+        /// <summary>
         /// Performs the concrete finishing of the given job run.
         /// </summary>
         /// <param name="run">A job run to finish.</param>
@@ -576,7 +576,7 @@ namespace Tasty.Jobs
             this.runs.Remove(record.Id.Value);
 
             this.RaiseEvent(this.FinishJob, new JobRecordEventArgs(record));
-        }*/
+        }
 
         /// <summary>
         /// Finishes any jobs that have completed by updating their records in the job store.
@@ -601,33 +601,7 @@ namespace Tasty.Jobs
 
                     foreach (var job in finishing)
                     {
-                        var record = job.Record;
-                        var run = job.Run;
-
-                        record.FinishDate = run.FinishDate;
-
-                        if (run.ExecutionException != null)
-                        {
-                            record.Exception = new ExceptionXElement(run.ExecutionException).ToString();
-                            record.Status = JobStatus.Failed;
-
-                            this.RaiseEvent(this.Error, new JobErrorEventArgs(record, run.ExecutionException));
-                        }
-                        else if (run.WasRecovered)
-                        {
-                            record.Status = JobStatus.Interrupted;
-                        }
-                        else
-                        {
-                            record.Status = JobStatus.Succeeded;
-                        }
-
-                        this.store.SaveJob(record, trans);
-                        this.runs.Remove(record.Id.Value);
-
-                        this.RaiseEvent(this.FinishJob, new JobRecordEventArgs(record));
-
-                        //this.FinishJobRun(job.Run, job.Record, trans);
+                        this.FinishJobRun(job.Run, job.Record, trans);
                     }
 
                     this.runs.Flush();
@@ -648,7 +622,7 @@ namespace Tasty.Jobs
         /// <param name="e">The event arguments.</param>
         private void JobRunFinished(object sender, JobRunEventArgs e)
         {
-            /*lock (this.runLocker)
+            lock (this.runLocker)
             {
                 using (IJobStoreTransaction trans = this.store.StartTransaction())
                 {
@@ -675,7 +649,7 @@ namespace Tasty.Jobs
                         throw;
                     }
                 }
-            }*/
+            }
         }
 
         /// <summary>

@@ -170,8 +170,6 @@ namespace Tasty.Jobs
                     this.IsRunning = false;
                     this.FinishDate = DateTime.UtcNow;
                 }
-
-                this.RaiseEvent(this.Finished, new JobRunEventArgs(this.JobId));
             }
             catch (Exception ex)
             {
@@ -181,7 +179,9 @@ namespace Tasty.Jobs
                     this.IsRunning = false;
                     this.FinishDate = DateTime.UtcNow;
                 }
-
+            }
+            finally
+            {
                 this.RaiseEvent(this.Finished, new JobRunEventArgs(this.JobId));
             }
         }

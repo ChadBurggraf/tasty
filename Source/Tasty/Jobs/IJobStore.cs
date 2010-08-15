@@ -16,12 +16,6 @@ namespace Tasty.Jobs
     public interface IJobStore : IDisposable
     {
         /// <summary>
-        /// Gets a unique identifier for this <see cref="IJobStore"/> implementation that
-        /// can be used to isolation job runners and running jobs peristence providers.
-        /// </summary>
-        string TypeKey { get; }
-
-        /// <summary>
         /// Deletes a job by ID.
         /// </summary>
         /// <param name="id">The ID of the job to delete.</param>

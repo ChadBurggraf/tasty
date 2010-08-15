@@ -156,7 +156,7 @@ namespace Tasty.Jobs
         /// <returns>The generated persistence file name.</returns>
         public static string GeneratePersistenceFileName(IJobStore store)
         {
-            return String.Concat(store.TypeKey.Hash(), ".xml");
+            return String.Concat(store.GetHashCode().ToString().Hash(), ".xml");
         }
 
         /// <summary>

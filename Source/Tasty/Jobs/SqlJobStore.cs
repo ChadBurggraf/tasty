@@ -8,6 +8,7 @@ namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Configuration;
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
@@ -169,6 +170,16 @@ namespace Tasty.Jobs
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the hash code for this instance.
+        /// </summary>
+        /// <returns>This instance's hash code.</returns>
+        public override int GetHashCode()
+        {
+            // TODO: Only calculate once until the CS changes.
+            return String.Concat(TypeName, this.ConnectionString).GetHashCode();
         }
 
         /// <summary>
@@ -397,7 +408,21 @@ namespace Tasty.Jobs
 
                 if (!String.IsNullOrEmpty(connectionStringName))
                 {
-                    message = String.Format(CultureInfo.InvariantCulture, "You've specified that the current job store should use the connection string named \"{0}\", but there is either no connection string configured with that name or it is empty.", connectionStringName);
+                    var csElement = ConfigurationManager.ConnectionStrings[connectionStringName];
+
+                    if (csElement != null)
+                    {
+                        this.ConnectionString = csElement.ConnectionString;
+                    }
+                    else
+                    {
+                        this.ConnectionString = ConfigurationManager.AppSettings[connectionStringName];
+                    }
+
+                    if (String.IsNullOrEmpty(this.ConnectionString))
+                    {
+                        message = String.Format(CultureInfo.InvariantCulture, "You've specified that the current job store should use the connection string named \"{0}\", but there is either no connection string configured with that name or it is empty.", connectionStringName);
+                    }
                 }
                 else
                 {
@@ -408,7 +433,10 @@ namespace Tasty.Jobs
                         GetType().Assembly.GetName().Name);
                 }
 
-                throw new InvalidOperationException(message);
+                if (!String.IsNullOrEmpty(message))
+                {
+                    throw new InvalidOperationException(message);
+                }
             }
         }
 

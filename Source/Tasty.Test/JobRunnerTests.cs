@@ -23,11 +23,12 @@ namespace Tasty.Test
         {
             TastySettings.Section.Jobs.Heartbeat = heartbeat;
 
-            //this.jobStore = new MemoryJobStore();
-            this.jobStore = new SqlServerJobStore(ConfigurationManager.AppSettings["SqlServerConnectionString"]);
+            // We have to use a MemoryJobStore here to ensure a unique JobRunner instance that
+            // isn't interfered with by any other tests running in the current test run.
+            this.jobStore = new MemoryJobStore();
             this.jobRunner = JobRunner.GetInstance(this.jobStore);
             this.jobRunner.Heartbeat = heartbeat;
-            this.jobRunner.MaximumConcurrency = 1000;
+            this.jobRunner.MaximumConcurrency = 25;
             this.jobRunner.Error += new EventHandler<JobErrorEventArgs>(JobRunnerError);
             this.jobRunner.Start();
         }
@@ -64,7 +65,7 @@ namespace Tasty.Test
         [TestMethod]
         public void JobRunner_ExecuteScheduledJobs()
         {
-            /*this.jobRunner.Start();
+            this.jobRunner.Start();
 
             JobScheduleElementCollection schedules = new JobScheduleElementCollection();
 
@@ -115,7 +116,7 @@ namespace Tasty.Test
 
             Assert.AreEqual(2, this.jobStore.GetJobCount(null, null, sched1.Name));
             Assert.AreEqual(1, this.jobStore.GetJobCount(null, null, sched2.Name));
-            Assert.AreEqual(0, this.jobStore.GetJobCount(null, null, sched3.Name));*/
+            Assert.AreEqual(0, this.jobStore.GetJobCount(null, null, sched3.Name));
         }
 
         [TestMethod]

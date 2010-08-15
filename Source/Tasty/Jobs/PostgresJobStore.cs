@@ -327,9 +327,7 @@ namespace Tasty.Jobs
         /// <returns></returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize)
         {
-            throw new NotImplementedException();
-            /*
-            SqlCommand command = ((SqlConnection)connection).CreateCommand();
+            NpgsqlCommand command = ((NpgsqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
 
             StringBuilder sb = new StringBuilder();
@@ -338,52 +336,57 @@ namespace Tasty.Jobs
             switch (orderBy)
             {
                 case JobRecordResultsOrderBy.FinishDate:
-                    orderByColumn = "[FinishDate]";
+                    orderByColumn = @"""finish_date""";
                     break;
                 case JobRecordResultsOrderBy.JobType:
-                    orderByColumn = "[Type]";
+                    orderByColumn = @"""type""";
                     break;
                 case JobRecordResultsOrderBy.Name:
-                    orderByColumn = "[Name]";
+                    orderByColumn = @"""name""";
                     break;
                 case JobRecordResultsOrderBy.QueueDate:
-                    orderByColumn = "[QueueDate]";
+                    orderByColumn = @"""queue_date""";
                     break;
                 case JobRecordResultsOrderBy.ScheduleName:
-                    orderByColumn = "[ScheduleName]";
+                    orderByColumn = @"""schedule_name""";
                     break;
                 case JobRecordResultsOrderBy.StartDate:
-                    orderByColumn = "[StartDate]";
+                    orderByColumn = @"""start_date""";
                     break;
                 case JobRecordResultsOrderBy.Status:
-                    orderByColumn = "[Status]";
+                    orderByColumn = @"""status""";
                     break;
                 default:
                     throw new NotImplementedException();
             }
 
-            sb.AppendFormat(
-                CultureInfo.InvariantCulture,
-                @"SELECT * FROM (
-                    SELECT *, SELECT ROW_NUMBER() OVER(ORDER BY {0} {1}) AS [RowNumber]
-                    FROM [TastyJob] WHERE [Name] LIKE @Name",
-                orderByColumn,
-                sortDescending ? "DESC" : "ASC");
+            sb.Append(@"SELECT * FROM ""tasty_job"" WHERE ""name"" LIKE :name");
 
             if (withStatus != null)
             {
-                sb.Append(" AND [Status]=@Status");
-                command.Parameters.Add(new SqlParameter("@Status", withStatus.Value.ToString()));
+                sb.Append(@" AND ""status""=:status");
+                command.Parameters.Add(new NpgsqlParameter(":status", withStatus.Value.ToString()));
             }
 
-            sb.Append(@") t WHERE [RowNumber] > @SkipFrom AND [RowNumber] <= @SkipTo");
+            if (!String.IsNullOrEmpty(inSchedule))
+            {
+                sb.Append(@" AND ""schedule_name""=:schedule_name");
+                command.Parameters.Add(new NpgsqlParameter(":schedule_name", inSchedule));
+            }
+
+            sb.AppendFormat(
+                CultureInfo.InvariantCulture,
+                @" ORDER BY {0} {1} LIMIT :take OFFSET :skip",
+                orderByColumn,
+                sortDescending ? "DESC" : "ASC");
+
             command.CommandText = sb.ToString();
 
-            int skipFrom = (pageNumber - 1) * pageSize;
+            command.Parameters.Add(new NpgsqlParameter(":name", String.Concat("%", (likeName ?? String.Empty).Trim(), "%")));
+            command.Parameters.Add(new NpgsqlParameter(":skip", (pageNumber - 1) * pageSize));
+            command.Parameters.Add(new NpgsqlParameter(":take", pageSize));
 
-            command.Parameters.Add(new SqlParameter("@Name", String.Concat("%", (likeName ?? String.Empty).Trim(), "%")));
-            command.Parameters.Add(new SqlParameter("@SkipFrom", skipFrom));
-            command.Parameters.Add(new SqlParameter("@SkipTo", skipFrom + pageSize));*/
+            return command;
         }
     }
 }

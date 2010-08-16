@@ -21,20 +21,20 @@ namespace Tasty.Test
             {
                 IJobStoreTransaction trans;
 
-                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
+                var job1 = this.CreateRecord(new TestIdJob(), JobStatus.Queued);
                 this.Store.SaveJob(job1);
                 Assert.IsNotNull(this.Store.GetJob(job1.Id.Value));
                 this.Store.DeleteJob(job1.Id.Value);
                 Assert.IsNull(this.Store.GetJob(job1.Id.Value));
 
-                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
+                var job2 = this.CreateRecord(new TestIdJob(), JobStatus.Queued);
                 this.Store.SaveJob(job2);
                 trans = this.Store.StartTransaction();
                 this.Store.DeleteJob(job2.Id.Value, trans);
                 trans.Rollback();
                 Assert.IsNotNull(this.Store.GetJob(job2.Id.Value));
 
-                var job3 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
+                var job3 = this.CreateRecord(new TestIdJob(), JobStatus.Queued);
                 this.Store.SaveJob(job3);
                 trans = this.Store.StartTransaction();
                 this.Store.DeleteJob(job3.Id.Value, trans);
@@ -51,8 +51,8 @@ namespace Tasty.Test
                 int finishedCount = this.Store.GetJobs(JobStatus.Succeeded, 0).Count();
                 int testIdJobCount = this.Store.GetJobCount(new TestIdJob().Name, null, null);
 
-                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
-                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Succeeded);
+                var job1 = this.CreateRecord(new TestIdJob(), JobStatus.Queued);
+                var job2 = this.CreateRecord(new TestIdJob(), JobStatus.Succeeded);
 
                 this.Store.SaveJob(job1);
                 this.Store.SaveJob(job2);
@@ -115,13 +115,13 @@ namespace Tasty.Test
             {
                 IJobStoreTransaction trans;
 
-                var job1 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
+                var job1 = this.CreateRecord(new TestIdJob(), JobStatus.Queued);
                 Assert.IsNull(job1.Id);
                 this.Store.SaveJob(job1);
                 Assert.IsNotNull(job1.Id);
                 Assert.IsNotNull(this.Store.GetJob(job1.Id.Value));
 
-                var job2 = this.CreateRecord(new TestIdJob(), DateTime.UtcNow, JobStatus.Queued);
+                var job2 = this.CreateRecord(new TestIdJob(), JobStatus.Queued);
                 trans = this.Store.StartTransaction();
                 this.Store.SaveJob(job2, trans);
                 trans.Rollback();
@@ -131,7 +131,7 @@ namespace Tasty.Test
                     Assert.IsNull(this.Store.GetJob(job2.Id.Value));
                 }
 
-                var job3 = this.CreateRecord(new TestIdJob(), DateTime.Now, JobStatus.Queued);
+                var job3 = this.CreateRecord(new TestIdJob(), JobStatus.Queued);
                 trans = this.Store.StartTransaction();
                 this.Store.SaveJob(job3, trans);
                 trans.Commit();
@@ -140,9 +140,9 @@ namespace Tasty.Test
             }
         }
 
-        private JobRecord CreateRecord(IJob job, DateTime queueDate, JobStatus status)
+        private JobRecord CreateRecord(IJob job, JobStatus status)
         {
-            JobRecord record = job.CreateRecord(queueDate);
+            JobRecord record = job.CreateRecord();
             record.Status = status;
 
             return record;
@@ -150,8 +150,8 @@ namespace Tasty.Test
 
         private JobRecord CreateAndSaveScheduledSucceeded(IJob job, DateTime queueDate, string scheduleName)
         {
-            JobRecord record = this.CreateRecord(job, queueDate, JobStatus.Succeeded);
-            record.StartDate = queueDate;
+            JobRecord record = this.CreateRecord(job, JobStatus.Succeeded);
+            record.QueueDate = queueDate;
             record.ScheduleName = scheduleName;
             this.Store.SaveJob(record);
 

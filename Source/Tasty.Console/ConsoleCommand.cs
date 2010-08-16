@@ -69,8 +69,7 @@ namespace Tasty.Console
                 case "SQL-INSTALL":
                     return new SqlInstallCommand(args);
                 case "JOBS":
-                    throw new NotImplementedException();
-                    //return new JobRunnerCommand(args);
+                    return new JobRunnerCommand(args);
                 default:
                     throw new ArgumentException("The given command was not recognized.", "command");
             }
@@ -99,7 +98,7 @@ namespace Tasty.Console
         /// <param name="args">Any formatting arguments to use when formatting the message.</param>
         protected virtual void BadArgument(string format, params object[] args)
         {
-            this.StandardError.Write("tasty {0}: ", this.ArgumentName);
+            this.StandardError.Write("Tasty {0}: ", this.ArgumentName);
             this.StandardError.WriteLine(format, args);
         }
 
@@ -130,7 +129,7 @@ namespace Tasty.Console
         /// <param name="ex">The parsing exception that was thrown.</param>
         protected virtual void ParseError(OptionSet options, OptionException ex)
         {
-            this.StandardError.Write("tasty {0}: ", this.ArgumentName);
+            this.StandardError.Write("Tasty {0}: ", this.ArgumentName);
             this.StandardError.WriteLine(ex.Message);
             this.StandardError.WriteLine();
             options.WriteOptionDescriptions(this.StandardError);

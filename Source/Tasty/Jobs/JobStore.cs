@@ -25,14 +25,7 @@ namespace Tasty.Jobs
 
         /// <summary>
         /// Gets or sets the current <see cref="IJobStore"/> implementation in use.
-        /// The setter on this property is primarily meant for testing purposes.
         /// </summary>
-        /// <remarks>
-        /// It is not recommended to set this property during runtime. You should instead
-        /// set it during static initialization if you would rather not infer it from
-        /// the configuration. Setting it later could cause persistence errors if any
-        /// currently-executing jobs try to persist their update data to the new store.
-        /// </remarks>
         public static IJobStore Current
         {
             get
@@ -45,14 +38,6 @@ namespace Tasty.Jobs
                     }
 
                     return current;
-                }
-            }
-
-            set
-            {
-                lock (locker)
-                {
-                    current = value;
                 }
             }
         }

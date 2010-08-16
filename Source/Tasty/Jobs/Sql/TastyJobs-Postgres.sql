@@ -5,7 +5,7 @@ CREATE TABLE "tasty_job"
 	"name" character varying(128) NOT NULL,
 	"type" character varying(512) NOT NULL,
 	"data" text NOT NULL,
-	"status" character varying(12) NOT NULL,
+	"status" character varying(24) NOT NULL,
 	"exception" text NULL,
 	"queue_date" timestamp without time zone NOT NULL,
 	"start_date" timestamp without time zone NULL,

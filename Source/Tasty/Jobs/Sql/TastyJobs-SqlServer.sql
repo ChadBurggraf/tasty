@@ -7,7 +7,7 @@ CREATE TABLE [TastyJob]
 	[Name] varchar(128) NOT NULL,
 	[Type] varchar(512) NOT NULL,
 	[Data] xml NOT NULL,
-	[Status] varchar(12) NOT NULL,
+	[Status] varchar(24) NOT NULL,
 	[Exception] xml NULL,
 	[QueueDate] datetime NOT NULL,
 	[StartDate] datetime NULL,

@@ -142,6 +142,13 @@ namespace Tasty.Jobs
         /// <param name="e">The event arguments.</param>
         private void JobRunnerExecuteScheduledJob(object sender, JobRecordEventArgs e)
         {
+            lock (this)
+            {
+                if (this.EventSink != null)
+                {
+                    this.EventSink.FireExecuteScheduledJob(e);
+                }
+            }
         }
 
         /// <summary>

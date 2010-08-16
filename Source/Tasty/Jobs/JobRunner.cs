@@ -678,9 +678,14 @@ namespace Tasty.Jobs
                             {
                                 this.IsShuttingDown = false;
                                 this.RaiseEvent(this.AllFinished, EventArgs.Empty);
+                                break;
                             }
                         }
                     }
+                }
+                catch (ThreadAbortException)
+                {
+                    break;
                 }
                 catch (Exception ex)
                 {

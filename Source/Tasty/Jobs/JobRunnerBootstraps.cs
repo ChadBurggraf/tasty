@@ -72,6 +72,11 @@ namespace Tasty.Jobs
         public event EventHandler AllFinished;
 
         /// <summary>
+        /// Event raised when the app domain is being reloaded.
+        /// </summary>
+        public event EventHandler AppDomainReloading;
+
+        /// <summary>
         /// Event raised when a job has been canceled and and its run terminated.
         /// </summary>
         public event EventHandler<JobRecordEventArgs> CancelJob;
@@ -151,6 +156,7 @@ namespace Tasty.Jobs
                     }
 
                     this.LoadAppDomain();
+                    this.CreateWatcher();
                     this.proxy.StartRunner();
                 }
             }
@@ -226,16 +232,15 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
+                this.RaiseEvent(this.AllFinished, e);
                 AppDomain.Unload(this.domain);
-
-                if (this.AllFinished != null)
-                {
-                    this.AllFinished(this, e);
-                }
 
                 if (this.AutoReload)
                 {
+                    this.RaiseEvent(this.AppDomainReloading, EventArgs.Empty);
                     this.LoadAppDomain();
+                    this.CreateWatcher();
+                    this.proxy.StartRunner();
                 }
             }
         }

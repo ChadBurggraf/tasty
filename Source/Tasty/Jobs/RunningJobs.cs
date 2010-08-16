@@ -126,7 +126,11 @@ namespace Tasty.Jobs
         {
             lock (this.runs)
             {
-                DataContractSerializer serializer = new DataContractSerializer(typeof(JobRun[]));
+                var exceptionTypes = (from r in this.runs
+                                      where r.ExecutionException != null
+                                      select r.ExecutionException.GetType()).Distinct();
+
+                DataContractSerializer serializer = new DataContractSerializer(typeof(JobRun[]), exceptionTypes);
 
                 using (FileStream stream = File.Create(this.PersistencePath))
                 {

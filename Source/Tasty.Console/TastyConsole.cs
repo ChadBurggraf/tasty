@@ -49,9 +49,9 @@ namespace Tasty.Console
             }
             catch (OptionException ex)
             {
-                System.Console.Error.Write("tasty: ");
+                System.Console.Error.Write("Tasty: ");
                 System.Console.Error.WriteLine(ex.Message);
-                System.Console.Error.WriteLine("Try 'tasty --help' for more information.");
+                System.Console.Error.WriteLine("Try 'Tasty --help' for more information.");
                 return;
             }
 
@@ -80,8 +80,8 @@ namespace Tasty.Console
         private static void Help(OptionSet options, TextWriter output)
         {
             output.WriteLine("Usage: tasty command [COMMAND_ARGUMENTS]+");
-            output.WriteLine("Executes one of the available tasty.dll command actions.");
-            output.WriteLine("Use 'tasty command -man' to show the manual for any command listed below.");
+            output.WriteLine("Executes one of the available Tasty.dll command actions.");
+            output.WriteLine("Use 'Tasty command -man' to show the manual for any command listed below.");
             output.WriteLine();
             output.WriteLine("Commands:");
             output.WriteLine("  sql-install                a SQL install script generator.");

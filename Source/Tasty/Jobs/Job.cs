@@ -67,22 +67,12 @@ namespace Tasty.Jobs
         /// <returns>The created job record.</returns>
         public virtual JobRecord CreateRecord()
         {
-            return this.CreateRecord(DateTime.UtcNow);
-        }
-
-        /// <summary>
-        /// Creates a new job record representing an enqueue-able state for this instance.
-        /// </summary>
-        /// <param name="queueDate">The date to queue the job for execution on.</param>
-        /// <returns>The created job record.</returns>
-        public virtual JobRecord CreateRecord(DateTime queueDate)
-        {
             return new JobRecord()
             {
                 Data = this.Serialize(),
                 JobType = JobRecord.JobTypeString(this),
                 Name = this.Name,
-                QueueDate = queueDate,
+                QueueDate = DateTime.UtcNow,
                 Status = JobStatus.Queued
             };
         }
@@ -93,43 +83,22 @@ namespace Tasty.Jobs
         /// <returns>The job record that was persisted.</returns>
         public virtual JobRecord Enqueue()
         {
-            return this.Enqueue(DateTime.UtcNow, null);
+            return this.Enqueue(JobStore.Current);
         }
 
         /// <summary>
-        /// Enqueues the job for execution.
+        /// Enqueues the job for execution using the given <see cref="IJobStore"/>.
         /// </summary>
         /// <param name="store">The job store to use when queueing the job.</param>
         /// <returns>The job record that was persisted.</returns>
         public virtual JobRecord Enqueue(IJobStore store)
-        {
-            return this.Enqueue(DateTime.UtcNow, store);
-        }
-
-        /// <summary>
-        /// Enqueues the job for execution on a certin date and for a specific schedule.
-        /// </summary>
-        /// <param name="queueDate">The date to queue the job for execution on.</param>
-        /// <returns>The job record that was persisted.</returns>
-        public virtual JobRecord Enqueue(DateTime queueDate)
-        {
-            return this.Enqueue(queueDate, JobStore.Current);
-        }
-
-        /// <summary>
-        /// Enqueues the job for execution on a certin date and for a specific schedule.
-        /// </summary>
-        /// <param name="queueDate">The date to queue the job for execution on.</param>
-        /// <param name="store">The job store to use when queueing the job.</param>
-        /// <returns>The job record that was persisted.</returns>
-        public virtual JobRecord Enqueue(DateTime queueDate, IJobStore store)
         {
             if (store == null)
             {
                 throw new ArgumentNullException("store", "store cannot be null.");
             }
 
-            JobRecord record = this.CreateRecord(queueDate);
+            JobRecord record = this.CreateRecord();
             store.SaveJob(record);
 
             return record;

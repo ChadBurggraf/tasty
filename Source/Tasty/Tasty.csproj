@@ -143,6 +143,7 @@
     <Compile Include="Jobs\JobRunner.cs" />
     <Compile Include="Jobs\JobRunnerEventSink.cs" />
     <Compile Include="Jobs\JobRunnerProxy.cs" />
+    <Compile Include="Jobs\JobsInProcessModule.cs" />
     <Compile Include="Jobs\JobStatus.cs" />
     <Compile Include="Jobs\JobStore.cs" />
     <Compile Include="Jobs\MemoryJobStore.cs" />

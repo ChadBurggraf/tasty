@@ -204,6 +204,16 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Strips all HTML tags from the given string value.
+        /// </summary>
+        /// <param name="value">The string value to strip HTML tags from.</param>
+        /// <returns>The string with HTML stripped.</returns>
+        public static string StripHtml(this string value)
+        {
+            return Regex.Replace(value, @"<\/?[^>]+>", String.Empty);
+        }
+
+        /// <summary>
         /// Combines the string dictionary with semi-colon (;) separators to form a connection string.
         /// </summary>
         /// <param name="dict">The string dictionary to combine.</param>

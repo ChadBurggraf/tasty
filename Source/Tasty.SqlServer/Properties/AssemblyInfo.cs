@@ -10,5 +10,4 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Tasty Libraries SqlServer Functions")]
 [assembly: AssemblyDescription("Tasty Libraries SqlServer Functions")]
-[assembly: AssemblyProduct("Tasty Libraries")]
 [assembly: Guid("ac2a0470-3da1-4cb1-8605-54df334df274")]

@@ -16,7 +16,7 @@
     <ILMergePath Condition="'$(ILMergePath)' == ''">$(ProgramFiles)\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
     <LibraryDir>$(MSBuildProjectDirectory)\Source\Tasty</LibraryDir>
     <BuildDir>$(MSBuildProjectDirectory)\Build</BuildDir>
-    <SolutionVersionInfoPath>$(MSBuildProjectDirectory)\Source\SolutionVersionInfo.cs</SolutionVersionInfoPath>
+    <SolutionInfoPath>$(MSBuildProjectDirectory)\Source\SolutionInfo.cs</SolutionInfoPath>
     <SqlServerDir>$(MSBuildProjectDirectory)\Source\Tasty.SqlServer</SqlServerDir>
   </PropertyGroup>
   
@@ -45,7 +45,7 @@
   </Target>
 
   <Target Name="GetVersion">
-    <GetVersion AssemblyInfoFile="$(SolutionVersionInfoPath)">
+    <GetVersion AssemblyInfoFile="$(SolutionInfoPath)">
       <Output TaskParameter="Major" PropertyName="Major"/>
       <Output TaskParameter="Minor" PropertyName="Minor"/>
       <Output TaskParameter="Build" PropertyName="Build"/>

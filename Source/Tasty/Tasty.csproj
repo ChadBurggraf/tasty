@@ -90,9 +90,6 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
-    <Compile Include="..\SolutionVersionInfo.cs">
-      <Link>Properties\SolutionVersionInfo.cs</Link>
-    </Compile>
     <Compile Include="Build\Extensions.cs" />
     <Compile Include="Build\GetVersion.cs" />
     <Compile Include="Build\IS3PublisherDelegate.cs" />

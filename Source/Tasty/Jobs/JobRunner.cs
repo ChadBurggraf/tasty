@@ -396,6 +396,50 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Cleans up any recovered jobs in this instance's <see cref="RunningJobs"/>.
+        /// </summary>
+        private void CleanupRecoveredJobs()
+        {
+            using (IJobStoreTransaction trans = this.store.StartTransaction())
+            {
+                try
+                {
+                    var runs = this.runs.GetAll().Where(r => r.WasRecovered);
+                    var records = this.store.GetJobs(runs.Select(r => r.JobId));
+
+                    var recovered = from run in runs
+                                    join record in records on run.JobId equals record.Id.Value
+                                    select new
+                                    {
+                                        Run = run,
+                                        Record = record
+                                    };
+
+                    foreach (var job in recovered)
+                    {
+                        job.Record.Status = JobStatus.Interrupted;
+
+                        if (job.Run.ExecutionException != null)
+                        {
+                            job.Record.Exception = new ExceptionXElement(job.Run.ExecutionException).ToString();
+                        }
+
+                        this.store.SaveJob(job.Record);
+                        this.runs.Remove(job.Record.Id.Value);
+                    }
+
+                    this.runs.Flush();
+                    trans.Commit();
+                }
+                catch
+                {
+                    trans.Rollback();
+                    throw;
+                }
+            }
+        }
+
+        /// <summary>
         /// Dequeues pending jobs in the job store.
         /// </summary>
         private void DequeueJobs()
@@ -657,6 +701,18 @@ namespace Tasty.Jobs
         /// </summary>
         private void SmiteThee()
         {
+            lock (this.runLocker)
+            {
+                try
+                {
+                    this.CleanupRecoveredJobs();
+                }
+                catch (Exception ex)
+                {
+                    this.RaiseEvent(this.Error, new JobErrorEventArgs(null, ex));
+                }
+            }
+
             while (true)
             {
                 try

@@ -37,15 +37,15 @@
   <ItemGroup>
     <Reference Include="AWSSDK, Version=1.0.3.0, Culture=neutral, PublicKeyToken=498aea76c1205a29, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\AWSSDK.dll</HintPath>
+      <HintPath>..\..\Lib\AWSSDK.dll</HintPath>
     </Reference>
     <Reference Include="DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\DocumentFormat.OpenXml.dll</HintPath>
+      <HintPath>..\..\Lib\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
     <Reference Include="Ionic.Zip.Reduced, Version=1.9.1.5, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\Ionic.Zip.Reduced.dll</HintPath>
+      <HintPath>..\..\Lib\Ionic.Zip.Reduced.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v3.5">
@@ -53,18 +53,24 @@
     </Reference>
     <Reference Include="Mono.Security, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\Mono.Security.dll</HintPath>
+      <HintPath>..\..\Lib\Mono.Security.dll</HintPath>
     </Reference>
     <Reference Include="Npgsql, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\Npgsql.dll</HintPath>
+      <HintPath>..\..\Lib\Npgsql.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.IdentityModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.ServiceModel.Web">
@@ -100,6 +106,10 @@
     <Compile Include="Build\SchemaUpgradeCommandSet.cs" />
     <Compile Include="Build\SchemaUpgradeCommandSetResult.cs" />
     <Compile Include="Build\SetVersion.cs" />
+    <Compile Include="Configuration\ClientCertificateElement.cs" />
+    <Compile Include="Configuration\ClientCertificateElementCollection.cs" />
+    <Compile Include="Configuration\EndpointElementCollection.cs" />
+    <Compile Include="Configuration\EndpointElement.cs" />
     <Compile Include="Configuration\GeocodeElement.cs" />
     <Compile Include="Configuration\HttpElement.cs" />
     <Compile Include="Configuration\HttpRedirectRuleElement.cs" />
@@ -110,6 +120,9 @@
     <Compile Include="Configuration\JobScheduleElement.cs" />
     <Compile Include="Configuration\JobScheduleElementCollection.cs" />
     <Compile Include="Configuration\JobStoreElement.cs" />
+    <Compile Include="Configuration\ServiceElement.cs" />
+    <Compile Include="Configuration\ServiceElementCollection.cs" />
+    <Compile Include="Configuration\ServiceModelElement.cs" />
     <Compile Include="Configuration\TastyConfigurationElementCollection.cs" />
     <Compile Include="Configuration\TastySettings.cs" />
     <Compile Include="Configuration\UrlTokensElement.cs" />
@@ -143,6 +156,11 @@
     <Compile Include="Jobs\SqlServerJobStore.cs" />
     <Compile Include="ShaLevel.cs" />
     <Compile Include="Strings.cs" />
+    <Compile Include="ServiceModel\Extensions.cs" />
+    <Compile Include="ServiceModel\X509CertificateLoader.cs" />
+    <Compile Include="ServiceModel\X509CertificateWhitelistServiceHost.cs" />
+    <Compile Include="ServiceModel\X509CertificateWhitelistServiceHostFactory.cs" />
+    <Compile Include="ServiceModel\X509CertificateWhitelistValidator.cs" />
     <Compile Include="TastyFileSystemEventType.cs" />
     <Compile Include="Geocode\GeocodeAddressDetails.cs" />
     <Compile Include="Geocode\GeocodeAdministrativeArea.cs" />
@@ -175,6 +193,7 @@
     <Compile Include="SpreadsheetWriter.cs" />
     <Compile Include="TastyFileSystemWatcher.cs" />
     <Compile Include="TastyFileSystemWatcherMode.cs" />
+    <Compile Include="Web\QueryStringMergeMode.cs" />
     <Compile Include="Web\UrlTokens\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\UrlTokens\IUrlToken.cs" />
     <Compile Include="Web\UrlTokens\IUrlTokenStore.cs" />

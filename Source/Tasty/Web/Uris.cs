@@ -162,6 +162,31 @@ namespace Tasty.Web
         }
 
         /// <summary>
+        /// Sets the entire query string for the given URL.
+        /// </summary>
+        /// <param name="url">The URL to set the query string for.</param>
+        /// <param name="query">The query string to set.</param>
+        /// <returns>The updated URL.</returns>
+        public static Uri SetQuery(this Uri url, string query)
+        {
+            return SetQuery(url, QueryString.Parse(query ?? String.Empty));
+        }
+
+        /// <summary>
+        /// Sets the entire query string for the given URL.
+        /// </summary>
+        /// <param name="url">The URl to set the query string for.</param>
+        /// <param name="query">The query string to set.</param>
+        /// <returns>The updated URL.</returns>
+        public static Uri SetQuery(this Uri url, QueryString query)
+        {
+            UriBuilder builder = new UriBuilder(url);
+            builder.Query = query != null ? query.ToString() : String.Empty;
+
+            return builder.Uri;
+        }
+
+        /// <summary>
         /// Sets the given key/value for the given URL's query string.
         /// </summary>
         /// <param name="url">The URL to set the query string value for.</param>

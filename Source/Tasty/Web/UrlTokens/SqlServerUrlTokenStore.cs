@@ -79,7 +79,7 @@ namespace Tasty.Web.UrlTokens
                     command.CommandText = Sql;
 
                     command.Parameters.Add(new SqlParameter("@Key", record.Key));
-                    command.Parameters.Add(new SqlParameter("@Type", record.TokenType.AssemblyQualifiedName));
+                    command.Parameters.Add(new SqlParameter("@Type", record.GetStorageTypeName()));
                     command.Parameters.Add(new SqlParameter("@Data", record.Data));
                     command.Parameters.Add(new SqlParameter("@Created", record.Created));
                     command.Parameters.Add(new SqlParameter("@Expires", record.Expires));

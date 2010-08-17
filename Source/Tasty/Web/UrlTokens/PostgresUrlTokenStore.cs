@@ -81,7 +81,7 @@ namespace Tasty.Web.UrlTokens
                     command.CommandText = Sql;
 
                     command.Parameters.Add(new NpgsqlParameter(":key", record.Key));
-                    command.Parameters.Add(new NpgsqlParameter(":type", record.TokenType.AssemblyQualifiedName));
+                    command.Parameters.Add(new NpgsqlParameter(":type", record.GetStorageTypeName()));
                     command.Parameters.Add(new NpgsqlParameter(":data", record.Data));
                     command.Parameters.Add(new NpgsqlParameter(":created", record.Created));
                     command.Parameters.Add(new NpgsqlParameter(":expires", record.Expires));

@@ -66,6 +66,15 @@ namespace Tasty.Web.UrlTokens
         public Type TokenType { get; set; }
 
         /// <summary>
+        /// Gets the type name to use when storing this record in an <see cref="IUrlTokenStore"/>.
+        /// </summary>
+        /// <returns>A storage-friendly type name.</returns>
+        public string GetStorageTypeName()
+        {
+            return String.Concat(this.TokenType.FullName, ", ", this.TokenType.Assembly.GetName().Name);
+        }
+
+        /// <summary>
         /// Converts this instance's <see cref="TokenType"/> and <see cref="Data"/> properties into an <see cref="IUrlToken"/> object.
         /// </summary>
         /// <returns>An <see cref="IUrlToken"/> object.</returns>

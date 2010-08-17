@@ -14,6 +14,7 @@
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <ConsoleDir>$(MSBuildProjectDirectory)\Source\Tasty.Console</ConsoleDir>
     <ILMergePath Condition="'$(ILMergePath)' == ''">$(ProgramFiles)\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
+    <LibDir>$(MSBuildProjectDirectory)\Lib</LibDir>
     <LibraryDir>$(MSBuildProjectDirectory)\Source\Tasty</LibraryDir>
     <BuildDir>$(MSBuildProjectDirectory)\Build</BuildDir>
     <SolutionInfoPath>$(MSBuildProjectDirectory)\Source\SolutionInfo.cs</SolutionInfoPath>
@@ -27,18 +28,18 @@
     <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration)"/>
   
     <Message Text='Merging assemblies into "Tasty.dll".'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryDir)\Tasty.snk /out:$(BuildDir)\Tasty.dll $(LibraryDir)\bin\Release\Tasty.dll $(LibraryDir)\bin\Release\AWSSDK.dll $(LibraryDir)\bin\Release\Ionic.Zip.Reduced.dll $(LibraryDir)\bin\Release\Npgsql.dll $(LibraryDir)\bin\Release\Mono.Security.dll'/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryDir)\Tasty.snk /out:$(BuildDir)\Tasty.dll $(LibraryDir)\bin\Release\Tasty.dll $(LibDir)\AWSSDK.dll $(LibDir)\Ionic.Zip.Reduced.dll $(LibDir)\Npgsql.dll $(LibDir)\Mono.Security.dll'/>
     <Copy SourceFiles="$(LibraryDir)\bin\Release\Tasty.xml" DestinationFiles="$(BuildDir)\Tasty.xml"/>
     <Copy SourceFiles="$(ConsoleDir)\bin\Release\Tasty.exe.config" DestinationFiles="$(BuildDir)\Tasty.exe.config"/>
     
     <Message Text='Merging assemblies into "Tasty.exe"'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsoleDir)\Tasty.Console.snk /out:$(BuildDir)\Tasty.exe $(ConsoleDir)\bin\Release\tasty.exe $(ConsoleDir)\bin\Release\Tasty.dll $(ConsoleDir)\bin\Release\AWSSDK.dll $(ConsoleDir)\bin\Release\Ionic.Zip.Reduced.dll $(LibraryDir)\bin\Release\Npgsql.dll $(LibraryDir)\bin\Release\Mono.Security.dll $(ConsoleDir)\bin\Release\NDesk.Options.dll'/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsoleDir)\Tasty.Console.snk /out:$(BuildDir)\Tasty.exe $(ConsoleDir)\bin\Release\Tasty.exe $(ConsoleDir)\bin\Release\Tasty.dll $(LibDir)\AWSSDK.dll $(LibDir)\Ionic.Zip.Reduced.dll $(LibDir)\Npgsql.dll $(LibDir)\Mono.Security.dll $(LibDir)\NDesk.Options.dll'/>
     <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.dll" DestinationFiles="$(BuildDir)\Tasty.SqlServer.dll"/>
     <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.xml" DestinationFiles="$(BuildDir)\Tasty.SqlServer.xml"/>
 
     <ItemGroup>
-      <OpenXml Include="$(MSBuildProjectDirectory)\Source\Dependencies\DocumentFormat.OpenXml.dll"/>
-      <OpenXml Include="$(MSBuildProjectDirectory)\Source\Dependencies\DocumentFormat.OpenXml.xml"/>
+      <OpenXml Include="$(LibDir)\DocumentFormat.OpenXml.dll"/>
+      <OpenXml Include="$(LibDir)\DocumentFormat.OpenXml.xml"/>
     </ItemGroup>
 
     <Copy SourceFiles="@(OpenXml)" DestinationFolder="$(BuildDir)"/>

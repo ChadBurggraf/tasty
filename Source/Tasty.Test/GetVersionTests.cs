@@ -22,7 +22,7 @@ namespace Tasty.Test
 
             GetVersion task = new GetVersion()
             {
-                AssemblyInfoFile = Path.GetFullPath("SolutionVersionInfo.cs")
+                AssemblyInfoFile = Path.GetFullPath("SolutionInfo.cs")
             };
 
             Assert.IsTrue(task.Execute());

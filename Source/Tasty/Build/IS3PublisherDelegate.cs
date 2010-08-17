@@ -23,5 +23,18 @@ namespace Tasty.Build
         /// <param name="withGzip">A value indicating whether the file was compressed with GZip before publishing.</param>
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
         void OnFilePublished(string path, string objectKey, bool withGzip);
+
+        /// <summary>
+        /// Called when a file is skipped for publishing because it already exists.
+        /// </summary>
+        /// <param name="path">The path of the file that was skipped.</param>
+        /// <param name="objectKey">The object key of the file on the service.</param>
+        void OnFileSkipped(string path, string objectKey);
+
+        /// <summary>
+        /// Called when an entire prefix is skipped for publishing because it already exists.
+        /// </summary>
+        /// <param name="prefix">The prefix that was skipped.</param>
+        void OnPrefixSkipped(string prefix);
     }
 }

@@ -25,6 +25,20 @@ namespace Tasty.Build
 
         #endregion
 
+        #region Construction
+
+        /// <summary>
+        /// Initializes a new instance of the S3Publish class.
+        /// </summary>
+        public S3Publish()
+            : base()
+        {
+            this.OverwriteExisting = true;
+            this.OverwriteExistingPrefix = true;
+        }
+
+        #endregion
+
         #region Public Instance Properties
 
         /// <summary>
@@ -57,6 +71,20 @@ namespace Tasty.Build
         public ITaskItem[] FilesPublished { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether to overwrite existing objects.
+        /// Defaults to true.
+        /// </summary>
+        public bool OverwriteExisting { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to overwrite objects
+        /// in the given prefix. If false and <see cref="Prefix"/> is set
+        /// and the prefix exists on the service, nothing will be written at all.
+        /// Defaults to true.
+        /// </summary>
+        public bool OverwriteExistingPrefix { get; set; }
+
+        /// <summary>
         /// Gets or sets the object prefix to use for object keys when publishing files.
         /// </summary>
         public string Prefix { get; set; }
@@ -82,19 +110,33 @@ namespace Tasty.Build
         /// <returns>True if the task executed successfully, false otherwise.</returns>
         public override bool Execute()
         {
-            this.filesPublished = new List<ITaskItem>();
+            try
+            {
+                this.filesPublished = new List<ITaskItem>();
 
-            new S3Publisher(this.AccessKeyId, this.SecretAccessKeyId)
-                .WithBasePath(this.BasePath)
-                .WithBucketName(this.BucketName)
-                .WithFiles(this.Files.Select(ti => ti.ItemSpec))
-                .WithPrefix(this.Prefix)
-                .WithPublisherDelegate(this)
-                .WithUseSsl(this.UseSsl).Publish();
+                if (this.Files != null && this.Files.Length > 0)
+                {
+                    new S3Publisher(this.AccessKeyId, this.SecretAccessKeyId)
+                        .WithBasePath(this.BasePath)
+                        .WithBucketName(this.BucketName)
+                        .WithFiles(this.Files.Select(ti => ti.ItemSpec))
+                        .WithOverwriteExisting(this.OverwriteExisting)
+                        .WithOverwriteExistingPrefix(this.OverwriteExistingPrefix)
+                        .WithPrefix(this.Prefix)
+                        .WithPublisherDelegate(this)
+                        .WithUseSsl(this.UseSsl)
+                        .Publish();
+                }
 
-            this.FilesPublished = this.filesPublished.ToArray();
+                this.FilesPublished = this.filesPublished.ToArray();
 
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.LogMessage(MessageImportance.High, "Whoops:{0}\r\nStack trace:\r\n{1}", ex.Message, ex.StackTrace);
+                return false;
+            }
         }
 
         /// <summary>
@@ -115,6 +157,25 @@ namespace Tasty.Build
             message += ".";
 
             Log.LogMessage(message, path, objectKey);
+        }
+
+        /// <summary>
+        /// Called when a file is skipped for publishing because it already exists.
+        /// </summary>
+        /// <param name="path">The path of the file that was skipped.</param>
+        /// <param name="objectKey">The object key of the file on the service.</param>
+        public void OnFileSkipped(string path, string objectKey)
+        {
+            Log.LogMessage("{0} skipped because it exists at {1}.", path, objectKey);
+        }
+
+        /// <summary>
+        /// Called when an entire prefix is skipped for publishing because it already exists.
+        /// </summary>
+        /// <param name="prefix">The prefix that was skipped.</param>
+        public void OnPrefixSkipped(string prefix)
+        {
+            Log.LogMessage("Prefix \"{0}\" skipped because it already exists.", prefix);
         }
 
         #endregion

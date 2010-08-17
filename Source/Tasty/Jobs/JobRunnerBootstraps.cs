@@ -11,6 +11,7 @@ namespace Tasty.Jobs
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Security.Policy;
 
     /// <summary>
     /// Provides bootup and teardown services for a <see cref="JobRunner"/>.
@@ -18,14 +19,15 @@ namespace Tasty.Jobs
     /// and automatically performs safe-shudownt and restart of the <see cref="JobRunner"/>
     /// when changes are detected.
     /// </summary>
-    public class JobRunnerBootstraps
+    public class JobRunnerBootstraps : IDisposable
     {
         #region Private Fields
 
+        private bool disposed;
         private AppDomain domain;
         private JobRunnerProxy proxy;
         private JobRunnerEventSink eventSink;
-        private TastyFileSystemWatcher watcher;
+        private TastyFileSystemWatcher directoryWatcher, configWatcher;
 
         #endregion
 
@@ -36,7 +38,6 @@ namespace Tasty.Jobs
         /// </summary>
         public JobRunnerBootstraps()
         {
-            this.AutoReload = true;
         }
 
         /// <summary>
@@ -72,14 +73,15 @@ namespace Tasty.Jobs
         public event EventHandler AllFinished;
 
         /// <summary>
-        /// Event raised when the app domain is being reloaded.
-        /// </summary>
-        public event EventHandler AppDomainReloading;
-
-        /// <summary>
         /// Event raised when a job has been canceled and and its run terminated.
         /// </summary>
         public event EventHandler<JobRecordEventArgs> CancelJob;
+
+        /// <summary>
+        /// Event raised when the target application directory or configuration file
+        /// is changed and the job runner is being shut down.
+        /// </summary>
+        public event EventHandler<FileSystemEventArgs> ChangeDetected;
 
         /// <summary>
         /// Event raised when a job has been dequeued from the persistent store
@@ -116,12 +118,6 @@ namespace Tasty.Jobs
         #region Public Instance Properties
 
         /// <summary>
-        /// Gets or sets a value indicating whether to automatically reload the <see cref="AppDomain"/>
-        /// when it is unloaded due to changes in the target application's directory.
-        /// </summary>
-        public bool AutoReload { get; set; }
-
-        /// <summary>
         /// Gets or sets the path to the target application's configuration file.
         /// </summary>
         public string ConfigurationFilePath { get; set; }
@@ -135,6 +131,15 @@ namespace Tasty.Jobs
         #endregion
 
         #region Public Instance Methods
+
+        /// <summary>
+        /// Disposes of resources used by this instance.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         /// <summary>
         /// Initiates a bootstrap pull-up if the target <see cref="AppDomain"/> isn't already loaded.
@@ -155,9 +160,7 @@ namespace Tasty.Jobs
                         throw new InvalidOperationException("ConfigurationFilePath must be set to an existing configuration file location.");
                     }
 
-                    this.LoadAppDomain();
-                    this.CreateWatcher();
-                    this.proxy.StartRunner();
+                    this.LoadAndStartAppDomain();
                 }
             }
         }
@@ -166,15 +169,19 @@ namespace Tasty.Jobs
         /// The opposite of <see cref="PullUp"/>, stops the target <see cref="AppDomain"/>, optionally waiting
         /// for all of the currently running jobs to complete.
         /// </summary>
-        /// <param name="unwind">Performs a delayed shutdown, waiting for all running jobs to complate.
-        /// WARNING: When true, this will cause the value of <see cref="AutoReload"/> to be set to false.</param>
+        /// <param name="unwind">Performs a delayed shutdown, waiting for all running jobs to complate.</param>
         public void PushDown(bool unwind)
         {
             lock (this)
             {
+                this.directoryWatcher.Dispose();
+                this.directoryWatcher = null;
+
+                this.configWatcher.Dispose();
+                this.configWatcher = null;
+
                 if (unwind)
                 {
-                    this.AutoReload = false;
                     this.proxy.StopRunner();
                 }
                 else
@@ -189,27 +196,43 @@ namespace Tasty.Jobs
         #region Private Instance Methods
 
         /// <summary>
-        /// Creates a <see cref="TastyFileSystemWatcher"/> to watch for changes in the target application's base directory.
+        /// Disposes of resources used by this instance.
         /// </summary>
-        private void CreateWatcher()
+        /// <param name="disposing">A value indicating whether to dispose of managed resources.</param>
+        private void Dispose(bool disposing)
         {
-            this.watcher = new TastyFileSystemWatcher(this.BasePath);
-            this.watcher.Operation += new FileSystemEventHandler(this.WatcherOperation);
-            this.watcher.Mode = TastyFileSystemWatcherMode.Directory;
-            this.watcher.EnableRaisingEvents = true;
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    if (this.configWatcher != null)
+                    {
+                        this.configWatcher.Dispose();
+                        this.configWatcher = null;
+                    }
+
+                    if (this.directoryWatcher != null)
+                    {
+                        this.directoryWatcher.Dispose();
+                        this.directoryWatcher = null;
+                    }
+                }
+
+                this.disposed = true;
+            }
         }
 
         /// <summary>
-        /// Loads the target <see cref="AppDomain"/>.
+        /// Loads the <see cref="AppDomain"/> to run the <see cref="JobRunner"/> in and starts the runner.
         /// </summary>
-        private void LoadAppDomain()
+        private void LoadAndStartAppDomain()
         {
             AppDomainSetup setup = new AppDomainSetup();
             setup.ApplicationBase = this.BasePath;
             setup.ShadowCopyFiles = "true";
             setup.ConfigurationFile = this.ConfigurationFilePath;
 
-            this.domain = AppDomain.CreateDomain("Tasty Job Runner", null, setup);
+            this.domain = AppDomain.CreateDomain("Tasty Job Runner", AppDomain.CurrentDomain.Evidence, setup);
             this.proxy = (JobRunnerProxy)this.domain.CreateInstanceAndUnwrap(GetType().Assembly.FullName, typeof(JobRunnerProxy).FullName);
 
             this.eventSink = new JobRunnerEventSink();
@@ -221,6 +244,20 @@ namespace Tasty.Jobs
             this.eventSink.FinishJob += new EventHandler<JobRecordEventArgs>(this.ProxyFinishJob);
             this.eventSink.TimeoutJob += new EventHandler<JobRecordEventArgs>(this.ProxyTimeoutJob);
             this.proxy.EventSink = this.eventSink;
+
+            this.directoryWatcher = new TastyFileSystemWatcher(this.BasePath);
+            this.directoryWatcher.Operation += new FileSystemEventHandler(this.WatcherOperation);
+            this.directoryWatcher.Mode = TastyFileSystemWatcherMode.Directory;
+            this.directoryWatcher.Filter = "*.dll";
+            this.directoryWatcher.EnableRaisingEvents = true;
+
+            this.configWatcher = new TastyFileSystemWatcher(Path.GetDirectoryName(this.ConfigurationFilePath));
+            this.configWatcher.Operation += new FileSystemEventHandler(this.WatcherOperation);
+            this.configWatcher.Mode = TastyFileSystemWatcherMode.IndividualFiles;
+            this.configWatcher.Filter = Path.GetFileName(this.ConfigurationFilePath);
+            this.configWatcher.EnableRaisingEvents = true;
+
+            this.proxy.StartRunner();
         }
 
         /// <summary>
@@ -232,16 +269,12 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
-                this.RaiseEvent(this.AllFinished, e);
-                AppDomain.Unload(this.domain);
+                this.proxy = null;
+                this.eventSink = null;
 
-                if (this.AutoReload)
-                {
-                    this.RaiseEvent(this.AppDomainReloading, EventArgs.Empty);
-                    this.LoadAppDomain();
-                    this.CreateWatcher();
-                    this.proxy.StartRunner();
-                }
+                this.RaiseEvent(this.AllFinished, e);
+                
+                AppDomain.Unload(this.domain);
             }
         }
 
@@ -314,7 +347,8 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
-                this.proxy.StopRunner();
+                this.RaiseEvent(this.ChangeDetected, e);
+                this.PushDown(true);
             }
         }
 

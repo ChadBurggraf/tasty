@@ -68,6 +68,18 @@ namespace Tasty.Jobs
         public string PersistencePath { get; private set; }
 
         /// <summary>
+        /// Generates a stable persistence file name for the given job store.
+        /// The name will be unique for the type, and remain the same as long as the type's
+        /// name and assembly name (not including version number or public key) do not change.
+        /// </summary>
+        /// <param name="store">The job store to generate the persistence file name for.</param>
+        /// <returns>The generated persistence file name.</returns>
+        public static string GeneratePersistenceFileName(IJobStore store)
+        {
+            return String.Concat(store.GetHashCode().ToString().Hash(), ".xml");
+        }
+
+        /// <summary>
         /// Gets all of the job runs this instance is maintaining.
         /// </summary>
         /// <returns>A collection of job runs.</returns>
@@ -149,18 +161,6 @@ namespace Tasty.Jobs
             {
                 this.runs.RemoveAll(r => r.JobId == jobId);
             }
-        }
-
-        /// <summary>
-        /// Generates a stable persistence file name for the given job store.
-        /// The name will be unique for the type, and remain the same as long as the type's
-        /// name and assembly name (not including version number or public key) do not change.
-        /// </summary>
-        /// <param name="store">The job store to generate the persistence file name for.</param>
-        /// <returns>The generated persistence file name.</returns>
-        public static string GeneratePersistenceFileName(IJobStore store)
-        {
-            return String.Concat(store.GetHashCode().ToString().Hash(), ".xml");
         }
 
         /// <summary>

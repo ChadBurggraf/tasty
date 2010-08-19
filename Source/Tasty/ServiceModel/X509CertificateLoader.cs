@@ -9,9 +9,9 @@ namespace Tasty.ServiceModel
     using System;
     using System.IO;
     using System.Reflection;
-    using System.ServiceModel;
     using System.Security.Cryptography.X509Certificates;
-
+    using System.ServiceModel;
+    
     /// <summary>
     /// Provides a simple service facade for loading <see cref="X509Certificate2"/>s from a stream,
     /// the filesystem or an embedded resource file.

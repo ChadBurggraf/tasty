@@ -12,7 +12,8 @@ namespace Tasty.Jobs
     /// Provides proxy access to the singleton <see cref="JobRunner"/> instance
     /// across application domains.
     /// </summary>
-    internal sealed class JobRunnerProxy : MarshalByRefObject
+    [Serializable]
+    public sealed class JobRunnerProxy : MarshalByRefObject
     {
         private bool isGreen = true;
 

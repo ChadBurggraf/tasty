@@ -18,26 +18,54 @@ namespace Tasty.Jobs
         /// Initializes a new instance of the ScheduledJobTuple class.
         /// </summary>
         public ScheduledJobTuple()
-            : this(null, null)
+            : this(null, null, null)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the ScheduledJobTuple from the given instance.
+        /// Initializes a new instance of the ScheduledJobTuple class from the given instance.
         /// Does not copy over the <see cref="ScheduledJobTuple.Record"/> property.
         /// </summary>
         /// <param name="tuple">The tuple instance to create this instance from.</param>
         /// <param name="record">The new tuple's <see cref="JobRecord"/>.</param>
-        public ScheduledJobTuple(ScheduledJobTuple tuple, JobRecord record)
+        /// <param name="now">The current date, used to calculate the next execution date.</param>
+        public ScheduledJobTuple(ScheduledJobTuple tuple, JobRecord record, DateTime? now)
         {
+            bool nextSet = false;
+
             if (tuple != null)
             {
                 this.Schedule = tuple.Schedule;
                 this.ScheduledJob = tuple.ScheduledJob;
+
+                if (now != null)
+                {
+                    if (now.Value.Kind != DateTimeKind.Utc)
+                    {
+                        throw new ArgumentException("now must be in UTC.", "now");
+                    }
+
+                    this.NextExecuteDate = Tasty.Jobs.ScheduledJob.GetNextExecuteDate(
+                        tuple.Schedule,
+                        record != null ? record.StartDate : null,
+                        now.Value);
+
+                    nextSet = true;
+                }
             }
 
             this.Record = record;
+
+            if (!nextSet)
+            {
+                this.NextExecuteDate = DateTime.UtcNow;
+            }
         }
+
+        /// <summary>
+        /// Gets or sets the scheduled job's next execute date.
+        /// </summary>
+        public DateTime NextExecuteDate { get; set; }
 
         /// <summary>
         /// Gets or sets scheduled job's previous run record.

@@ -205,18 +205,21 @@ namespace Tasty.Web
                                 this.Add(key, source.GetAll(key));
                             }
                         }
+
                         break;
                     case QueryStringMergeMode.AddToExisting:
                         foreach (string key in source.Keys)
                         {
                             this.Add(key, source.GetAll(key));
                         }
+
                         break;
                     case QueryStringMergeMode.OverwriteExisting:
                         foreach (string key in source.Keys)
                         {
                             this.SetAll(key, source.GetAll(key));
                         }
+
                         break;
                     default:
                         throw new NotImplementedException();

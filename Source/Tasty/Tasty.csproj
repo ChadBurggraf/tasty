@@ -155,6 +155,7 @@
     <Compile Include="Jobs\SqlJobStore.cs" />
     <Compile Include="Jobs\SqlJobStoreTransaction.cs" />
     <Compile Include="Jobs\SqlServerJobStore.cs" />
+    <Compile Include="LambdaComparer.cs" />
     <Compile Include="ShaLevel.cs" />
     <Compile Include="Strings.cs" />
     <Compile Include="ServiceModel\Extensions.cs" />

@@ -128,10 +128,10 @@ namespace Tasty
 
             switch (level)
             {
-                case (ShaLevel.TwoFiftySix):
+                case ShaLevel.TwoFiftySix:
                     crypto = new SHA256CryptoServiceProvider();
                     break;
-                case (ShaLevel.FiveTwelve):
+                case ShaLevel.FiveTwelve:
                     crypto = new SHA512CryptoServiceProvider();
                     break;
                 default:

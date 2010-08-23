@@ -101,12 +101,12 @@ namespace Tasty.Jobs
         /// <returns>A delete command.</returns>
         public override DbCommand CreateDeleteCommand(DbConnection connection, DbTransaction transaction, int id)
         {
-            const string sql = @"DELETE FROM ""tasty_job"" WHERE ""id"" = :id";
+            const string Sql = @"DELETE FROM ""tasty_job"" WHERE ""id"" = :id";
 
             NpgsqlCommand command = ((NpgsqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
             command.Transaction = transaction as NpgsqlTransaction;
-            command.CommandText = sql;
+            command.CommandText = Sql;
             command.Parameters.Add(new NpgsqlParameter(":id", id));
 
             return command;
@@ -158,8 +158,8 @@ namespace Tasty.Jobs
         /// <returns>An insert or update command.</returns>
         public override DbCommand CreateSaveCommand(DbConnection connection, DbTransaction transaction, JobRecord record)
         {
-            const string insert = @"INSERT INTO ""tasty_job""(""name"",""type"",""data"",""status"",""exception"",""queue_date"",""start_date"",""finish_date"",""schedule_name"") VALUES(:name,:type,:data,:status,:exception,:queue_date,:start_date,:finish_date,:schedule_name); SELECT currval('tasty_job_id_seq') AS ""id"";";
-            const string update = @"UPDATE ""tasty_job"" SET ""name""=:name,""type""=:type,""data""=:data,""status""=:status,""exception""=:exception,""queue_date""=:queue_date,""start_date""=:start_date,""finish_date""=:finish_date,""schedule_name""=:schedule_name WHERE ""id""=:id";
+            const string Insert = @"INSERT INTO ""tasty_job""(""name"",""type"",""data"",""status"",""exception"",""queue_date"",""start_date"",""finish_date"",""schedule_name"") VALUES(:name,:type,:data,:status,:exception,:queue_date,:start_date,:finish_date,:schedule_name); SELECT currval('tasty_job_id_seq') AS ""id"";";
+            const string Update = @"UPDATE ""tasty_job"" SET ""name""=:name,""type""=:type,""data""=:data,""status""=:status,""exception""=:exception,""queue_date""=:queue_date,""start_date""=:start_date,""finish_date""=:finish_date,""schedule_name""=:schedule_name WHERE ""id""=:id";
 
             NpgsqlCommand command = ((NpgsqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
@@ -167,11 +167,11 @@ namespace Tasty.Jobs
 
             if (record.Id == null)
             {
-                command.CommandText = insert;
+                command.CommandText = Insert;
             }
             else
             {
-                command.CommandText = update;
+                command.CommandText = Update;
                 command.Parameters.Add(new NpgsqlParameter(":id", record.Id.Value));
             }
 
@@ -261,11 +261,11 @@ namespace Tasty.Jobs
         /// <returns>A select command.</returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, int id)
         {
-            const string sql = @"SELECT * FROM ""tasty_job"" WHERE ""id"" = :id";
+            const string Sql = @"SELECT * FROM ""tasty_job"" WHERE ""id"" = :id";
 
             NpgsqlCommand command = ((NpgsqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
-            command.CommandText = sql;
+            command.CommandText = Sql;
             command.Parameters.Add(new NpgsqlParameter(":id", id));
 
             return command;
@@ -279,13 +279,13 @@ namespace Tasty.Jobs
         /// <returns>A select command.</returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, IEnumerable<int> ids)
         {
-            const string sql = @"SELECT * FROM ""tasty_job"" WHERE ""id"" IN ({0}) ORDER BY ""queue_date""";
+            const string Sql = @"SELECT * FROM ""tasty_job"" WHERE ""id"" IN ({0}) ORDER BY ""queue_date""";
 
             string[] idStrings = ids != null ? ids.Select(i => i.ToString(CultureInfo.InvariantCulture)).ToArray() : new string[0];
 
             NpgsqlCommand command = ((NpgsqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
-            command.CommandText = String.Format(CultureInfo.InvariantCulture, sql, String.Join(",", idStrings));
+            command.CommandText = String.Format(CultureInfo.InvariantCulture, Sql, String.Join(",", idStrings));
 
             return command;
         }
@@ -299,11 +299,11 @@ namespace Tasty.Jobs
         /// <returns>A select command.</returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, JobStatus status, int count)
         {
-            const string sql = @"SELECT * FROM ""tasty_job"" WHERE ""status""=:status ORDER BY ""queue_date""";
+            const string Sql = @"SELECT * FROM ""tasty_job"" WHERE ""status""=:status ORDER BY ""queue_date""";
 
             NpgsqlCommand command = ((NpgsqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
-            command.CommandText = sql;
+            command.CommandText = Sql;
 
             if (count > 0)
             {
@@ -326,7 +326,7 @@ namespace Tasty.Jobs
         /// <param name="sortDescending">A value indicating whether to order the resultset in descending order.</param>
         /// <param name="pageNumber">The page number to get.</param>
         /// <param name="pageSize">The size of the pages to get.</param>
-        /// <returns></returns>
+        /// <returns>A select command.</returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize)
         {
             if (pageNumber < 1)

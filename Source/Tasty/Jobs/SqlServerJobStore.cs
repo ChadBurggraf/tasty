@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="SqlJobStore.cs" company="Tasty Codes">
+// <copyright file="SqlServerJobStore.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -99,12 +99,12 @@ namespace Tasty.Jobs
         /// <returns>A delete command.</returns>
         public override DbCommand CreateDeleteCommand(DbConnection connection, DbTransaction transaction, int id)
         {
-            const string sql = "DELETE FROM [TastyJob] WHERE [Id] = @Id";
+            const string Sql = "DELETE FROM [TastyJob] WHERE [Id] = @Id";
 
             SqlCommand command = ((SqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
             command.Transaction = transaction as SqlTransaction;
-            command.CommandText = sql;
+            command.CommandText = Sql;
             command.Parameters.Add(new SqlParameter("@Id", id));
 
             return command;
@@ -156,8 +156,8 @@ namespace Tasty.Jobs
         /// <returns>An insert or update command.</returns>
         public override DbCommand CreateSaveCommand(DbConnection connection, DbTransaction transaction, JobRecord record)
         {
-            const string insert = "INSERT INTO [TastyJob]([Name],[Type],[Data],[Status],[Exception],[QueueDate],[StartDate],[FinishDate],[ScheduleName]) VALUES(@Name,@Type,@Data,@Status,@Exception,@QueueDate,@StartDate,@FinishDate,@ScheduleName); SELECT SCOPE_IDENTITY()";
-            const string update = "UPDATE [TastyJob] SET [Name]=@Name,[Type]=@Type,[Data]=@Data,[Status]=@Status,[Exception]=@Exception,[QueueDate]=@QueueDate,[StartDate]=@StartDate,[FinishDate]=@FinishDate,[ScheduleName]=@ScheduleName WHERE [Id]=@Id";
+            const string Insert = "INSERT INTO [TastyJob]([Name],[Type],[Data],[Status],[Exception],[QueueDate],[StartDate],[FinishDate],[ScheduleName]) VALUES(@Name,@Type,@Data,@Status,@Exception,@QueueDate,@StartDate,@FinishDate,@ScheduleName); SELECT SCOPE_IDENTITY()";
+            const string Update = "UPDATE [TastyJob] SET [Name]=@Name,[Type]=@Type,[Data]=@Data,[Status]=@Status,[Exception]=@Exception,[QueueDate]=@QueueDate,[StartDate]=@StartDate,[FinishDate]=@FinishDate,[ScheduleName]=@ScheduleName WHERE [Id]=@Id";
 
             SqlCommand command = ((SqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
@@ -165,11 +165,11 @@ namespace Tasty.Jobs
 
             if (record.Id == null)
             {
-                command.CommandText = insert;
+                command.CommandText = Insert;
             }
             else
             {
-                command.CommandText = update;
+                command.CommandText = Update;
                 command.Parameters.Add(new SqlParameter("@Id", record.Id.Value));
             }
 
@@ -259,11 +259,11 @@ namespace Tasty.Jobs
         /// <returns>A select command.</returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, int id)
         {
-            const string sql = "SELECT * FROM [TastyJob] WHERE [Id] = @Id";
+            const string Sql = "SELECT * FROM [TastyJob] WHERE [Id] = @Id";
 
             SqlCommand command = ((SqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
-            command.CommandText = sql;
+            command.CommandText = Sql;
             command.Parameters.Add(new SqlParameter("@Id", id));
 
             return command;
@@ -277,13 +277,13 @@ namespace Tasty.Jobs
         /// <returns>A select command.</returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, IEnumerable<int> ids)
         {
-            const string sql = "SELECT * FROM [TastyJob] WHERE [Id] IN ({0}) ORDER BY [QueueDate]";
+            const string Sql = "SELECT * FROM [TastyJob] WHERE [Id] IN ({0}) ORDER BY [QueueDate]";
 
             string[] idStrings = ids != null ? ids.Select(i => i.ToString(CultureInfo.InvariantCulture)).ToArray() : new string[0];
 
             SqlCommand command = ((SqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
-            command.CommandText = String.Format(CultureInfo.InvariantCulture, sql, String.Join(",", idStrings));
+            command.CommandText = String.Format(CultureInfo.InvariantCulture, Sql, String.Join(",", idStrings));
 
             return command;
         }
@@ -297,18 +297,18 @@ namespace Tasty.Jobs
         /// <returns>A select command.</returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, JobStatus status, int count)
         {
-            const string sql = " * FROM [TastyJob] WHERE [Status]=@Status ORDER BY [QueueDate]";
+            const string Sql = " * FROM [TastyJob] WHERE [Status]=@Status ORDER BY [QueueDate]";
 
             SqlCommand command = ((SqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
 
             if (count > 0)
             {
-                command.CommandText = String.Format(CultureInfo.InvariantCulture, "SELECT TOP {0}{1}", count, sql);
+                command.CommandText = String.Format(CultureInfo.InvariantCulture, "SELECT TOP {0}{1}", count, Sql);
             }
             else
             {
-                command.CommandText = String.Concat("SELECT", sql);
+                command.CommandText = String.Concat("SELECT", Sql);
             }
 
             command.Parameters.Add(new SqlParameter("@Status", status.ToString()));
@@ -327,9 +327,13 @@ namespace Tasty.Jobs
         /// <param name="sortDescending">A value indicating whether to order the resultset in descending order.</param>
         /// <param name="pageNumber">The page number to get.</param>
         /// <param name="pageSize">The size of the pages to get.</param>
-        /// <returns></returns>
+        /// <returns>A select command.</returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize)
         {
+            const string Sql = @"SELECT * FROM (
+                SELECT *, ROW_NUMBER() OVER(ORDER BY {0} {1}) AS [RowNumber]
+                FROM [TastyJob] WHERE [Name] LIKE @Name";
+
             if (pageNumber < 1)
             {
                 pageNumber = 1;
@@ -375,9 +379,7 @@ namespace Tasty.Jobs
 
             sb.AppendFormat(
                 CultureInfo.InvariantCulture,
-                @"SELECT * FROM (
-                    SELECT *, ROW_NUMBER() OVER(ORDER BY {0} {1}) AS [RowNumber]
-                    FROM [TastyJob] WHERE [Name] LIKE @Name",
+                Sql,
                 orderByColumn,
                 sortDescending ? "DESC" : "ASC");
 

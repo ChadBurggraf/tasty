@@ -39,7 +39,7 @@ namespace Tasty.Jobs
         #region Construction
 
         /// <summary>
-        /// Prevents a default instance of the JobRunner class from being created.
+        /// Initializes a new instance of the JobRunner class.
         /// </summary>
         /// <param name="store">The <see cref="IJobStore"/> to use when accessing job data.</param>
         private JobRunner(IJobStore store)
@@ -130,6 +130,7 @@ namespace Tasty.Jobs
                     return this.heartbeat;
                 }
             }
+
             set
             {
                 lock (this.stateLocker)
@@ -166,6 +167,7 @@ namespace Tasty.Jobs
                     return this.maximumConcurrency;
                 }
             }
+
             set
             {
                 lock (this.stateLocker)
@@ -191,21 +193,13 @@ namespace Tasty.Jobs
                 {
                     if (this.scheduledJobs == null)
                     {
-                        List<ScheduledJobTuple> list = new List<ScheduledJobTuple>();
-
-                        foreach (var schedule in this.Schedules)
-                        {
-                            foreach (var scheduledJob in schedule.ScheduledJobs)
-                            {
-                                list.Add(new ScheduledJobTuple()
-                                {
-                                    Schedule = schedule,
-                                    ScheduledJob = scheduledJob
-                                });
-                            }
-                        }
-
-                        this.scheduledJobs = list.ToArray();
+                        this.scheduledJobs = (from s in this.Schedules
+                                              from j in s.ScheduledJobs
+                                              select new ScheduledJobTuple()
+                                              {
+                                                  Schedule = s,
+                                                  ScheduledJob = j
+                                              }).ToArray();
                     }
 
                     return this.scheduledJobs;
@@ -214,10 +208,8 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Gets or sets the schedule collection to use when processing scheduled jobs.
-        /// TODO: Clone this when set.
+        /// Gets the schedule collection to use when processing scheduled jobs.
         /// </summary>
-        //[SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "We want to 
         public JobScheduleElementCollection Schedules
         {
             get
@@ -518,66 +510,63 @@ namespace Tasty.Jobs
                 {
                     try
                     {
+                        DateTime now = DateTime.UtcNow;
+
                         var scheduleNames = this.Schedules.Select(s => s.Name);
                         var records = this.store.GetLatestScheduledJobs(scheduleNames, trans);
 
-                        var tuples = from sj in this.ScheduledJobs
-                                     from r in
-                                         (from r in records
-                                          where sj.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
-                                                sj.ScheduledJob.JobType.Equals(r.JobType, StringComparison.OrdinalIgnoreCase)
-                                          select r).DefaultIfEmpty()
-                                     select new ScheduledJobTuple(sj, r);
-
-                        DateTime now = DateTime.UtcNow;
+                        var tuples = (from t in
+                                          (from sj in this.ScheduledJobs
+                                           from r in
+                                               (from r in records
+                                                where !String.IsNullOrEmpty(r.JobType) &&
+                                                      sj.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
+                                                      r.JobType.StartsWith(sj.ScheduledJob.JobType, StringComparison.OrdinalIgnoreCase)
+                                                select r).DefaultIfEmpty()
+                                           select new ScheduledJobTuple(sj, r, now))
+                                      where t.NextExecuteDate <= now
+                                      orderby t.NextExecuteDate
+                                      select t).Take(count);
 
                         foreach (var tuple in tuples)
                         {
-                            DateTime runOn = ScheduledJob.GetNextExecuteDate(
-                                tuple.Schedule,
-                                tuple.Record != null ? tuple.Record.StartDate : null,
-                                now);
+                            JobRecord record = ScheduledJob.CreateRecord(tuple.Schedule, tuple.ScheduledJob, now);
 
-                            if (runOn <= now)
+                            IJob job = null;
+                            Exception toJobEx = null;
+
+                            try
                             {
-                                JobRecord record = ScheduledJob.CreateRecord(tuple.Schedule, tuple.ScheduledJob, now);
-
-                                IJob job = null;
-                                Exception toJobEx = null;
-
-                                try
-                                {
-                                    job = ScheduledJob.CreateFromConfiguration(tuple.ScheduledJob);
-                                }
-                                catch (ConfigurationErrorsException ex)
-                                {
-                                    toJobEx = ex;
-                                    this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
-                                }
-
-                                if (job != null)
-                                {
-                                    record.Name = job.Name;
-                                    record.JobType = JobRecord.JobTypeString(job);
-                                    record.Data = job.Serialize();
-                                    this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
-
-                                    JobRun run = new JobRun(record.Id.Value, job);
-                                    run.Finished += new EventHandler<JobRunEventArgs>(this.JobRunFinished);
-                                    this.runs.Add(run);
-
-                                    run.Start();
-                                }
-                                else
-                                {
-                                    record.Status = JobStatus.FailedToLoadType;
-                                    record.FinishDate = now;
-                                    record.Exception = new ExceptionXElement(toJobEx).ToString();
-                                }
-
-                                trans.AddForSave(record);
-                                this.RaiseEvent(this.ExecuteScheduledJob, new JobRecordEventArgs(record));
+                                job = ScheduledJob.CreateFromConfiguration(tuple.ScheduledJob);
                             }
+                            catch (ConfigurationErrorsException ex)
+                            {
+                                toJobEx = ex;
+                                this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
+                            }
+
+                            if (job != null)
+                            {
+                                record.Name = job.Name;
+                                record.JobType = JobRecord.JobTypeString(job);
+                                record.Data = job.Serialize();
+                                this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
+
+                                JobRun run = new JobRun(record.Id.Value, job);
+                                run.Finished += new EventHandler<JobRunEventArgs>(this.JobRunFinished);
+                                this.runs.Add(run);
+
+                                run.Start();
+                            }
+                            else
+                            {
+                                record.Status = JobStatus.FailedToLoadType;
+                                record.FinishDate = now;
+                                record.Exception = new ExceptionXElement(toJobEx).ToString();
+                            }
+
+                            trans.AddForSave(record);
+                            this.RaiseEvent(this.ExecuteScheduledJob, new JobRecordEventArgs(record));
                         }
 
                         this.runs.Flush();

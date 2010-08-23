@@ -9,11 +9,11 @@
 namespace Tasty.ServiceModel
 {
     using System;
+    using System.Configuration;
     using System.Globalization;
     using System.IO;
-    using System.ServiceModel;
-    using System.Configuration;
     using System.Security.Cryptography.X509Certificates;
+    using System.ServiceModel;
     using System.ServiceModel.Security;
     using Tasty.Configuration;
 

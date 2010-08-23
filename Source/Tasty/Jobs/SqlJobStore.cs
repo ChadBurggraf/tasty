@@ -144,7 +144,7 @@ namespace Tasty.Jobs
         /// <param name="sortDescending">A value indicating whether to order the resultset in descending order.</param>
         /// <param name="pageNumber">The page number to get.</param>
         /// <param name="pageSize">The size of the pages to get.</param>
-        /// <returns></returns>
+        /// <returns>A select command.</returns>
         public abstract DbCommand CreateSelectCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize);
 
         /// <summary>
@@ -377,6 +377,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Starts a transaction.
         /// </summary>
+        /// <returns>A new <see cref="IJobStoreTransaction"/>.</returns>
         public override IJobStoreTransaction StartTransaction()
         {
             DbConnection connection = this.CreateConnection();
@@ -408,11 +409,11 @@ namespace Tasty.Jobs
 
                 if (!String.IsNullOrEmpty(connectionStringName))
                 {
-                    var csElement = ConfigurationManager.ConnectionStrings[connectionStringName];
+                    var element = ConfigurationManager.ConnectionStrings[connectionStringName];
 
-                    if (csElement != null)
+                    if (element != null)
                     {
-                        this.ConnectionString = csElement.ConnectionString;
+                        this.ConnectionString = element.ConnectionString;
                     }
                     else
                     {

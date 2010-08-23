@@ -1,8 +1,14 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿//-----------------------------------------------------------------------
+// <copyright file="ShaLevel.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Tasty Codes.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty
 {
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+
     /// <summary>
     /// Defines the possible SHA hashing levels.
     /// </summary>

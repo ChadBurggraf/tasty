@@ -42,7 +42,6 @@ namespace Tasty.ServiceModel
                         CultureInfo.InvariantCulture,
                         "You must configure a client certificate for the service contract \"{0}\" under <tasty><serviceModel><endpoints/></serviceModel></tasty>.",
                         client.Endpoint.Contract.ConfigurationName));
-
             }
         }
 

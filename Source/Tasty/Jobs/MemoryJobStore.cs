@@ -285,6 +285,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Starts a transaction.
         /// </summary>
+        /// <returns>A new <see cref="IJobStoreTransaction"/>.</returns>
         public override IJobStoreTransaction StartTransaction()
         {
             return new MemoryJobStoreTransaction(this);

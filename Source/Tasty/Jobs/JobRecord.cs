@@ -90,40 +90,6 @@ namespace Tasty.Jobs
         public JobStatus Status { get; set; }
 
         /// <summary>
-        /// Converts this instance's <see cref="JobType"/> and <see cref="Data"/> properties into an <see cref="IJob"/> object.
-        /// </summary>
-        /// <returns>An <see cref="IJob"/> object.</returns>
-        public IJob ToJob()
-        {
-            if (String.IsNullOrEmpty(this.JobType))
-            {
-                throw new InvalidOperationException("JobType must have a value in order to convert this instance's Data property into an IJob object.");
-            }
-
-            if (String.IsNullOrEmpty(this.Data))
-            {
-                throw new InvalidOperationException("Data must have a value to de-serialize an IJob object from.");
-            }
-
-            try
-            {
-                DataContractSerializer serializer = new DataContractSerializer(Type.GetType(this.JobType, true));
-
-                using (StringReader sr = new StringReader(this.Data))
-                {
-                    using (XmlReader xr = new XmlTextReader(sr))
-                    {
-                        return (IJob)serializer.ReadObject(xr);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("The JobType and Data values could not be converted into an IJob object.", ex);
-            }
-        }
-
-        /// <summary>
         /// Gets the string used when persisting the type of an <see cref="IJob"/> into a <see cref="JobRecord"/>.
         /// </summary>
         /// <param name="job">The job to get the type string from.</param>
@@ -156,6 +122,40 @@ namespace Tasty.Jobs
             }
 
             return String.Concat(jobType.FullName, ", ", jobType.Assembly.GetName().Name);
+        }
+
+        /// <summary>
+        /// Converts this instance's <see cref="JobType"/> and <see cref="Data"/> properties into an <see cref="IJob"/> object.
+        /// </summary>
+        /// <returns>An <see cref="IJob"/> object.</returns>
+        public IJob ToJob()
+        {
+            if (String.IsNullOrEmpty(this.JobType))
+            {
+                throw new InvalidOperationException("JobType must have a value in order to convert this instance's Data property into an IJob object.");
+            }
+
+            if (String.IsNullOrEmpty(this.Data))
+            {
+                throw new InvalidOperationException("Data must have a value to de-serialize an IJob object from.");
+            }
+
+            try
+            {
+                DataContractSerializer serializer = new DataContractSerializer(Type.GetType(this.JobType, true));
+
+                using (StringReader sr = new StringReader(this.Data))
+                {
+                    using (XmlReader xr = new XmlTextReader(sr))
+                    {
+                        return (IJob)serializer.ReadObject(xr);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("The JobType and Data values could not be converted into an IJob object.", ex);
+            }
         }
     }
 }

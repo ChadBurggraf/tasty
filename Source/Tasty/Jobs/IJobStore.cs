@@ -156,6 +156,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Starts a transaction.
         /// </summary>
+        /// <returns>A new <see cref="IJobStoreTransaction"/>.</returns>
         IJobStoreTransaction StartTransaction();
     }
 }

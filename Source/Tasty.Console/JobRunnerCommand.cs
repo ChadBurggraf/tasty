@@ -90,13 +90,13 @@ namespace Tasty.Console
 
             if (man > 0)
             {
-                Help(options);
+                this.Help(options);
                 return;
             }
 
             if (String.IsNullOrEmpty(directory))
             {
-                Help(options);
+                this.Help(options);
                 return;
             }
             else if (!Directory.Exists(directory))
@@ -112,7 +112,7 @@ namespace Tasty.Console
 
             if (String.IsNullOrEmpty(config))
             {
-                Help(options);
+                this.Help(options);
                 return;
             }
             else if (!File.Exists(config))

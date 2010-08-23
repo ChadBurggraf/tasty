@@ -9,8 +9,10 @@ namespace Tasty.Jobs
     using System;
     using System.Collections.Generic;
     using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
+    using System.Security;
     using System.Threading;
     using Tasty.Configuration;
 
@@ -215,6 +217,7 @@ namespace Tasty.Jobs
         /// Gets or sets the schedule collection to use when processing scheduled jobs.
         /// TODO: Clone this when set.
         /// </summary>
+        //[SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "We want to 
         public JobScheduleElementCollection Schedules
         {
             get
@@ -222,14 +225,6 @@ namespace Tasty.Jobs
                 lock (this.stateLocker)
                 {
                     return this.schedules ?? (this.schedules = new JobScheduleElementCollection());
-                }
-            }
-            set
-            {
-                lock (this.stateLocker)
-                {
-                    this.schedules = value;
-                    this.scheduledJobs = null;
                 }
             }
         }
@@ -268,7 +263,11 @@ namespace Tasty.Jobs
                     JobRunner runner = new JobRunner(store);
                     runner.Heartbeat = TastySettings.Section.Jobs.Heartbeat;
                     runner.MaximumConcurrency = TastySettings.Section.Jobs.MaximumConcurrency;
-                    runner.Schedules = TastySettings.Section.Jobs.Schedules;
+
+                    foreach (var schedule in TastySettings.Section.Jobs.Schedules)
+                    {
+                        runner.Schedules.Add(schedule);
+                    }
 
                     instances[key] = runner;
                 }
@@ -336,7 +335,10 @@ namespace Tasty.Jobs
                                 this.god.Abort();
                                 this.god = null;
                             }
-                            catch
+                            catch (SecurityException)
+                            {
+                            }
+                            catch (ThreadStateException)
                             {
                             }
                         }
@@ -699,6 +701,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Main God thread run loop.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want the run loop to continue at all costs.")]
         private void SmiteThee()
         {
             lock (this.runLocker)

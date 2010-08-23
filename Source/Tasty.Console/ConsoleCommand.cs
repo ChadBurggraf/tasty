@@ -13,7 +13,7 @@ namespace Tasty.Console
     /// <summary>
     /// Base class for console commands.
     /// </summary>
-    internal abstract class ConsoleCommand
+    internal abstract class ConsoleCommand : IDisposable
     {
         private string[] args;
 
@@ -76,6 +76,15 @@ namespace Tasty.Console
         }
 
         /// <summary>
+        /// Disposes of resources used by this instance.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
         /// Executes the command.
         /// </summary>
         public abstract void Execute();
@@ -101,6 +110,12 @@ namespace Tasty.Console
             this.StandardError.Write("Tasty {0}: ", this.ArgumentName);
             this.StandardError.WriteLine(format, args);
         }
+
+        /// <summary>
+        /// Disposes of resources used by this instance.
+        /// </summary>
+        /// <param name="disposing">A value indicating whether to dispose of managed resources.</param>
+        protected abstract void Dispose(bool disposing);
 
         /// <summary>
         /// Writes a help message to the standard output stream.

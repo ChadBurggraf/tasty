@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="X509CertificateWhitelistValidator.cs" company="Tasty Codes">
+// <copyright file="X509CertificateWhiteListValidator.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 //     Adapted from code by Davide Icardi, Copyright (c) Davide Icardi 2007.
 //     The original can be found at http://www.codeproject.com/KB/WCF/wcfcertificates.aspx
@@ -14,39 +14,39 @@ namespace Tasty.ServiceModel
     using System.Security.Cryptography.X509Certificates;
 
     /// <summary>
-    /// Extends <see cref="X509CertificateValidator"/> to validate X509 certificates against a whitelist.
+    /// Extends <see cref="X509CertificateValidator"/> to validate X509 certificates against a whiteList.
     /// </summary>
-    public class X509CertificateWhitelistValidator : X509CertificateValidator
+    public class X509CertificateWhiteListValidator : X509CertificateValidator
     {
-        private IList<X509Certificate2> whitelist;
+        private IList<X509Certificate2> whiteList;
 
         /// <summary>
-        /// Initializes a new instance of the X509CertificateWhitelistValidator class.
+        /// Initializes a new instance of the X509CertificateWhiteListValidator class.
         /// </summary>
-        public X509CertificateWhitelistValidator()
+        public X509CertificateWhiteListValidator()
             : base()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the X509CertificateWhitelistValidator class.
+        /// Initializes a new instance of the X509CertificateWhiteListValidator class.
         /// </summary>
-        /// <param name="whitelist">The certificate whitelist to validate against.</param>
-        public X509CertificateWhitelistValidator(IEnumerable<X509Certificate2> whitelist)
+        /// <param name="whiteList">The certificate whiteList to validate against.</param>
+        public X509CertificateWhiteListValidator(IEnumerable<X509Certificate2> whiteList)
             : this()
         {
-            if (whitelist != null)
+            if (whiteList != null)
             {
-                this.whitelist = new List<X509Certificate2>(whitelist);
+                this.whiteList = new List<X509Certificate2>(whiteList);
             }
         }
 
         /// <summary>
-        /// Gets the certificate whitelist to validate against.
+        /// Gets the certificate whiteList to validate against.
         /// </summary>
-        public IList<X509Certificate2> Whitelist
+        public IList<X509Certificate2> WhiteList
         {
-            get { return this.whitelist ?? (this.whitelist = new List<X509Certificate2>()); }
+            get { return this.whiteList ?? (this.whiteList = new List<X509Certificate2>()); }
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Tasty.ServiceModel
                 throw new ArgumentNullException("certificate", "certificate cannot be null.");
             }
 
-            foreach (var cert in this.Whitelist)
+            foreach (var cert in this.WhiteList)
             {
                 if (cert.Equals(certificate))
                 {

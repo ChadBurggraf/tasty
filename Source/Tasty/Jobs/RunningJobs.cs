@@ -8,6 +8,8 @@ namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
@@ -32,25 +34,25 @@ namespace Tasty.Jobs
         /// <summary>
         /// Initializes a new instance of the RunningJobs class.
         /// </summary>
-        /// <param name="persistencPath">The persistence path to use when persisting run data.</param>
-        public RunningJobs(string persistencPath)
+        /// <param name="persistencePath">The persistence path to use when persisting run data.</param>
+        public RunningJobs(string persistencePath)
         {
-            if (String.IsNullOrEmpty(persistencPath))
+            if (String.IsNullOrEmpty(persistencePath))
             {
-                throw new ArgumentNullException("persistencPath", "persistencPath must contain a value.");
+                throw new ArgumentNullException("persistencePath", "persistencePath must contain a value.");
             }
 
-            if (!Path.IsPathRooted(persistencPath))
+            if (!Path.IsPathRooted(persistencePath))
             {
-                persistencPath = Path.GetFullPath(persistencPath);
+                persistencePath = Path.GetFullPath(persistencePath);
             }
 
-            if (!persistencPath.StartsWith(Environment.CurrentDirectory, StringComparison.OrdinalIgnoreCase))
+            if (!persistencePath.StartsWith(Environment.CurrentDirectory, StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentException("persistencPath must point to a path inside the current application directory.", "persistencPath");
+                throw new ArgumentException("persistencePath must point to a path inside the current application directory.", "persistencePath");
             }
 
-            this.PersistencePath = persistencPath;
+            this.PersistencePath = persistencePath;
             this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
         }
 
@@ -71,6 +73,7 @@ namespace Tasty.Jobs
         /// Gets all of the job runs this instance is maintaining.
         /// </summary>
         /// <returns>A collection of job runs.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "I want to encourange caching the results of this call into a variable.")]
         public IEnumerable<JobRun> GetAll()
         {
             lock (this.runs)
@@ -83,6 +86,7 @@ namespace Tasty.Jobs
         /// Gets all of the job runs marked as not-running this instance is maintaining.
         /// </summary>
         /// <returns>A collection of job runs.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "I want to encourange caching the results of this call into a variable.")]
         public IEnumerable<JobRun> GetNotRunning()
         {
             lock (this.runs)
@@ -97,6 +101,7 @@ namespace Tasty.Jobs
         /// Gets all of the job runs marked as running this instance is maintaining.
         /// </summary>
         /// <returns>A collection of job runs.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "I want to encourange caching the results of this call into a variable.")]
         public IEnumerable<JobRun> GetRunning()
         {
             lock (this.runs)
@@ -160,7 +165,7 @@ namespace Tasty.Jobs
         /// <returns>The generated persistence file name.</returns>
         public static string GeneratePersistenceFileName(IJobStore store)
         {
-            return String.Concat(store.GetHashCode().ToString().Hash(), ".xml");
+            return String.Concat(store.GetHashCode().ToString(CultureInfo.InvariantCulture).Hash(), ".xml");
         }
 
         /// <summary>
@@ -168,6 +173,7 @@ namespace Tasty.Jobs
         /// </summary>
         /// <param name="persistencPath">The persistenc path to load job runs from.</param>
         /// <returns>The loaded job run collection.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "It's not worth it to enumarte all of the possible failure scenarios. We're okay with failing in general.")]
         private static IEnumerable<JobRun> LoadFromPersisted(string persistencPath)
         {
             IEnumerable<JobRun> runs;

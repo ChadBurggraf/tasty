@@ -241,7 +241,6 @@ namespace Tasty
                 }
 
                 PathEventItem item = this.pathEvents[key];
-                item.Path = path;
 
                 if (item.RaisedCount == 0 || now.Subtract(item.LastRaised).TotalMilliseconds > this.Threshold)
                 {
@@ -395,7 +394,6 @@ namespace Tasty
         [Serializable]
         private class PathEventItem : ISerializable
         {
-            private string path;
             private DateTime lastRaised;
             private FileSystemEventArgs publishEventArgs;
             private TastyFileSystemEventType publishEventType;
@@ -420,20 +418,10 @@ namespace Tasty
                     throw new ArgumentNullException("info", "info cannot be null.");
                 }
 
-                this.path = info.GetString("path");
                 this.publishEventArgs = (FileSystemEventArgs)info.GetValue("publishEventArgs", typeof(FileSystemEventArgs));
                 this.publishEventType = (TastyFileSystemEventType)Enum.ToObject(typeof(TastyFileSystemEventType), info.GetInt32("publishEventType"));
                 this.lastRaised = info.GetDateTime("lastRaised");
                 this.raisedCount = info.GetInt32("raisedCount");
-            }
-
-            /// <summary>
-            /// Gets or sets the path of the file this item represents.
-            /// </summary>
-            public string Path
-            {
-                get { return this.path ?? String.Empty; }
-                set { this.path = value; }
             }
 
             /// <summary>
@@ -484,7 +472,6 @@ namespace Tasty
                     throw new ArgumentNullException("info", "info cannot be null.");
                 }
 
-                info.AddValue("path", this.path);
                 info.AddValue("publishEventArgs", this.publishEventArgs);
                 info.AddValue("publishEventType", this.publishEventType);
                 info.AddValue("lastRaised", this.lastRaised);

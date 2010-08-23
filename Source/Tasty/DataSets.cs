@@ -1,8 +1,6 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="DataSets.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
-//     Adapted from code by Josip Kremenic, Copyright (c) Josip Kremenic 2009.
-//     The original can be found at http://www.codeproject.com/KB/office/ReadWriteOds.aspx
 // </copyright>
 //-----------------------------------------------------------------------
 
@@ -10,6 +8,8 @@ namespace Tasty
 {
     using System;
     using System.Data;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
 
     /// <summary>
     /// Provides extensions and helpers for <see cref="DataSet"/>s.
@@ -31,6 +31,7 @@ namespace Tasty
         /// </summary>
         /// <param name="dataSet">The <see cref="DataSet"/> to write.</param>
         /// <param name="path">The path to write to.</param>
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
         public static void WriteToXlsxFile(this DataSet dataSet, string path)
         {
             new XlsxWriter().Write(dataSet, path);

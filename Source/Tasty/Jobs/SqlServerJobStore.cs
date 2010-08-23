@@ -330,6 +330,16 @@ namespace Tasty.Jobs
         /// <returns></returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize)
         {
+            if (pageNumber < 1)
+            {
+                pageNumber = 1;
+            }
+
+            if (pageSize < 0)
+            {
+                pageSize = 0;
+            }
+
             SqlCommand command = ((SqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
 

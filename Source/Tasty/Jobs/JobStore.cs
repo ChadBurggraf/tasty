@@ -64,13 +64,6 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Disposes of resources used by this instance.
-        /// </summary>
-        public virtual void Dispose()
-        {
-        }
-
-        /// <summary>
         /// Deletes a job by ID.
         /// </summary>
         /// <param name="id">The ID of the job to delete.</param>

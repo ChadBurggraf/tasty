@@ -130,6 +130,14 @@ namespace Tasty.Console
         }
 
         /// <summary>
+        /// Disposes of resources used by this instance.
+        /// </summary>
+        /// <param name="disposing">A value indicating whether to dispose of managed resources.</param>
+        protected override void Dispose(bool disposing)
+        {
+        }
+
+        /// <summary>
         /// Writes a help message to the standard output stream.
         /// </summary>
         /// <param name="options">The option set to use when generating the help message.</param>

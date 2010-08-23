@@ -216,15 +216,15 @@ namespace Tasty
         /// <summary>
         /// Combines the string dictionary with semi-colon (;) separators to form a connection string.
         /// </summary>
-        /// <param name="dict">The string dictionary to combine.</param>
+        /// <param name="dictionary">The string dictionary to combine.</param>
         /// <returns>The combined connection string.</returns>
-        public static string ToConnectionString(this IDictionary<string, string> dict)
+        public static string ToConnectionString(this IDictionary<string, string> dictionary)
         {
             StringBuilder sb = new StringBuilder();
 
-            if (dict != null)
+            if (dictionary != null)
             {
-                foreach (KeyValuePair<string, string> pair in dict)
+                foreach (KeyValuePair<string, string> pair in dictionary)
                 {
                     string key = pair.Key.Trim().Replace(";", String.Empty);
                     string value = pair.Value.Trim().Replace(";", String.Empty);

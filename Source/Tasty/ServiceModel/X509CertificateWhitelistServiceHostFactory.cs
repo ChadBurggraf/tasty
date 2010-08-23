@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="X509CertificateWhitelistServiceHostFactory.cs" company="Tasty Codes">
+// <copyright file="X509CertificateWhiteListServiceHostFactory.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -12,9 +12,9 @@ namespace Tasty.ServiceModel
     using Tasty.Configuration;
 
     /// <summary>
-    /// Extends <see cref="ServiceHostFactory"/> to create <see cref="X509CertificateWhitelistServiceHost"/> instances.
+    /// Extends <see cref="ServiceHostFactory"/> to create <see cref="X509CertificateWhiteListServiceHost"/> instances.
     /// </summary>
-    public class X509CertificateWhitelistServiceHostFactory : ServiceHostFactory
+    public class X509CertificateWhiteListServiceHostFactory : ServiceHostFactory
     {
         /// <summary>
         /// Creates a <see cref="ServiceHost"/> for the specified type of service.
@@ -24,7 +24,7 @@ namespace Tasty.ServiceModel
         /// <returns>The created <see cref="ServiceHost"/></returns>
         protected override ServiceHost CreateServiceHost(Type serviceType, Uri[] baseAddresses)
         {
-            return new X509CertificateWhitelistServiceHost(serviceType, baseAddresses);
+            return new X509CertificateWhiteListServiceHost(serviceType, baseAddresses);
         }
     }
 }

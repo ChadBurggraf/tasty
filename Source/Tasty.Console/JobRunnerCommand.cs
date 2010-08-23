@@ -30,6 +30,7 @@ namespace Tasty.Console
         private string config, directory, logPath;
         private JobRunnerBootstraps bootstaps;
         private ManualResetEvent exitHandle;
+        private bool disposed;
 
         #endregion
 
@@ -172,6 +173,33 @@ namespace Tasty.Console
         #endregion
 
         #region Protected Instance Methods
+
+        /// <summary>
+        /// Disposes of resources used by this instance.
+        /// </summary>
+        /// <param name="disposing">A value indicating whether to dispose of managed resources.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    if (this.exitHandle != null)
+                    {
+                        this.exitHandle.Close();
+                        this.exitHandle = null;
+                    }
+
+                    if (this.bootstaps != null)
+                    {
+                        this.bootstaps.Dispose();
+                        this.bootstaps = null;
+                    }
+                }
+
+                this.disposed = true;
+            }
+        }
 
         /// <summary>
         /// Writes a help message to the standard output stream.

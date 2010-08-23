@@ -8,6 +8,7 @@ namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -170,6 +171,7 @@ namespace Tasty.Jobs
         /// for all of the currently running jobs to complete.
         /// </summary>
         /// <param name="unwind">Performs a delayed shutdown, waiting for all running jobs to complate.</param>
+        [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", Justification = "Meant as a verb, not a noun.")]
         public void PushDown(bool unwind)
         {
             lock (this)

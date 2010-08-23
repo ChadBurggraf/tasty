@@ -7,7 +7,9 @@
 namespace Tasty.Jobs
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
+    using System.Security;
     using System.Threading;
 
     /// <summary>
@@ -108,7 +110,10 @@ namespace Tasty.Jobs
                             this.executionThread = null;
                         }
                     }
-                    catch
+                    catch (SecurityException)
+                    {
+                    }
+                    catch (ThreadStateException)
                     {
                     }
 
@@ -159,6 +164,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Concrete job execution method.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to catch and act on all exceptions later.")]
         private void StartInternal()
         {
             try

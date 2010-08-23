@@ -7,11 +7,13 @@
 namespace Tasty.Jobs
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Provides proxy access to the singleton <see cref="JobRunner"/> instance
     /// across application domains.
     /// </summary>
+    [SuppressMessage("Microsoft.Performance", "CA1812:AvoidUninstantiatedInternalClasses", Justification = "False positive.")]
     internal sealed class JobRunnerProxy : MarshalByRefObject
     {
         private bool isGreen = true;
@@ -30,6 +32,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Pauses the job runner.
         /// </summary>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Not applicable in our (cross app-domain) scenario.")]
         public void PauseRunner()
         {
             JobRunner.GetInstance().Pause();
@@ -62,6 +65,7 @@ namespace Tasty.Jobs
         /// Stops the job runner by issuing a stop command and firing
         /// an <see cref="JobRunnerEventSink.AllFinished"/> event once all running jobs have finished executing.
         /// </summary>
+        [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Justification = "Not applicable in our (cross app-domain) scenario.")]
         public void StopRunner()
         {
             JobRunner.GetInstance().Stop(true);

@@ -127,6 +127,7 @@ namespace Tasty
         /// <param name="sender">The event sender.</param>
         /// <param name="handler">The event delegate.</param>
         /// <param name="e">The event arguments.</param>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate here.")]
         public static void RaiseEvent(this object sender, EventHandler handler, EventArgs e)
         {
             if (handler != null)
@@ -142,6 +143,7 @@ namespace Tasty
         /// <param name="sender">The event sender.</param>
         /// <param name="handler">The event delegate.</param>
         /// <param name="e">The event arguments.</param>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate here.")]
         public static void RaiseEvent<T>(this object sender, EventHandler<T> handler, T e) where T : EventArgs
         {
             if (handler != null)

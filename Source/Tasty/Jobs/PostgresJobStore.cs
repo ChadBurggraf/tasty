@@ -10,6 +10,7 @@ namespace Tasty.Jobs
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
     using System.Text;
@@ -18,6 +19,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Implements <see cref="IJobStore"/> for Postgres.
     /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class PostgresJobStore : SqlJobStore
     {
         /// <summary>
@@ -327,6 +329,16 @@ namespace Tasty.Jobs
         /// <returns></returns>
         public override DbCommand CreateSelectCommand(DbConnection connection, string likeName, JobStatus? withStatus, string inSchedule, JobRecordResultsOrderBy orderBy, bool sortDescending, int pageNumber, int pageSize)
         {
+            if (pageNumber < 1)
+            {
+                pageNumber = 1;
+            }
+
+            if (pageSize < 0)
+            {
+                pageSize = 0;
+            }
+
             NpgsqlCommand command = ((NpgsqlConnection)connection).CreateCommand();
             command.CommandType = CommandType.Text;
 

@@ -8,6 +8,7 @@ namespace Tasty
 {
     using System;
     using System.Data;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using DocumentFormat.OpenXml;
@@ -17,6 +18,7 @@ namespace Tasty
     /// <summary>
     /// Implements <see cref="ISpreadsheetWriter"/> to write Excel spreadsheets.
     /// </summary>
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class XlsxWriter : SpreadsheetWriter
     {
         /// <summary>

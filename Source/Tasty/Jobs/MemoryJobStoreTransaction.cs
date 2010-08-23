@@ -12,7 +12,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Implements <see cref="IJobStoreTransaction"/> for the <see cref="MemoryJobStore"/>.
     /// </summary>
-    public class MemoryJobStoreTransaction : IJobStoreTransaction
+    public sealed class MemoryJobStoreTransaction : IJobStoreTransaction
     {
         private MemoryJobStore jobStore;
         private List<JobRecord> saving = new List<JobRecord>();

@@ -7,7 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
 		SolutionInfo.cs = SolutionInfo.cs
-		Tasty.vsmdi = Tasty.vsmdi
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Test", "Tasty.Test\Tasty.Test.csproj", "{E5B6327D-3E79-424F-8BF2-126D3905631C}"
@@ -17,9 +16,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.SqlServer", "Tasty.SqlServer\Tasty.SqlServer.csproj", "{C437CA7E-8233-44A5-B693-5829FA3888CA}"
 EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = Tasty.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

@@ -233,7 +233,7 @@ namespace Tasty.Jobs
             setup.ConfigurationFile = this.ConfigurationFilePath;
 
             this.domain = AppDomain.CreateDomain("Tasty Job Runner", AppDomain.CurrentDomain.Evidence, setup);
-            this.proxy = (JobRunnerProxy)this.domain.CreateInstanceAndUnwrap(GetType().Assembly.FullName, typeof(JobRunnerProxy).FullName);
+            this.proxy = (JobRunnerProxy)this.domain.CreateInstanceAndUnwrap("Tasty", "Tasty.Jobs.JobRunnerProxy");
 
             this.eventSink = new JobRunnerEventSink();
             this.eventSink.AllFinished += new EventHandler(this.ProxyAllFinished);

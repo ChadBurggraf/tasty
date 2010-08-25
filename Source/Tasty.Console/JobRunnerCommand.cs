@@ -325,6 +325,7 @@ namespace Tasty.Console
         /// </summary>
         /// <param name="outputToConsole">A value indicating whether to output to the console.</param>
         /// <param name="outputToFile">A value indicating whether to output to a log file.</param>
+        /// <returns>The configured logger instance.</returns>
         private ILog ConfigureAndGetLogger(bool outputToConsole, bool outputToFile)
         {
             Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository();
@@ -417,6 +418,9 @@ namespace Tasty.Console
             }
         }
 
+        /// <summary>
+        /// Quits the job runner and signals that this process can exit.
+        /// </summary>
         private void Quit()
         {
             this.inputThread.Abort();

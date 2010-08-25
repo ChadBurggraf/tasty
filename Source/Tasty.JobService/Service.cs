@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="JobService.cs" company="Tasty Codes">
+// <copyright file="Service.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -29,7 +29,7 @@ namespace Tasty.JobService
         #region Construction
 
         /// <summary>
-        /// Initializes a new instance of the JobService class.
+        /// Initializes a new instance of the Service class.
         /// </summary>
         public Service()
         {
@@ -133,8 +133,7 @@ namespace Tasty.JobService
                             CultureInfo.InvariantCulture,
                             @"jobs -d ""{0}"" -c ""{1}"" -l",
                             appElement.Directory,
-                            appElement.CfgFile
-                        )
+                            appElement.CfgFile)
                     }
                 };
             }

@@ -8,6 +8,7 @@ namespace Tasty.JobService
 {
     using System;
     using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Represents an application configuration element.
@@ -18,6 +19,7 @@ namespace Tasty.JobService
         /// Gets or sets the path of the configuration file to use when configurint the job runner for the target application.
         /// </summary>
         [ConfigurationProperty("cfgFile", IsRequired = true)]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "Config/configuration is a reserved word in configuration files.")]
         public string CfgFile
         {
             get { return (string)this["cfgFile"]; }

@@ -208,33 +208,6 @@ namespace Tasty.Jobs
         #region Private Instance Methods
 
         /// <summary>
-        /// Raises the AppDomain's AssemblyResolve event.
-        /// </summary>
-        /// <param name="sender">The event sender.</param>
-        /// <param name="args">The event arguments.</param>
-        /// <returns>The resolved assembly.</returns>
-        private Assembly AppDomainAssemblyResolve(object sender, ResolveEventArgs args)
-        {
-            try
-            {
-                Assembly assembly = Assembly.Load(args.Name);
-
-                if (assembly != null)
-                {
-                    return assembly;
-                }
-            }
-            catch
-            {
-            }
-
-            string[] parts = args.Name.Split(',');
-            string path = Path.Combine(this.BasePath, parts[0].Trim() + ".dll");
-
-            return Assembly.LoadFrom(path);
-        }
-
-        /// <summary>
         /// Disposes of resources used by this instance.
         /// </summary>
         /// <param name="disposing">A value indicating whether to dispose of managed resources.</param>
@@ -267,16 +240,12 @@ namespace Tasty.Jobs
         /// </summary>
         private void LoadAndStartAppDomain()
         {
-            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(this.AppDomainAssemblyResolve);
-
             AppDomainSetup setup = new AppDomainSetup();
             setup.ApplicationBase = this.BasePath;
             setup.ShadowCopyFiles = "true";
             setup.ConfigurationFile = this.ConfigurationFilePath;
 
             this.domain = AppDomain.CreateDomain("Tasty Job Runner", AppDomain.CurrentDomain.Evidence, setup);
-            //this.domain.AssemblyResolve += new ResolveEventHandler(this.AppDomainAssemblyResolve);
-
             this.proxy = (JobRunnerProxy)this.domain.CreateInstanceAndUnwrap("Tasty", "Tasty.Jobs.JobRunnerProxy");
 
             this.eventSink = new JobRunnerEventSink();

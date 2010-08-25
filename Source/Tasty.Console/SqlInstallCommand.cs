@@ -37,7 +37,8 @@ namespace Tasty.Console
         /// <summary>
         /// Executes the action.
         /// </summary>
-        public override void Execute()
+        /// <returns>A value indicating whether the command completed successfully.</returns>
+        public override bool Execute()
         {
             string from = null, to = null, dir = null, output = null;
             int verbose = 0, man = 0;
@@ -59,19 +60,19 @@ namespace Tasty.Console
             catch (OptionException ex)
             {
                 ParseError(options, ex);
-                return;
+                return false;
             }
 
             if (man > 0)
             {
                 this.Help(options);
-                return;
+                return false;
             }
 
             if (String.IsNullOrEmpty(dir) || String.IsNullOrEmpty(output))
             {
                 this.Help(options);
-                return;
+                return false;
             }
 
             bool badVersions = false;
@@ -106,13 +107,13 @@ namespace Tasty.Console
             if (badVersions)
             {
                 BadArgument("Please provide a valid version number.");
-                return;
+                return false;
             }
 
             if (!Directory.Exists(dir))
             {
                 BadArgument("The directory '{0}' does not exist.", dir);
-                return;
+                return false;
             }
 
             SchemaUpgradeService.GenerateInstallScript(
@@ -127,6 +128,8 @@ namespace Tasty.Console
                         StandardOut.WriteLine("Added script {0} for version {1}.", path, version);
                     }
                 });
+
+            return true;
         }
 
         /// <summary>

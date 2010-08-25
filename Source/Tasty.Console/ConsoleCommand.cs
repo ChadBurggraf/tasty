@@ -87,7 +87,8 @@ namespace Tasty.Console
         /// <summary>
         /// Executes the command.
         /// </summary>
-        public abstract void Execute();
+        /// <returns>A value indicating whether the command completed successfully.</returns>
+        public abstract bool Execute();
 
         /// <summary>
         /// Writes a message indicating a bad command argument was encountered

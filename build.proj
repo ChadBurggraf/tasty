@@ -17,32 +17,49 @@
     <LibDir>$(MSBuildProjectDirectory)\Lib</LibDir>
     <LibraryDir>$(MSBuildProjectDirectory)\Source\Tasty</LibraryDir>
     <BuildDir>$(MSBuildProjectDirectory)\Build</BuildDir>
+    <JobServiceDir>$(MSBuildProjectDirectory)\Source\Tasty.JobService</JobServiceDir>
     <SolutionInfoPath>$(MSBuildProjectDirectory)\Source\SolutionInfo.cs</SolutionInfoPath>
     <SqlServerDir>$(MSBuildProjectDirectory)\Source\Tasty.SqlServer</SqlServerDir>
   </PropertyGroup>
   
   <Target Name="Build">
     <RemoveDir Directories="$(BuildDir)"/>
-    <MakeDir Directories="$(BuildDir)"/>
+    <MakeDir Directories="$(BuildDir);$(BuildDir)\Library;$(BuildDir)\Console;$(BuildDir)\SqlServer;$(BuildDir)\JobService"/>
     
-    <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration)"/>
+    <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj;$(JobServiceDir)\Tasty.JobService.csproj" Properties="Configuration=$(Configuration)"/>
   
     <Message Text='Merging assemblies into "Tasty.dll".'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryDir)\Tasty.snk /out:$(BuildDir)\Tasty.dll $(LibraryDir)\bin\Release\Tasty.dll $(LibDir)\AWSSDK.dll $(LibDir)\Ionic.Zip.Reduced.dll $(LibDir)\Npgsql.dll $(LibDir)\Mono.Security.dll'/>
-    <Copy SourceFiles="$(LibraryDir)\bin\Release\Tasty.xml" DestinationFiles="$(BuildDir)\Tasty.xml"/>
-    <Copy SourceFiles="$(ConsoleDir)\bin\Release\Tasty.exe.config" DestinationFiles="$(BuildDir)\Tasty.exe.config"/>
-    
-    <Message Text='Merging assemblies into "Tasty.exe"'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(ConsoleDir)\Tasty.Console.snk /out:$(BuildDir)\Tasty.exe $(ConsoleDir)\bin\Release\Tasty.exe $(ConsoleDir)\bin\Release\Tasty.dll $(LibDir)\AWSSDK.dll $(LibDir)\Ionic.Zip.Reduced.dll $(LibDir)\Npgsql.dll $(LibDir)\Mono.Security.dll $(LibDir)\NDesk.Options.dll'/>
-    <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.dll" DestinationFiles="$(BuildDir)\Tasty.SqlServer.dll"/>
-    <Copy SourceFiles="$(SqlServerDir)\bin\Release\Tasty.SqlServer.xml" DestinationFiles="$(BuildDir)\Tasty.SqlServer.xml"/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryDir)\Tasty.snk /out:$(BuildDir)\Library\Tasty.dll $(LibraryDir)\bin\Release\Tasty.dll $(LibDir)\AWSSDK.dll $(LibDir)\Ionic.Zip.Reduced.dll $(LibDir)\Npgsql.dll $(LibDir)\Mono.Security.dll'/>
 
     <ItemGroup>
-      <OpenXml Include="$(LibDir)\DocumentFormat.OpenXml.dll"/>
-      <OpenXml Include="$(LibDir)\DocumentFormat.OpenXml.xml"/>
+      <LibraryFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.xml"/>
+      <LibraryFiles Include="$(LibDir)\DocumentFormat.OpenXml.dll"/>
+      <LibraryFiles Include="$(LibDir)\DocumentFormat.OpenXml.xml"/>
     </ItemGroup>
 
-    <Copy SourceFiles="@(OpenXml)" DestinationFolder="$(BuildDir)"/>
+    <ItemGroup>
+      <ConsoleFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.dll"/>
+      <ConsoleFiles Include="@(LibraryFiles)"/>
+      <ConsoleFiles Include="$(ConsoleDir)\bin\$(Configuration)\TastyConsole.exe"/>
+      <ConsoleFiles Include="$(LibDir)\log4net.dll"/>
+      <ConsoleFiles Include="$(LibDir)\NDesk.Options.dll"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <SqlServerFiles Include="$(SqlServerDir)\bin\$(Configuration)\Tasty.SqlServer.dll"/>
+      <SqlServerFiles Include="$(SqlServerDir)\bin\$(Configuration)\Tasty.SqlServer.xml"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <JobServiceFiles Include="@(ConsoleFiles)"/>
+      <JobServiceFiles Include="$(JobServiceDir)\bin\$(Configuration)\TastyJobService.exe"/>
+      <JobServiceFiles Include="$(JobServiceDir)\bin\$(Configuration)\TastyJobService.exe.config"/>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(LibraryFiles)" DestinationFolder="$(BuildDir)\Library"/>
+    <Copy SourceFiles="@(ConsoleFiles)" DestinationFolder="$(BuildDir)\Console"/>
+    <Copy SourceFiles="@(SqlServerFiles)" DestinationFolder="$(BuildDir)\SqlServer"/>
+    <Copy SourceFiles="@(JobServiceFiles)" DestinationFolder="$(BuildDir)\JobService"/>
   </Target>
 
   <Target Name="GetVersion">

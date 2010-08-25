@@ -8,6 +8,7 @@ namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Configuration;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
@@ -27,7 +28,7 @@ namespace Tasty.Jobs
         private readonly object stateLocker = new object();
         private readonly object runLocker = new object();
         private static Dictionary<int, JobRunner> instances = new Dictionary<int, JobRunner>();
-        private JobScheduleElementCollection schedules;
+        private ReadOnlyCollection<JobScheduleElement> schedules;
         private IEnumerable<ScheduledJobTuple> scheduledJobs;
         private RunningJobs runs;
         private IJobStore store;
@@ -49,7 +50,7 @@ namespace Tasty.Jobs
                 throw new ArgumentNullException("store", "store cannot be null.");
             }
 
-            this.runs = new RunningJobs(Path.Combine(Environment.CurrentDirectory, RunningJobs.GeneratePersistenceFileName(store)));
+            this.runs = new RunningJobs(Path.Combine(Path.GetDirectoryName(GetType().Assembly.Location), RunningJobs.GeneratePersistenceFileName(store)));
             this.store = store;
         }
 
@@ -210,13 +211,13 @@ namespace Tasty.Jobs
         /// <summary>
         /// Gets the schedule collection to use when processing scheduled jobs.
         /// </summary>
-        public JobScheduleElementCollection Schedules
+        public ReadOnlyCollection<JobScheduleElement> Schedules
         {
             get
             {
                 lock (this.stateLocker)
                 {
-                    return this.schedules ?? (this.schedules = new JobScheduleElementCollection());
+                    return this.schedules ?? (this.schedules = new ReadOnlyCollection<JobScheduleElement>(new List<JobScheduleElement>()));
                 }
             }
         }
@@ -255,11 +256,7 @@ namespace Tasty.Jobs
                     JobRunner runner = new JobRunner(store);
                     runner.Heartbeat = TastySettings.Section.Jobs.Heartbeat;
                     runner.MaximumConcurrency = TastySettings.Section.Jobs.MaximumConcurrency;
-
-                    foreach (var schedule in TastySettings.Section.Jobs.Schedules)
-                    {
-                        runner.Schedules.Add(schedule);
-                    }
+                    runner.SetSchedules(TastySettings.Section.Jobs.Schedules);
 
                     instances[key] = runner;
                 }
@@ -281,6 +278,24 @@ namespace Tasty.Jobs
             lock (this.stateLocker)
             {
                 this.IsRunning = false;
+            }
+        }
+
+        /// <summary>
+        /// Sets the schedule collection to use when processing scheduled jobs.
+        /// </summary>
+        /// <param name="schedules">A collection of schedules.</param>
+        public void SetSchedules(IEnumerable<JobScheduleElement> schedules)
+        {
+            if (schedules == null)
+            {
+                throw new ArgumentNullException("schedules", "schedules cannot be null.");
+            }
+
+            lock (this.stateLocker)
+            {
+                this.schedules = new ReadOnlyCollection<JobScheduleElement>(schedules.ToList());
+                this.scheduledJobs = null;
             }
         }
 

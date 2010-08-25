@@ -103,10 +103,7 @@ namespace Tasty.Test
             sched2.ScheduledJobs.Add(job2);
             sched3.ScheduledJobs.Add(job1);
 
-            this.jobRunner.Schedules.Clear();
-            this.jobRunner.Schedules.Add(sched1);
-            this.jobRunner.Schedules.Add(sched2);
-            this.jobRunner.Schedules.Add(sched3);
+            this.jobRunner.SetSchedules(new JobScheduleElement[] { sched1, sched2, sched3 });
             Thread.Sleep(heartbeat * 2);
 
             Assert.AreEqual(2, this.jobStore.GetJobCount(null, null, sched1.Name));

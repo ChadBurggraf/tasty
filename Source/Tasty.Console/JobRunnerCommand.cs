@@ -8,13 +8,20 @@ namespace Tasty.Console
 {
     using System;
     using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Security;
     using System.Text;
+    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Xml.Linq;
+    using log4net;
+    using log4net.Appender;
+    using log4net.Core;
+    using log4net.Layout;
+    using log4net.Repository.Hierarchy;
     using NDesk.Options;
     using Tasty.Configuration;
     using Tasty.Jobs;
@@ -26,11 +33,16 @@ namespace Tasty.Console
     {
         #region Private Fields
 
-        private bool verbose, log, autoReload;
-        private string config, directory, logPath;
+        private const string PathQuotesExp = @"^[""']?([^""']*)[""']?$";
+
+        private object bootstrapsLocker = new object();
+        private bool autoReload, disposed, executeSuccess;
+        private string config, directory;
+        private int pullUpFailCount;
         private JobRunnerBootstraps bootstaps;
         private ManualResetEvent exitHandle;
-        private bool disposed;
+        private Thread inputThread;
+        private ILog logger;
 
         #endregion
 
@@ -64,110 +76,86 @@ namespace Tasty.Console
         /// <summary>
         /// Executes the action.
         /// </summary>
-        public override void Execute()
+        /// <returns>A value indicating whether the command completed successfully.</returns>
+        public override bool Execute()
         {
-            string config = null, log = null, directory = null;
-            int verbose = 0, man = 0;
+            string config = null, directory = null;
+            int enableLogging = 0, verbose = 0, man = 0;
 
             var options = new OptionSet()
             {
                 { "d|directory=", "(required) the path to the application directory of the target Tasty.dll and job assemblies to run.", v => directory = v },
                 { "c|config=", "(required) the path to a configuration file to use.", v => config = v },
                 { "v|verbose", "write session output to the console.", v => { ++verbose; } },
-                { "l|log=", "the path to a file to log session output to.", v => log = v },
+                { "l|log", "enable logging to a file.", v => { ++enableLogging; } },
                 { "m|man", "show this message", v => { ++man; } }
             };
 
             try
             {
                 options.Parse(this.InputArgs());
+
+                directory = Regex.Replace(directory, PathQuotesExp, "$1");
+                config = Regex.Replace(config, PathQuotesExp, "$1");
             }
             catch (OptionException ex)
             {
                 ParseError(options, ex);
-                return;
+                return false;
             }
 
             if (man > 0)
             {
                 this.Help(options);
-                return;
+                return false;
             }
 
             if (String.IsNullOrEmpty(directory))
             {
                 this.Help(options);
-                return;
+                return false;
             }
             else if (!Directory.Exists(directory))
             {
-                BadArgument("There directory '{0}' does not exist.", directory);
-                return;
+                BadArgument("The directory '{0}' does not exist.", directory);
+                return false;
             }
             else if (!File.Exists(Path.Combine(directory, "Tasty.dll")))
             {
                 BadArgument("Tasty.dll could not be located at '{0}'.", directory);
-                return;
+                return false;
             }
 
             if (String.IsNullOrEmpty(config))
             {
                 this.Help(options);
-                return;
+                return false;
             }
             else if (!File.Exists(config))
             {
                 BadArgument("There is no configuration file at '{0}'.", config);
-                return;
-            }
-
-            if (!String.IsNullOrEmpty(log))
-            {
-                bool canLog = false;
-
-                try
-                {
-                    File.AppendAllText(log, String.Empty);
-                    canLog = true;
-                }
-                catch (IOException)
-                {
-                }
-                catch (SecurityException)
-                {
-                }
-                catch (UnauthorizedAccessException)
-                {
-                }
-                catch (NotSupportedException)
-                {
-                }
-
-                if (canLog)
-                {
-                    this.log = true;
-                    this.logPath = log;
-                }
-                else
-                {
-                    BadArgument("Failed to create or open the log file at '{0}'. Please make sure you have permission to access that location.", log);
-                    return;
-                }
+                return false;
             }
 
             this.directory = directory;
             this.config = config;
-            this.verbose = verbose > 0;
             this.autoReload = true;
             this.exitHandle = new ManualResetEvent(false);
+            this.logger = this.ConfigureAndGetLogger(verbose > 0, enableLogging > 0);
 
             this.CreateAndPullUpBootstraps();
 
-            StandardOut.WriteLine("The tasty job runner is active.");
-            StandardOut.WriteLine("Press Q to safely shut down, Ctl+C to exit immediately.\n");
+            if (this.bootstaps != null && this.bootstaps.IsLoaded)
+            {
+                this.executeSuccess = true;
 
-            new Thread(new ParameterizedThreadStart(this.WaitForInput)).Start();
-            WaitHandle.WaitAll(new WaitHandle[] { this.exitHandle }, Timeout.Infinite);
+                this.inputThread = new Thread(new ParameterizedThreadStart(this.WaitForInput));
+                this.inputThread.Start();
+
+                WaitHandle.WaitAll(new WaitHandle[] { this.exitHandle }, Timeout.Infinite);
+            }
+
+            return this.executeSuccess;
         }
 
         #endregion
@@ -227,16 +215,13 @@ namespace Tasty.Console
         {
             if (this.autoReload)
             {
-                System.Console.ForegroundColor = ConsoleColor.DarkGray;
-                this.Log("The job runner is re-starting...");
+                this.logger.Info("The job runner is restarting.");
                 this.CreateAndPullUpBootstraps();
-                this.Log("The job runner is active.");
-                System.Console.ResetColor();
             }
             else
             {
-                this.Log("All jobs have finished running. Stay classy, San Diego.");
-                this.exitHandle.Set();
+                this.logger.Info("All jobs have finished running. Stay classy, San Diego.");
+                this.Quit();
             }
         }
 
@@ -247,9 +232,7 @@ namespace Tasty.Console
         /// <param name="e">The event arguments.</param>
         private void BootstrapsCancelJob(object sender, JobRecordEventArgs e)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkYellow;
-            this.Log("Canceled '{0}' ({1})", e.Record.Name, e.Record.Id);
-            System.Console.ResetColor();
+            this.logger.InfoFormat("Canceled '{0}' ({1})", e.Record.Name, e.Record.Id);
         }
 
         /// <summary>
@@ -259,9 +242,7 @@ namespace Tasty.Console
         /// <param name="e">The event arguments.</param>
         private void BootstrapsChangeDetected(object sender, FileSystemEventArgs e)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkYellow;
-            this.Log("A change was detected in '{0}'. The job runner is shutting down (it will be automatically re-started)...", e.FullPath);
-            System.Console.ResetColor();
+            this.logger.InfoFormat("A change was detected in '{0}'. The job runner is shutting down (it will be automatically re-started).", e.FullPath);
         }
 
         /// <summary>
@@ -271,9 +252,7 @@ namespace Tasty.Console
         /// <param name="e">The event arguments.</param>
         private void BootstrapsDequeueJob(object sender, JobRecordEventArgs e)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkCyan;
-            this.Log("Dequeued '{0}' ({1})", e.Record.Name, e.Record.Id);
-            System.Console.ResetColor();
+            this.logger.InfoFormat("Dequeued '{0}' ({1}).", e.Record.Name, e.Record.Id);
         }
 
         /// <summary>
@@ -283,27 +262,23 @@ namespace Tasty.Console
         /// <param name="e">The event arguments.</param>
         private void BootstrapsError(object sender, JobErrorEventArgs e)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkRed;
-
             if (!String.IsNullOrEmpty(e.Record.Name) && !String.IsNullOrEmpty(e.Record.Exception))
             {
                 string message = ExceptionXElement.Parse(e.Record.Exception).Descendants("Message").First().Value;
-                this.Log("An error occurred during the run loop for '{0}' ({1}). The message received was: '{2}'", e.Record.Name, e.Record.Id, message);
+                this.logger.ErrorFormat("An error occurred during the run loop for '{0}' ({1}). The message received was: '{2}'", e.Record.Name, e.Record.Id, message);
             }
             else if (!String.IsNullOrEmpty(e.Record.Name))
             {
-                this.Log("An error occurred during the run loop for '{0}' ({1})", e.Record.Name, e.Record.Id);
+                this.logger.ErrorFormat("An error occurred during the run loop for '{0}' ({1}).", e.Record.Name, e.Record.Id);
             }
             else if (e.Exception != null)
             {
-                this.Log("An error occurred during the run loop. The message received was: '{0}'", e.Exception.Message);
+                this.logger.Error("An error occurred during the run loop.", e.Exception);
             }
             else
             {
-                this.Log("An unspecified error occurred during the run loop");
+                this.logger.Error("An unspecified error occurred during the run loop.");
             }
-
-            System.Console.ResetColor();
         }
 
         /// <summary>
@@ -313,9 +288,7 @@ namespace Tasty.Console
         /// <param name="e">The event arguments.</param>
         private void BootstrapsExecuteScheduledJob(object sender, JobRecordEventArgs e)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkGray;
-            this.Log("Started execution of '{0}' ({1}) for schedule '{2}'", e.Record.Name, e.Record.Id, e.Record.ScheduleName);
-            System.Console.ResetColor();
+            this.logger.InfoFormat("Started execution of '{0}' ({1}) for schedule '{2}'.", e.Record.Name, e.Record.Id, e.Record.ScheduleName);
         }
 
         /// <summary>
@@ -327,17 +300,13 @@ namespace Tasty.Console
         {
             if (e.Record.Status == JobStatus.Succeeded)
             {
-                System.Console.ForegroundColor = ConsoleColor.DarkGreen;
-                this.Log("'{0}' ({1}) completed successfully", e.Record.Name, e.Record.Id);
+                this.logger.InfoFormat("'{0}' ({1}) completed successfully.", e.Record.Name, e.Record.Id);
             }
             else
             {
-                System.Console.ForegroundColor = ConsoleColor.DarkRed;
                 string message = ExceptionXElement.Parse(e.Record.Exception).Descendants("Message").First().Value;
-                this.Log("'{0}' ({1}) failed with the message: {2}", e.Record.Name, e.Record.Id, message);
+                this.logger.ErrorFormat("'{0}' ({1}) failed with the message: {2}.", e.Record.Name, e.Record.Id, message);
             }
-
-            System.Console.ResetColor();
         }
 
         /// <summary>
@@ -347,46 +316,133 @@ namespace Tasty.Console
         /// <param name="e">The event arguments.</param>
         private void BootstrapsTimeoutJob(object sender, JobRecordEventArgs e)
         {
-            System.Console.ForegroundColor = ConsoleColor.DarkRed;
-            this.Log("Timed out '{0}' ({1}) because it was taking too long to finish.", e.Record.Name, e.Record.Id);
-            System.Console.ResetColor();
+            this.logger.ErrorFormat("Timed out '{0}' ({1}) because it was taking too long to finish.", e.Record.Name, e.Record.Id);
+        }
+
+        /// <summary>
+        /// Configures and returns the logger instance to use when logging.
+        /// TODO: Extract this out so we can easily log other <see cref="ConsoleCommand"/>s.
+        /// </summary>
+        /// <param name="outputToConsole">A value indicating whether to output to the console.</param>
+        /// <param name="outputToFile">A value indicating whether to output to a log file.</param>
+        private ILog ConfigureAndGetLogger(bool outputToConsole, bool outputToFile)
+        {
+            Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository();
+
+            PatternLayout layout = new PatternLayout();
+            layout.ConversionPattern = "%d [%t] %-5p - %m%n";
+            layout.ActivateOptions();
+
+            if (outputToConsole)
+            {
+                ColoredConsoleAppender console = new ColoredConsoleAppender();
+                console.Layout = layout;
+
+                console.AddMapping(new ColoredConsoleAppender.LevelColors()
+                {
+                    ForeColor = ColoredConsoleAppender.Colors.Red,
+                    Level = Level.Fatal
+                });
+
+                console.AddMapping(new ColoredConsoleAppender.LevelColors()
+                {
+                    ForeColor = ColoredConsoleAppender.Colors.Red,
+                    Level = Level.Error
+                });
+
+                console.AddMapping(new ColoredConsoleAppender.LevelColors()
+                {
+                    ForeColor = ColoredConsoleAppender.Colors.White,
+                    Level = Level.Info
+                });
+
+                console.ActivateOptions();
+                hierarchy.Root.AddAppender(console);
+            }
+
+            if (outputToFile)
+            {
+                RollingFileAppender roller = new RollingFileAppender();
+                roller.Layout = layout;
+                roller.AppendToFile = true;
+                roller.RollingStyle = RollingFileAppender.RollingMode.Size;
+                roller.MaxSizeRollBackups = 10;
+                roller.MaximumFileSize = "1MB";
+                roller.StaticLogFileName = true;
+                roller.File = Path.Combine(this.directory, "tasty-jobs-log.txt");
+                roller.ActivateOptions();
+                hierarchy.Root.AddAppender(roller);
+            }
+
+            hierarchy.Root.Level = Level.All;
+            hierarchy.Configured = true;
+
+            return LogManager.GetLogger("Jobs");
         }
 
         /// <summary>
         /// Creates this instance's <see cref="JobRunnerBootstraps"/> object, sets up the events and executes the pull-up.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want to retry the pull-up operation no matter the reason for failure.")]
         private void CreateAndPullUpBootstraps()
         {
-            this.bootstaps = new JobRunnerBootstraps(this.directory, this.config);
-            this.bootstaps.AllFinished += new EventHandler(this.BootstrapsAllFinished);
-            this.bootstaps.CancelJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsCancelJob);
-            this.bootstaps.ChangeDetected += new EventHandler<FileSystemEventArgs>(this.BootstrapsChangeDetected);
-            this.bootstaps.DequeueJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsDequeueJob);
-            this.bootstaps.Error += new EventHandler<JobErrorEventArgs>(this.BootstrapsError);
-            this.bootstaps.ExecuteScheduledJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsExecuteScheduledJob);
-            this.bootstaps.FinishJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsFinishJob);
-            this.bootstaps.TimeoutJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsTimeoutJob);
-            this.bootstaps.PullUp();
+            lock (this.bootstrapsLocker)
+            {
+                if (this.bootstaps != null)
+                {
+                    this.bootstaps.Dispose();
+                }
+
+                try
+                {
+                    this.bootstaps = new JobRunnerBootstraps(this.directory, this.config);
+                    this.bootstaps.AllFinished += new EventHandler(this.BootstrapsAllFinished);
+                    this.bootstaps.CancelJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsCancelJob);
+                    this.bootstaps.ChangeDetected += new EventHandler<FileSystemEventArgs>(this.BootstrapsChangeDetected);
+                    this.bootstaps.DequeueJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsDequeueJob);
+                    this.bootstaps.Error += new EventHandler<JobErrorEventArgs>(this.BootstrapsError);
+                    this.bootstaps.ExecuteScheduledJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsExecuteScheduledJob);
+                    this.bootstaps.FinishJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsFinishJob);
+                    this.bootstaps.TimeoutJob += new EventHandler<JobRecordEventArgs>(this.BootstrapsTimeoutJob);
+                    this.bootstaps.PullUp();
+
+                    this.pullUpFailCount = 0;
+                    StandardOut.WriteLine("The tasty job runner is active.\nPress Q+Enter to safely shut down, Ctl+C to exit immediately.\n");
+                }
+                catch (Exception ex)
+                {
+                    this.pullUpFailCount++;
+                    this.TimeoutAndRetryPullUp(ex.Message);
+                }
+            }
+        }
+
+        private void Quit()
+        {
+            this.inputThread.Abort();
+            this.exitHandle.Set();
         }
 
         /// <summary>
-        /// Logs the given message to the standard output and/or the current logfile path.
+        /// Times out the current thread because of the given error message and retries
+        /// <see cref="CreateAndPullUpBootstraps()"/> after the timeout is complete.
         /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="args">The formatting arguments to use when formatting the message.</param>
-        private void Log(string message, params object[] args)
+        /// <param name="message">The error message to log.</param>
+        private void TimeoutAndRetryPullUp(string message)
         {
-            string logMessage = String.Format(CultureInfo.InvariantCulture, "{0:s}\n", DateTime.Now);
-            logMessage += String.Format(CultureInfo.CurrentCulture, message, args) + "\n\n";
-            
-            if (this.log)
+            if (this.pullUpFailCount < 10)
             {
-                File.AppendAllText(this.logPath, logMessage, Encoding.UTF8);
+                this.logger.ErrorFormat("Failed to bootstrap a job runner at the destination with the message: {0}\nTrying again in 10 seconds.", message);
+                
+                Thread.Sleep(10000);
+                this.CreateAndPullUpBootstraps();
             }
-
-            if (this.verbose)
+            else
             {
-                StandardOut.Write(logMessage);
+                this.logger.Fatal("Failed to bootstrap a job runner at the destination application 10 times. I'm giving up.");
+                
+                this.executeSuccess = false;
+                this.Quit();
             }
         }
 
@@ -398,21 +454,36 @@ namespace Tasty.Console
         {
             while (true)
             {
-                ConsoleKeyInfo info = System.Console.ReadKey();
+                bool isLoaded = false;
 
-                if ("q".Equals(info.Key.ToString(), StringComparison.OrdinalIgnoreCase))
+                lock (this.bootstrapsLocker)
                 {
-                    System.Console.CursorLeft = 0;
-
-                    System.Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    this.Log("The tasty job runner is sutting down...");
-                    System.Console.ResetColor();
-
-                    this.autoReload = false;
-                    this.bootstaps.PushDown(true);
-
-                    break;
+                    isLoaded = this.bootstaps != null && this.bootstaps.IsLoaded;
                 }
+
+                if (isLoaded)
+                {
+                    byte[] buffer = new byte[1];
+
+                    System.Console.OpenStandardInput().BeginRead(
+                        buffer,
+                        0,
+                        buffer.Length,
+                        (IAsyncResult result) =>
+                        {
+                            string input = Encoding.ASCII.GetString(buffer).Trim();
+
+                            if ("q".Equals(input, StringComparison.OrdinalIgnoreCase))
+                            {
+                                this.logger.Info("The tasty job runner is sutting down.");
+                                this.autoReload = false;
+                                this.bootstaps.PushDown(true);
+                            }
+                        },
+                        null);
+                }
+
+                Thread.Sleep(250);
             }
         }
 

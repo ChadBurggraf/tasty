@@ -17,7 +17,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Provides bootup and teardown services for a <see cref="JobRunner"/>.
     /// Loads a secondary <see cref="AppDomain"/> by shadow-coping the target assemblies,
-    /// and automatically performs safe-shudownt and restart of the <see cref="JobRunner"/>
+    /// and automatically performs safe-shutdown and restart of the <see cref="JobRunner"/>
     /// when changes are detected.
     /// </summary>
     public class JobRunnerBootstraps : IDisposable
@@ -129,6 +129,11 @@ namespace Tasty.Jobs
         /// </summary>
         public string BasePath { get; set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the target application has been successfully loaded.
+        /// </summary>
+        public bool IsLoaded { get; private set; }
+
         #endregion
 
         #region Public Instance Methods
@@ -162,6 +167,7 @@ namespace Tasty.Jobs
                     }
 
                     this.LoadAndStartAppDomain();
+                    this.IsLoaded = true;
                 }
             }
         }
@@ -176,19 +182,23 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
-                this.directoryWatcher.Dispose();
-                this.directoryWatcher = null;
-
-                this.configWatcher.Dispose();
-                this.configWatcher = null;
-
-                if (unwind)
+                if (this.IsLoaded)
                 {
-                    this.proxy.StopRunner();
-                }
-                else
-                {
-                    AppDomain.Unload(this.domain);
+                    this.directoryWatcher.Dispose();
+                    this.directoryWatcher = null;
+
+                    this.configWatcher.Dispose();
+                    this.configWatcher = null;
+
+                    if (unwind)
+                    {
+                        this.proxy.StopRunner();
+                    }
+                    else
+                    {
+                        this.IsLoaded = false;
+                        AppDomain.Unload(this.domain);
+                    }
                 }
             }
         }
@@ -196,6 +206,33 @@ namespace Tasty.Jobs
         #endregion
 
         #region Private Instance Methods
+
+        /// <summary>
+        /// Raises the AppDomain's AssemblyResolve event.
+        /// </summary>
+        /// <param name="sender">The event sender.</param>
+        /// <param name="args">The event arguments.</param>
+        /// <returns>The resolved assembly.</returns>
+        private Assembly AppDomainAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            try
+            {
+                Assembly assembly = Assembly.Load(args.Name);
+
+                if (assembly != null)
+                {
+                    return assembly;
+                }
+            }
+            catch
+            {
+            }
+
+            string[] parts = args.Name.Split(',');
+            string path = Path.Combine(this.BasePath, parts[0].Trim() + ".dll");
+
+            return Assembly.LoadFrom(path);
+        }
 
         /// <summary>
         /// Disposes of resources used by this instance.
@@ -221,6 +258,7 @@ namespace Tasty.Jobs
                 }
 
                 this.disposed = true;
+                this.IsLoaded = false;
             }
         }
 
@@ -229,12 +267,16 @@ namespace Tasty.Jobs
         /// </summary>
         private void LoadAndStartAppDomain()
         {
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(this.AppDomainAssemblyResolve);
+
             AppDomainSetup setup = new AppDomainSetup();
             setup.ApplicationBase = this.BasePath;
             setup.ShadowCopyFiles = "true";
             setup.ConfigurationFile = this.ConfigurationFilePath;
 
             this.domain = AppDomain.CreateDomain("Tasty Job Runner", AppDomain.CurrentDomain.Evidence, setup);
+            //this.domain.AssemblyResolve += new ResolveEventHandler(this.AppDomainAssemblyResolve);
+
             this.proxy = (JobRunnerProxy)this.domain.CreateInstanceAndUnwrap("Tasty", "Tasty.Jobs.JobRunnerProxy");
 
             this.eventSink = new JobRunnerEventSink();
@@ -271,6 +313,8 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
+                this.IsLoaded = false;
+
                 this.proxy = null;
                 this.eventSink = null;
 

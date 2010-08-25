@@ -22,6 +22,7 @@
  </ProjectOptions>
  <Targets>
   <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/Tasty.exe" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/Tasty.JobService/bin/Debug/TastyJobService.exe" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/Tasty.SqlServer/bin/Debug/Tasty.SqlServer.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>

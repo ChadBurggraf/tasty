@@ -31,10 +31,22 @@ namespace Tasty.Web.UrlTokens
         #region Public Instance Properties
 
         /// <summary>
+        /// Gets or sets a value indicating when the token expires, in UTC.
+        /// </summary>
+        [IgnoreDataMember]
+        public DateTime Expires { get; set; }
+
+        /// <summary>
         /// Gets the number of hours from creation the URL token expires in.
         /// </summary>
         [IgnoreDataMember]
         public abstract int ExpiryHours { get; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the token is expired.
+        /// </summary>
+        [IgnoreDataMember]
+        public bool IsExpired { get; set; }
 
         #endregion
 

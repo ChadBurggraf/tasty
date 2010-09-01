@@ -96,7 +96,11 @@ namespace Tasty.Web.UrlTokens
             {
                 using (XmlReader xr = new XmlTextReader(sr))
                 {
-                    return (IUrlToken)serializer.ReadObject(xr);
+                    IUrlToken token = (IUrlToken)serializer.ReadObject(xr);
+                    token.Expires = this.Expires;
+                    token.IsExpired = DateTime.UtcNow > this.Expires;
+
+                    return token;
                 }
             }
         }

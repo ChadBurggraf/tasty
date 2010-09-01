@@ -8,9 +8,12 @@ namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Configuration;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
+    using System.Security;
     using System.Threading;
     using Tasty.Configuration;
 
@@ -25,7 +28,7 @@ namespace Tasty.Jobs
         private readonly object stateLocker = new object();
         private readonly object runLocker = new object();
         private static Dictionary<int, JobRunner> instances = new Dictionary<int, JobRunner>();
-        private JobScheduleElementCollection schedules;
+        private ReadOnlyCollection<JobScheduleElement> schedules;
         private IEnumerable<ScheduledJobTuple> scheduledJobs;
         private RunningJobs runs;
         private IJobStore store;
@@ -37,7 +40,7 @@ namespace Tasty.Jobs
         #region Construction
 
         /// <summary>
-        /// Prevents a default instance of the JobRunner class from being created.
+        /// Initializes a new instance of the JobRunner class.
         /// </summary>
         /// <param name="store">The <see cref="IJobStore"/> to use when accessing job data.</param>
         private JobRunner(IJobStore store)
@@ -47,7 +50,7 @@ namespace Tasty.Jobs
                 throw new ArgumentNullException("store", "store cannot be null.");
             }
 
-            this.runs = new RunningJobs(Path.Combine(Environment.CurrentDirectory, RunningJobs.GeneratePersistenceFileName(store)));
+            this.runs = new RunningJobs(Path.Combine(Path.GetDirectoryName(GetType().Assembly.Location), RunningJobs.GeneratePersistenceFileName(store)));
             this.store = store;
         }
 
@@ -128,6 +131,7 @@ namespace Tasty.Jobs
                     return this.heartbeat;
                 }
             }
+
             set
             {
                 lock (this.stateLocker)
@@ -164,6 +168,7 @@ namespace Tasty.Jobs
                     return this.maximumConcurrency;
                 }
             }
+
             set
             {
                 lock (this.stateLocker)
@@ -189,21 +194,13 @@ namespace Tasty.Jobs
                 {
                     if (this.scheduledJobs == null)
                     {
-                        List<ScheduledJobTuple> list = new List<ScheduledJobTuple>();
-
-                        foreach (var schedule in this.Schedules)
-                        {
-                            foreach (var scheduledJob in schedule.ScheduledJobs)
-                            {
-                                list.Add(new ScheduledJobTuple()
-                                {
-                                    Schedule = schedule,
-                                    ScheduledJob = scheduledJob
-                                });
-                            }
-                        }
-
-                        this.scheduledJobs = list.ToArray();
+                        this.scheduledJobs = (from s in this.Schedules
+                                              from j in s.ScheduledJobs
+                                              select new ScheduledJobTuple()
+                                              {
+                                                  Schedule = s,
+                                                  ScheduledJob = j
+                                              }).ToArray();
                     }
 
                     return this.scheduledJobs;
@@ -212,24 +209,15 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Gets or sets the schedule collection to use when processing scheduled jobs.
-        /// TODO: Clone this when set.
+        /// Gets the schedule collection to use when processing scheduled jobs.
         /// </summary>
-        public JobScheduleElementCollection Schedules
+        public ReadOnlyCollection<JobScheduleElement> Schedules
         {
             get
             {
                 lock (this.stateLocker)
                 {
-                    return this.schedules ?? (this.schedules = new JobScheduleElementCollection());
-                }
-            }
-            set
-            {
-                lock (this.stateLocker)
-                {
-                    this.schedules = value;
-                    this.scheduledJobs = null;
+                    return this.schedules ?? (this.schedules = new ReadOnlyCollection<JobScheduleElement>(new List<JobScheduleElement>()));
                 }
             }
         }
@@ -268,7 +256,7 @@ namespace Tasty.Jobs
                     JobRunner runner = new JobRunner(store);
                     runner.Heartbeat = TastySettings.Section.Jobs.Heartbeat;
                     runner.MaximumConcurrency = TastySettings.Section.Jobs.MaximumConcurrency;
-                    runner.Schedules = TastySettings.Section.Jobs.Schedules;
+                    runner.SetSchedules(TastySettings.Section.Jobs.Schedules);
 
                     instances[key] = runner;
                 }
@@ -290,6 +278,24 @@ namespace Tasty.Jobs
             lock (this.stateLocker)
             {
                 this.IsRunning = false;
+            }
+        }
+
+        /// <summary>
+        /// Sets the schedule collection to use when processing scheduled jobs.
+        /// </summary>
+        /// <param name="schedules">A collection of schedules.</param>
+        public void SetSchedules(IEnumerable<JobScheduleElement> schedules)
+        {
+            if (schedules == null)
+            {
+                throw new ArgumentNullException("schedules", "schedules cannot be null.");
+            }
+
+            lock (this.stateLocker)
+            {
+                this.schedules = new ReadOnlyCollection<JobScheduleElement>(schedules.ToList());
+                this.scheduledJobs = null;
             }
         }
 
@@ -336,7 +342,10 @@ namespace Tasty.Jobs
                                 this.god.Abort();
                                 this.god = null;
                             }
-                            catch
+                            catch (SecurityException)
+                            {
+                            }
+                            catch (ThreadStateException)
                             {
                             }
                         }
@@ -516,66 +525,63 @@ namespace Tasty.Jobs
                 {
                     try
                     {
+                        DateTime now = DateTime.UtcNow;
+
                         var scheduleNames = this.Schedules.Select(s => s.Name);
                         var records = this.store.GetLatestScheduledJobs(scheduleNames, trans);
 
-                        var tuples = from sj in this.ScheduledJobs
-                                     from r in
-                                         (from r in records
-                                          where sj.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
-                                                sj.ScheduledJob.JobType.Equals(r.JobType, StringComparison.OrdinalIgnoreCase)
-                                          select r).DefaultIfEmpty()
-                                     select new ScheduledJobTuple(sj, r);
-
-                        DateTime now = DateTime.UtcNow;
+                        var tuples = (from t in
+                                          (from sj in this.ScheduledJobs
+                                           from r in
+                                               (from r in records
+                                                where !String.IsNullOrEmpty(r.JobType) &&
+                                                      sj.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
+                                                      r.JobType.StartsWith(sj.ScheduledJob.JobType, StringComparison.OrdinalIgnoreCase)
+                                                select r).DefaultIfEmpty()
+                                           select new ScheduledJobTuple(sj, r, now))
+                                      where t.NextExecuteDate <= now
+                                      orderby t.NextExecuteDate
+                                      select t).Take(count);
 
                         foreach (var tuple in tuples)
                         {
-                            DateTime runOn = ScheduledJob.GetNextExecuteDate(
-                                tuple.Schedule,
-                                tuple.Record != null ? tuple.Record.StartDate : null,
-                                now);
+                            JobRecord record = ScheduledJob.CreateRecord(tuple.Schedule, tuple.ScheduledJob, now);
 
-                            if (runOn <= now)
+                            IJob job = null;
+                            Exception toJobEx = null;
+
+                            try
                             {
-                                JobRecord record = ScheduledJob.CreateRecord(tuple.Schedule, tuple.ScheduledJob, now);
-
-                                IJob job = null;
-                                Exception toJobEx = null;
-
-                                try
-                                {
-                                    job = ScheduledJob.CreateFromConfiguration(tuple.ScheduledJob);
-                                }
-                                catch (ConfigurationErrorsException ex)
-                                {
-                                    toJobEx = ex;
-                                    this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
-                                }
-
-                                if (job != null)
-                                {
-                                    record.Name = job.Name;
-                                    record.JobType = JobRecord.JobTypeString(job);
-                                    record.Data = job.Serialize();
-                                    this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
-
-                                    JobRun run = new JobRun(record.Id.Value, job);
-                                    run.Finished += new EventHandler<JobRunEventArgs>(this.JobRunFinished);
-                                    this.runs.Add(run);
-
-                                    run.Start();
-                                }
-                                else
-                                {
-                                    record.Status = JobStatus.FailedToLoadType;
-                                    record.FinishDate = now;
-                                    record.Exception = new ExceptionXElement(toJobEx).ToString();
-                                }
-
-                                trans.AddForSave(record);
-                                this.RaiseEvent(this.ExecuteScheduledJob, new JobRecordEventArgs(record));
+                                job = ScheduledJob.CreateFromConfiguration(tuple.ScheduledJob);
                             }
+                            catch (ConfigurationErrorsException ex)
+                            {
+                                toJobEx = ex;
+                                this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
+                            }
+
+                            if (job != null)
+                            {
+                                record.Name = job.Name;
+                                record.JobType = JobRecord.JobTypeString(job);
+                                record.Data = job.Serialize();
+                                this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
+
+                                JobRun run = new JobRun(record.Id.Value, job);
+                                run.Finished += new EventHandler<JobRunEventArgs>(this.JobRunFinished);
+                                this.runs.Add(run);
+
+                                run.Start();
+                            }
+                            else
+                            {
+                                record.Status = JobStatus.FailedToLoadType;
+                                record.FinishDate = now;
+                                record.Exception = new ExceptionXElement(toJobEx).ToString();
+                            }
+
+                            trans.AddForSave(record);
+                            this.RaiseEvent(this.ExecuteScheduledJob, new JobRecordEventArgs(record));
                         }
 
                         this.runs.Flush();
@@ -699,6 +705,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Main God thread run loop.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We want the run loop to continue at all costs.")]
         private void SmiteThee()
         {
             lock (this.runLocker)

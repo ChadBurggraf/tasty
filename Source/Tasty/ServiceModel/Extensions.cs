@@ -27,7 +27,7 @@ namespace Tasty.ServiceModel
         /// </summary>
         /// <typeparam name="TChannel">The concrete channel type of the client being configured.</typeparam>
         /// <param name="client">The client to configure.</param>
-        public static void ConfigureForX509Whitelist<TChannel>(this ClientBase<TChannel> client) where TChannel : class
+        public static void ConfigureForX509WhiteList<TChannel>(this ClientBase<TChannel> client) where TChannel : class
         {
             EndpointElement element = TastySettings.Section.ServiceModel.Endpoints[client.Endpoint.Contract.ConfigurationName];
 
@@ -42,7 +42,6 @@ namespace Tasty.ServiceModel
                         CultureInfo.InvariantCulture,
                         "You must configure a client certificate for the service contract \"{0}\" under <tasty><serviceModel><endpoints/></serviceModel></tasty>.",
                         client.Endpoint.Contract.ConfigurationName));
-
             }
         }
 

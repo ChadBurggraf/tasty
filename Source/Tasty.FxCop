@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<FxCopProject Version="1.36" Name="My FxCop Project">
+<FxCopProject Version="10.0" Name="My FxCop Project">
  <ProjectOptions>
   <SharedProject>True</SharedProject>
-  <Stylesheet Apply="False">c:\program files\microsoft fxcop 1.36\Xml\FxCopReport.xsl</Stylesheet>
+  <Stylesheet Apply="False">$(ProjectDir)/../../../program files/microsoft fxcop 1.36/Xml/FxCopReport.xsl</Stylesheet>
   <SaveMessages>
    <Project Status="Active, Excluded" NewOnly="False" />
    <Report Status="Active" NewOnly="False" />
@@ -21,7 +21,8 @@
   <IgnoreGeneratedCode>False</IgnoreGeneratedCode>
  </ProjectOptions>
  <Targets>
-  <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/Tasty.exe" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/TastyConsole.exe" Analyze="True" AnalyzeAllChildren="True" />
+  <Target Name="$(ProjectDir)/Tasty.JobService/bin/Debug/TastyJobService.exe" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/Tasty.SqlServer/bin/Debug/Tasty.SqlServer.dll" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll" Analyze="True" AnalyzeAllChildren="True" />
  </Targets>
@@ -40,7 +41,7 @@
   <Groups />
   <Settings />
  </Rules>
- <FxCopReport Version="1.36">
+ <FxCopReport Version="10.0">
   <Namespaces>
    <Namespace Name="Tasty.Http">
     <Messages>
@@ -61,39 +62,9 @@
     </Messages>
    </Namespace>
   </Namespaces>
-  <Targets>
-   <Target Name="$(ProjectDir)/Tasty/bin/Debug/Tasty.dll">
-    <Modules>
-     <Module Name="tasty.dll">
-      <Namespaces>
-       <Namespace Name="Tasty">
-        <Types>
-         <Type Name="DataSets">
-          <Members>
-           <Member Name="#odfNamespaces">
-            <Messages>
-             <Message Id="Member" TypeName="PreferJaggedArraysOverMultidimensional" Category="Microsoft.Performance" CheckId="CA1814" Created="2010-04-27 22:55:11Z">
-              <Issue>
-               <Item>'DataSets.odfNamespaces'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-        </Types>
-       </Namespace>
-      </Namespaces>
-     </Module>
-    </Modules>
-   </Target>
-  </Targets>
   <Rules>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
-   </Rule>
-   <Rule TypeName="PreferJaggedArraysOverMultidimensional" Category="Microsoft.Performance" CheckId="CA1814">
-    <Resolution Name="Default">{0} is a multidimensional array. Replace it with a jagged array if possible.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

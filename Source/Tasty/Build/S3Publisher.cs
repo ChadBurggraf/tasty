@@ -119,6 +119,7 @@ namespace Tasty.Build
             { 
                 return this.useSsl; 
             }
+
             set
             {
                 this.useSsl = value;

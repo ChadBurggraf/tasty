@@ -8,6 +8,7 @@ namespace Tasty.Jobs
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Reflection;
@@ -16,7 +17,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Provides bootup and teardown services for a <see cref="JobRunner"/>.
     /// Loads a secondary <see cref="AppDomain"/> by shadow-coping the target assemblies,
-    /// and automatically performs safe-shudownt and restart of the <see cref="JobRunner"/>
+    /// and automatically performs safe-shutdown and restart of the <see cref="JobRunner"/>
     /// when changes are detected.
     /// </summary>
     public class JobRunnerBootstraps : IDisposable
@@ -128,6 +129,11 @@ namespace Tasty.Jobs
         /// </summary>
         public string BasePath { get; set; }
 
+        /// <summary>
+        /// Gets a value indicating whether the target application has been successfully loaded.
+        /// </summary>
+        public bool IsLoaded { get; private set; }
+
         #endregion
 
         #region Public Instance Methods
@@ -161,6 +167,7 @@ namespace Tasty.Jobs
                     }
 
                     this.LoadAndStartAppDomain();
+                    this.IsLoaded = true;
                 }
             }
         }
@@ -170,23 +177,28 @@ namespace Tasty.Jobs
         /// for all of the currently running jobs to complete.
         /// </summary>
         /// <param name="unwind">Performs a delayed shutdown, waiting for all running jobs to complate.</param>
+        [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", Justification = "Meant as a verb, not a noun.")]
         public void PushDown(bool unwind)
         {
             lock (this)
             {
-                this.directoryWatcher.Dispose();
-                this.directoryWatcher = null;
-
-                this.configWatcher.Dispose();
-                this.configWatcher = null;
-
-                if (unwind)
+                if (this.IsLoaded)
                 {
-                    this.proxy.StopRunner();
-                }
-                else
-                {
-                    AppDomain.Unload(this.domain);
+                    this.directoryWatcher.Dispose();
+                    this.directoryWatcher = null;
+
+                    this.configWatcher.Dispose();
+                    this.configWatcher = null;
+
+                    if (unwind)
+                    {
+                        this.proxy.StopRunner();
+                    }
+                    else
+                    {
+                        this.IsLoaded = false;
+                        AppDomain.Unload(this.domain);
+                    }
                 }
             }
         }
@@ -219,6 +231,7 @@ namespace Tasty.Jobs
                 }
 
                 this.disposed = true;
+                this.IsLoaded = false;
             }
         }
 
@@ -233,7 +246,7 @@ namespace Tasty.Jobs
             setup.ConfigurationFile = this.ConfigurationFilePath;
 
             this.domain = AppDomain.CreateDomain("Tasty Job Runner", AppDomain.CurrentDomain.Evidence, setup);
-            this.proxy = (JobRunnerProxy)this.domain.CreateInstanceAndUnwrap(GetType().Assembly.FullName, typeof(JobRunnerProxy).FullName);
+            this.proxy = (JobRunnerProxy)this.domain.CreateInstanceAndUnwrap("Tasty", "Tasty.Jobs.JobRunnerProxy");
 
             this.eventSink = new JobRunnerEventSink();
             this.eventSink.AllFinished += new EventHandler(this.ProxyAllFinished);
@@ -269,6 +282,8 @@ namespace Tasty.Jobs
         {
             lock (this)
             {
+                this.IsLoaded = false;
+
                 this.proxy = null;
                 this.eventSink = null;
 

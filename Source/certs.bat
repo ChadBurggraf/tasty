@@ -5,7 +5,7 @@ REM Use "tastyserver" as the test password for the server certificate.
 rm TastyServer.pvk
 rm TastyServer.cer
 
-REM Use "tastyclient" as the test password for the server certificate.
+REM Use "tastyclient" as the test password for the client certificate.
 
 "C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\makecert" -r -pe -n "CN=Tasty Client" -sky exchange TastyClient.cer -sv TastyClient.pvk
 "C:\Program Files\Microsoft SDKs\Windows\v6.0A\bin\pvk2pfx" -pvk TastyClient.pvk -pi tastyclient -spc TastyClient.cer -pfx TastyClient.pfx -po tastyclient

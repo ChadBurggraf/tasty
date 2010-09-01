@@ -13,7 +13,7 @@ namespace Tasty.Jobs
     /// <summary>
     /// Defines the interface for persistent job stores.
     /// </summary>
-    public interface IJobStore : IDisposable
+    public interface IJobStore
     {
         /// <summary>
         /// Deletes a job by ID.
@@ -156,6 +156,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Starts a transaction.
         /// </summary>
+        /// <returns>A new <see cref="IJobStoreTransaction"/>.</returns>
         IJobStoreTransaction StartTransaction();
     }
 }

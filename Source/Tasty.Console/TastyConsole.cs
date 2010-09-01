@@ -13,7 +13,7 @@ namespace Tasty.Console
     using NDesk.Options;
 
     /// <summary>
-    /// The main execution handler for tasty.exe.
+    /// The main execution handler for TastyConsole.exe.
     /// </summary>
     public static class TastyConsole
     {
@@ -21,7 +21,8 @@ namespace Tasty.Console
         /// Main execution method.
         /// </summary>
         /// <param name="args">Input arguments.</param>
-        public static void Main(string[] args)
+        /// <returns>The program's exit code.</returns>
+        public static int Main(string[] args)
         {
             string command = null;
             string[] commandArgs = new string[0];
@@ -40,7 +41,7 @@ namespace Tasty.Console
             else
             {
                 Help(options, System.Console.Out);
-                return;
+                return 1;
             }
 
             try
@@ -52,7 +53,7 @@ namespace Tasty.Console
                 System.Console.Error.Write("Tasty: ");
                 System.Console.Error.WriteLine(ex.Message);
                 System.Console.Error.WriteLine("Try 'Tasty --help' for more information.");
-                return;
+                return 1;
             }
 
             if (help)
@@ -68,8 +69,11 @@ namespace Tasty.Console
                 catch (ArgumentException)
                 {
                     Help(options, System.Console.Out);
+                    return 1;
                 }
             }
+
+            return 0;
         }
 
         /// <summary>

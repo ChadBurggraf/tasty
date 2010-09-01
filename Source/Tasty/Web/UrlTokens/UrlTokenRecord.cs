@@ -17,6 +17,8 @@ namespace Tasty.Web.UrlTokens
     [Serializable]
     public sealed class UrlTokenRecord
     {
+        private string storageTypeName;
+
         /// <summary>
         /// Initializes a new instance of the UrlTokenRecord class.
         /// </summary>
@@ -61,18 +63,17 @@ namespace Tasty.Web.UrlTokens
         public string Key { get; set; }
 
         /// <summary>
+        /// Gets the type name to use when storing this record in an <see cref="IUrlTokenStore"/>.
+        /// </summary>
+        public string StorageTypeName
+        {
+            get { return this.storageTypeName ?? (this.storageTypeName = String.Concat(this.TokenType.FullName, ", ", this.TokenType.Assembly.GetName().Name)); }
+        }
+
+        /// <summary>
         /// Gets or sets <see cref="IUrlToken"/> implementor that the token is persisted for.
         /// </summary>
         public Type TokenType { get; set; }
-
-        /// <summary>
-        /// Gets the type name to use when storing this record in an <see cref="IUrlTokenStore"/>.
-        /// </summary>
-        /// <returns>A storage-friendly type name.</returns>
-        public string GetStorageTypeName()
-        {
-            return String.Concat(this.TokenType.FullName, ", ", this.TokenType.Assembly.GetName().Name);
-        }
 
         /// <summary>
         /// Converts this instance's <see cref="TokenType"/> and <see cref="Data"/> properties into an <see cref="IUrlToken"/> object.

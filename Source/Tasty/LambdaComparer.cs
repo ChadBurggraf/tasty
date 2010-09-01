@@ -1,9 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿//-----------------------------------------------------------------------
+// <copyright file="LambdaComparer.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Tasty Codes.
+//     TODO: This code is adapted (almost verbatim) from an unknown source.
+//     Please help me find and credit the original author!
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+
     /// <summary>
     /// Implements <see cref="IEqualityComparer{T}"/> for use with arbitrary lambda expressions.
     /// </summary>

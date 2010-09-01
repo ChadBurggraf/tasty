@@ -7,12 +7,14 @@
 namespace Tasty.Jobs
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// Provides access to <see cref="JobRunner"/> and <see cref="JobRunnerProxy"/>
     /// events across <see cref="AppDomain"/> boundaries.
     /// </summary>
-    internal sealed class JobRunnerEventSink : MarshalByRefObject
+    [Serializable]
+    public sealed class JobRunnerEventSink : MarshalByRefObject
     {
         #region Events
 
@@ -64,6 +66,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Fires <see cref="AllFinished"/> this instance's original <see cref="AppDomain"/>.
         /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate.")]
         public void FireAllFinished()
         {
             this.RaiseEvent(this.AllFinished, EventArgs.Empty);
@@ -72,6 +75,8 @@ namespace Tasty.Jobs
         /// <summary>
         /// Fires <see cref="CancelJob"/> this instance's original <see cref="AppDomain"/>.
         /// </summary>
+        /// <param name="e">The event arguments.</param>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate.")]
         public void FireCancelJob(JobRecordEventArgs e)
         {
             this.RaiseEvent(this.CancelJob, e);
@@ -80,6 +85,8 @@ namespace Tasty.Jobs
         /// <summary>
         /// Fires <see cref="DequeueJob"/> this instance's original <see cref="AppDomain"/>.
         /// </summary>
+        /// <param name="e">The event arguments.</param>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate.")]
         public void FireDequeueJob(JobRecordEventArgs e)
         {
             this.RaiseEvent(this.DequeueJob, e);
@@ -88,6 +95,8 @@ namespace Tasty.Jobs
         /// <summary>
         /// Fires <see cref="Error"/> this instance's original <see cref="AppDomain"/>.
         /// </summary>
+        /// <param name="e">The event arguments.</param>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate.")]
         public void FireError(JobErrorEventArgs e)
         {
             this.RaiseEvent(this.Error, e);
@@ -96,6 +105,8 @@ namespace Tasty.Jobs
         /// <summary>
         /// Fires <see cref="ExecuteScheduledJob"/> this instance's original <see cref="AppDomain"/>.
         /// </summary>
+        /// <param name="e">The event arguments.</param>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate.")]
         public void FireExecuteScheduledJob(JobRecordEventArgs e)
         {
             this.RaiseEvent(this.ExecuteScheduledJob, e);
@@ -104,6 +115,8 @@ namespace Tasty.Jobs
         /// <summary>
         /// Fires <see cref="FinishJob"/> this instance's original <see cref="AppDomain"/>.
         /// </summary>
+        /// <param name="e">The event arguments.</param>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate.")]
         public void FireFinishJob(JobRecordEventArgs e)
         {
             this.RaiseEvent(this.FinishJob, e);
@@ -112,6 +125,8 @@ namespace Tasty.Jobs
         /// <summary>
         /// Fires <see cref="TimeoutJob"/> this instance's original <see cref="AppDomain"/>.
         /// </summary>
+        /// <param name="e">The event arguments.</param>
+        [SuppressMessage("Microsoft.Design", "CA1030:UseEventsWhereAppropriate", Justification = "Not appropriate.")]
         public void FireTimeoutJob(JobRecordEventArgs e)
         {
             this.RaiseEvent(this.TimeoutJob, e);

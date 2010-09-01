@@ -35,16 +35,6 @@ namespace Tasty
         public abstract void Write(DataSet dataSet, string path);
 
         /// <summary>
-        /// Gets a path for this instance from the given path, replacing the given file extension as necessary.
-        /// </summary>
-        /// <param name="path">The path to create this instance's path from.</param>
-        /// <returns>The created path.</returns>
-        protected string CreatePath(string path)
-        {
-            return Path.Combine(Path.GetDirectoryName(path), String.Concat(Path.GetFileNameWithoutExtension(path), this.Extension));
-        }
-
-        /// <summary>
         /// Gets the cell at the given location as a display string based on the type of the <see cref="DataColumn"/>
         /// it resides in.
         /// </summary>
@@ -52,7 +42,7 @@ namespace Tasty
         /// <param name="rowIndex">The index of the row to get the cell value form.</param>
         /// <param name="columnIndex">The index of the column to get the cell value from.</param>
         /// <returns>The specified cell value as a string.</returns>
-        protected string GetCellValueAsString(DataTable table, int rowIndex, int columnIndex)
+        protected static string GetCellValueAsString(DataTable table, int rowIndex, int columnIndex)
         {
             string value = String.Empty;
             object obj = table.Rows[rowIndex][columnIndex];
@@ -97,6 +87,16 @@ namespace Tasty
             }
 
             return value;
+        }
+
+        /// <summary>
+        /// Gets a path for this instance from the given path, replacing the given file extension as necessary.
+        /// </summary>
+        /// <param name="path">The path to create this instance's path from.</param>
+        /// <returns>The created path.</returns>
+        protected string CreatePath(string path)
+        {
+            return Path.Combine(Path.GetDirectoryName(path), String.Concat(Path.GetFileNameWithoutExtension(path), this.Extension));
         }
     }
 }

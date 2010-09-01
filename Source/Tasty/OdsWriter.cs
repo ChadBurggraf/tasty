@@ -44,35 +44,35 @@ namespace Tasty
         /// <summary>
         /// A collection of ODF namespaces and their prefixes.
         /// </summary>
-        private static string[,] odfNamespaces = new string[,]
+        private static string[][] odfNamespaces =
         {
-            { "table", "urn:oasis:names:tc:opendocument:xmlns:table:1.0" },
-            { "office", "urn:oasis:names:tc:opendocument:xmlns:office:1.0" },
-            { "style", "urn:oasis:names:tc:opendocument:xmlns:style:1.0" },
-            { "text", "urn:oasis:names:tc:opendocument:xmlns:text:1.0" },            
-            { "draw", "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" },
-            { "fo", "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" },
-            { "dc", "http://purl.org/dc/elements/1.1/" },
-            { "meta", "urn:oasis:names:tc:opendocument:xmlns:meta:1.0" },
-            { "number", "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" },
-            { "presentation", "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" },
-            { "svg", "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" },
-            { "chart", "urn:oasis:names:tc:opendocument:xmlns:chart:1.0" },
-            { "dr3d", "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" },
-            { "math", "http://www.w3.org/1998/Math/MathML" },
-            { "form", "urn:oasis:names:tc:opendocument:xmlns:form:1.0" },
-            { "script", "urn:oasis:names:tc:opendocument:xmlns:script:1.0" },
-            { "ooo", "http://openoffice.org/2004/office" },
-            { "ooow", "http://openoffice.org/2004/writer" },
-            { "oooc", "http://openoffice.org/2004/calc" },
-            { "dom", "http://www.w3.org/2001/xml-events" },
-            { "xforms", "http://www.w3.org/2002/xforms" },
-            { "xsd", "http://www.w3.org/2001/XMLSchema" },
-            { "xsi", "http://www.w3.org/2001/XMLSchema-instance" },
-            { "rpt", "http://openoffice.org/2005/report" },
-            { "of", "urn:oasis:names:tc:opendocument:xmlns:of:1.2" },
-            { "rdfa", "http://docs.oasis-open.org/opendocument/meta/rdfa#" },
-            { "config", "urn:oasis:names:tc:opendocument:xmlns:config:1.0" }
+            new string[] { "table", "urn:oasis:names:tc:opendocument:xmlns:table:1.0" },
+            new string[] { "office", "urn:oasis:names:tc:opendocument:xmlns:office:1.0" },
+            new string[] { "style", "urn:oasis:names:tc:opendocument:xmlns:style:1.0" },
+            new string[] { "text", "urn:oasis:names:tc:opendocument:xmlns:text:1.0" },            
+            new string[] { "draw", "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" },
+            new string[] { "fo", "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" },
+            new string[] { "dc", "http://purl.org/dc/elements/1.1/" },
+            new string[] { "meta", "urn:oasis:names:tc:opendocument:xmlns:meta:1.0" },
+            new string[] { "number", "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" },
+            new string[] { "presentation", "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" },
+            new string[] { "svg", "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" },
+            new string[] { "chart", "urn:oasis:names:tc:opendocument:xmlns:chart:1.0" },
+            new string[] { "dr3d", "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" },
+            new string[] { "math", "http://www.w3.org/1998/Math/MathML" },
+            new string[] { "form", "urn:oasis:names:tc:opendocument:xmlns:form:1.0" },
+            new string[] { "script", "urn:oasis:names:tc:opendocument:xmlns:script:1.0" },
+            new string[] { "ooo", "http://openoffice.org/2004/office" },
+            new string[] { "ooow", "http://openoffice.org/2004/writer" },
+            new string[] { "oooc", "http://openoffice.org/2004/calc" },
+            new string[] { "dom", "http://www.w3.org/2001/xml-events" },
+            new string[] { "xforms", "http://www.w3.org/2002/xforms" },
+            new string[] { "xsd", "http://www.w3.org/2001/XMLSchema" },
+            new string[] { "xsi", "http://www.w3.org/2001/XMLSchema-instance" },
+            new string[] { "rpt", "http://openoffice.org/2005/report" },
+            new string[] { "of", "urn:oasis:names:tc:opendocument:xmlns:of:1.2" },
+            new string[] { "rdfa", "http://docs.oasis-open.org/opendocument/meta/rdfa#" },
+            new string[] { "config", "urn:oasis:names:tc:opendocument:xmlns:config:1.0" }
         };
 
         /// <summary>
@@ -170,9 +170,9 @@ namespace Tasty
         {
             XmlNamespaceManager mgr = new XmlNamespaceManager(document.NameTable);
 
-            for (int i = 0; i < odfNamespaces.GetLength(0); i++)
+            for (int i = 0; i < odfNamespaces.Length; i++)
             {
-                mgr.AddNamespace(odfNamespaces[i, 0], odfNamespaces[i, 1]);
+                mgr.AddNamespace(odfNamespaces[i][0], odfNamespaces[i][1]);
             }
 
             return mgr;

@@ -24,7 +24,7 @@ namespace Tasty.Jobs
         private string typeName;
 
         /// <summary>
-        /// Gets or sets the current <see cref="IJobStore"/> implementation in use.
+        /// Gets the current <see cref="IJobStore"/> implementation in use.
         /// </summary>
         public static IJobStore Current
         {
@@ -61,13 +61,6 @@ namespace Tasty.Jobs
                     return this.typeName;
                 }
             }
-        }
-
-        /// <summary>
-        /// Disposes of resources used by this instance.
-        /// </summary>
-        public virtual void Dispose()
-        {
         }
 
         /// <summary>
@@ -255,6 +248,7 @@ namespace Tasty.Jobs
         /// <summary>
         /// Starts a transaction.
         /// </summary>
+        /// <returns>A new <see cref="IJobStoreTransaction"/>.</returns>
         public abstract IJobStoreTransaction StartTransaction();
     }
 }

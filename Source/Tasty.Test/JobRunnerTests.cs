@@ -67,16 +67,12 @@ namespace Tasty.Test
         {
             this.jobRunner.Start();
 
-            JobScheduleElementCollection schedules = new JobScheduleElementCollection();
-
             JobScheduleElement sched1 = new JobScheduleElement() 
             {
                 Name = "___TEST_SCHED_1___" + Guid.NewGuid().ToString(),
                 RepeatHours = 24,
                 StartOn = DateTime.UtcNow.AddYears(-1)
             };
-
-            schedules.Add(sched1);
 
             JobScheduleElement sched2 = new JobScheduleElement()
             {
@@ -85,16 +81,12 @@ namespace Tasty.Test
                 StartOn = DateTime.UtcNow.AddDays(-1)
             };
 
-            schedules.Add(sched2);
-
             JobScheduleElement sched3 = new JobScheduleElement()
             {
                 Name = "___TEST_SCHED_3___" + Guid.NewGuid().ToString(),
                 RepeatHours = .5,
                 StartOn = DateTime.UtcNow.AddDays(1)
             };
-
-            schedules.Add(sched3);
 
             JobScheduledJobElement job1 = new JobScheduledJobElement()
             {
@@ -111,7 +103,7 @@ namespace Tasty.Test
             sched2.ScheduledJobs.Add(job2);
             sched3.ScheduledJobs.Add(job1);
 
-            this.jobRunner.Schedules = schedules;
+            this.jobRunner.SetSchedules(new JobScheduleElement[] { sched1, sched2, sched3 });
             Thread.Sleep(heartbeat * 2);
 
             Assert.AreEqual(2, this.jobStore.GetJobCount(null, null, sched1.Name));

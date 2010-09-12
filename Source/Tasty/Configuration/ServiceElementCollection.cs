@@ -14,7 +14,7 @@ namespace Tasty.Configuration
     /// <summary>
     /// Represents a collection of <see cref="ServiceElement"/>s in the configuration.
     /// </summary>
-    public class ServiceElementCollection : TastyConfigurationElementCollection<ServiceElement>
+    public class ServiceElementCollection : ConfigurationElementCollection<ServiceElement>
     {
         /// <summary>
         /// Gets the element with the given name.

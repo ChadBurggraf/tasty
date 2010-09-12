@@ -106,6 +106,7 @@
     <Compile Include="Build\SchemaUpgradeCommandSet.cs" />
     <Compile Include="Build\SchemaUpgradeCommandSetResult.cs" />
     <Compile Include="Build\SetVersion.cs" />
+    <Compile Include="ConfigurationElementCollection.cs" />
     <Compile Include="Configuration\ClientCertificateElement.cs" />
     <Compile Include="Configuration\ClientCertificateElementCollection.cs" />
     <Compile Include="Configuration\EndpointElementCollection.cs" />
@@ -123,7 +124,6 @@
     <Compile Include="Configuration\ServiceElement.cs" />
     <Compile Include="Configuration\ServiceElementCollection.cs" />
     <Compile Include="Configuration\ServiceModelElement.cs" />
-    <Compile Include="Configuration\TastyConfigurationElementCollection.cs" />
     <Compile Include="Configuration\TastySettings.cs" />
     <Compile Include="Configuration\UrlTokensElement.cs" />
     <Compile Include="DataSets.cs" />

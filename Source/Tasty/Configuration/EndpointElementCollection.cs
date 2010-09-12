@@ -14,7 +14,7 @@ namespace Tasty.Configuration
     /// <summary>
     /// Represents a collection of <see cref="EndpointElement"/>s in the configuration.
     /// </summary>
-    public class EndpointElementCollection : TastyConfigurationElementCollection<EndpointElement>
+    public class EndpointElementCollection : ConfigurationElementCollection<EndpointElement>
     {
         /// <summary>
         /// Gets the element with the given contract name.

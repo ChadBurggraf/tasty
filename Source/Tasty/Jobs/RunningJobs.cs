@@ -47,7 +47,7 @@ namespace Tasty.Jobs
                 persistencePath = Path.GetFullPath(persistencePath);
             }
 
-            if (!persistencePath.StartsWith(Environment.CurrentDirectory, StringComparison.OrdinalIgnoreCase))
+            if (!persistencePath.StartsWith(Path.GetDirectoryName(GetType().Assembly.Location), StringComparison.OrdinalIgnoreCase))
             {
                 throw new ArgumentException("persistencePath must point to a path inside the current application directory.", "persistencePath");
             }

@@ -13,7 +13,7 @@ namespace Tasty.Configuration
     /// <summary>
     /// Represents a collection of <see cref="JobScheduleElement"/>s in the configuration.
     /// </summary>
-    public class JobScheduleElementCollection : TastyConfigurationElementCollection<JobScheduleElement>
+    public class JobScheduleElementCollection : ConfigurationElementCollection<JobScheduleElement>
     {
         /// <summary>
         /// Gets a value indicating whether the collection contains the given item.

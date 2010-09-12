@@ -14,7 +14,7 @@ namespace Tasty.Configuration
     /// <summary>
     /// Represents a collection of <see cref="ClientCertificateElement"/>s in the configuration.
     /// </summary>
-    public class ClientCertificateElementCollection : TastyConfigurationElementCollection<ClientCertificateElement>
+    public class ClientCertificateElementCollection : ConfigurationElementCollection<ClientCertificateElement>
     {
         /// <summary>
         /// Gets a value indicating whether the collection contains the given item.

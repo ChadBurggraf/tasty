@@ -2,6 +2,7 @@
 *.csproj.user
 *.vsmdi
 *.Cache
+*.snk
 bin
 obj
 TestResults

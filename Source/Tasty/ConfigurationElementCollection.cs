@@ -1,10 +1,10 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="TastyConfigurationElementCollection.cs" company="Tasty Codes">
+// <copyright file="ConfigurationElementCollection.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Tasty Codes.
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Tasty.Configuration
+namespace Tasty
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace Tasty.Configuration
     /// Represents the base class for <see cref="ConfigurationElementCollection"/> implementors.
     /// </summary>
     /// <typeparam name="T">The type of the configuration elements contained in the collection.</typeparam>
-    public abstract class TastyConfigurationElementCollection<T> : ConfigurationElementCollection, ICollection<T>
+    public abstract class ConfigurationElementCollection<T> : ConfigurationElementCollection, ICollection<T>
         where T : ConfigurationElement
     {
         #region Public Instance Properties

@@ -15,17 +15,6 @@ namespace Tasty.Configuration
     public class JobsElement : ConfigurationElement
     {
         /// <summary>
-        /// Gets or sets a value indicating whether to delete job records found in the job store
-        /// for scheduled jobs that could not be instantiated (e.g., if the type no longer exists or could not be loaded).
-        /// </summary>
-        [ConfigurationProperty("deleteBadScheduledJobRecords", IsRequired  = false, DefaultValue = false)]
-        public bool DeleteBadScheduledJobRecords
-        {
-            get { return (bool)this["deleteBadScheduledJobRecords"]; }
-            set { this["deleteBadScheduledJobRecords"] = value; }
-        }
-
-        /// <summary>
         /// Gets or sets the heartbeat timeout (in miliseconds) to use for the job runner. The runner will 
         /// pause for this duration at the end of each cancel/finish/timeout/dequeue loop.
         /// When not configured, defaults to 10,000 (10 seconds).
@@ -46,28 +35,6 @@ namespace Tasty.Configuration
         {
             get { return (int)this["maximumConcurrency"]; }
             set { this["maximumConcurrency"] = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum number of retries to perform when a job
-        /// fails or is timed out. When not configured, defaults to 0 (no retries).
-        /// </summary>
-        [ConfigurationProperty("maximumFailedRetries", IsRequired = false)]
-        public int MaximumFailedRetries
-        {
-            get { return (int)this["maximumFailedRetries"]; }
-            set { this["maximumFailedRetries"] = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to notify the delegate when bad
-        /// scheduled job records are found in the job store (e.g., if the type no longer exists or could not be loaded).
-        /// </summary>
-        [ConfigurationProperty("notifyOnBadScheduledJobs", IsRequired = false, DefaultValue = false)]
-        public bool NotifyOnBadScheduledJobs
-        {
-            get { return (bool)this["notifyOnBadScheduledJobs"]; }
-            set { this["notifyOnBadScheduledJobs"] = value; }
         }
 
         /// <summary>

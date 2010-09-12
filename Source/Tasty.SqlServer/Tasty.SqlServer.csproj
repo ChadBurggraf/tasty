@@ -51,6 +51,8 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AssemblyImport.sql" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Tasty.SqlServer.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

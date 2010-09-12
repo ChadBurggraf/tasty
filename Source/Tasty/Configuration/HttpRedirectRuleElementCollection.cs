@@ -14,7 +14,7 @@ namespace Tasty.Configuration
     /// <summary>
     /// Represents a collection of <see cref="HttpRedirectRuleElement"/>s in the configuration.
     /// </summary>
-    public class HttpRedirectRuleElementCollection : TastyConfigurationElementCollection<HttpRedirectRuleElement>
+    public class HttpRedirectRuleElementCollection : ConfigurationElementCollection<HttpRedirectRuleElement>
     {
         /// <summary>
         /// Gets a value indicating whether the collection contains the given item.

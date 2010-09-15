@@ -5,13 +5,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty", "Tasty\Tasty.csproj
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{185BB18E-0FD1-4E78-BD64-2FD8ED94B027}"
 	ProjectSection(SolutionItems) = preProject
-		App.config.template = App.config.template
 		..\build.proj = ..\build.proj
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
-		S3Publish.proj.template = S3Publish.proj.template
 		SolutionInfo.cs = SolutionInfo.cs
-		Tasty.vsmdi = Tasty.vsmdi
-		Test.config.template = Test.config.template
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Test", "Tasty.Test\Tasty.Test.csproj", "{E5B6327D-3E79-424F-8BF2-126D3905631C}"
@@ -22,10 +18,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.SqlServer", "Tasty.Sq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.JobService", "Tasty.JobService\Tasty.JobService.csproj", "{133F9392-34CB-4F7C-817E-79E2C56612D6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{5890438D-C5F7-4EC3-B878-5875926C985A}"
+	ProjectSection(SolutionItems) = preProject
+		Templates\App.config.template = Templates\App.config.template
+		Templates\JobService.config.template = Templates\JobService.config.template
+		Templates\S3Publish.proj.template = Templates\S3Publish.proj.template
+		Templates\Test.config.template = Templates\Test.config.template
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = Tasty.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU

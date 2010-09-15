@@ -1,57 +1,73 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" />
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <BuildDir>$(MSBuildProjectDirectory)\Build</BuildDir>
     <ConsoleDir>$(MSBuildProjectDirectory)\Source\Tasty.Console</ConsoleDir>
-    <ILMergePath Condition="'$(ILMergePath)' == ''">$(ProgramFiles)\Microsoft\ILMerge\ILMerge.exe</ILMergePath>
+    <ILMergePath>$(MSBuildProjectDirectory)\Tools\ILMerge\ILMerge.exe</ILMergePath>
+    <KeyFile>$(MSBuildProjectDirectory)\Source\SThreeQL.snk</KeyFile>
     <LibDir>$(MSBuildProjectDirectory)\Lib</LibDir>
     <LibraryDir>$(MSBuildProjectDirectory)\Source\Tasty</LibraryDir>
-    <BuildDir>$(MSBuildProjectDirectory)\Build</BuildDir>
     <JobServiceDir>$(MSBuildProjectDirectory)\Source\Tasty.JobService</JobServiceDir>
     <SolutionInfoPath>$(MSBuildProjectDirectory)\Source\SolutionInfo.cs</SolutionInfoPath>
     <SqlServerDir>$(MSBuildProjectDirectory)\Source\Tasty.SqlServer</SqlServerDir>
+    <TestDir>$(MSBuildProjectDirectory)\Source\Tasty.Test</TestDir>
   </PropertyGroup>
+
+  <Choose>
+    <When Condition="Exists('$(KeyFile)')">
+      <PropertyGroup>
+        <KeyFileArgs>/keyfile:"$(KeyFile)"</KeyFileArgs>
+        <SignAssembly>true</SignAssembly>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <SignAssembly>false</SignAssembly>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
   
-  <Target Name="Build">
+  <Target Name="Build" DependsOnTargets="EnsureConfigs">
     <RemoveDir Directories="$(BuildDir)"/>
     <MakeDir Directories="$(BuildDir);$(BuildDir)\Library;$(BuildDir)\Console;$(BuildDir)\SqlServer;$(BuildDir)\JobService"/>
     
-    <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj;$(JobServiceDir)\Tasty.JobService.csproj" Properties="Configuration=$(Configuration)"/>
+    <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj;$(JobServiceDir)\Tasty.JobService.csproj" Properties="Configuration=$(Configuration);SignAssembly=$(SignAssembly);AssemblyOriginatorKeyFile=$(KeyFile)"/>
   
     <Message Text='Merging assemblies into "Tasty.dll".'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize /keyfile:$(LibraryDir)\Tasty.snk /out:$(BuildDir)\Library\Tasty.dll $(LibraryDir)\bin\Release\Tasty.dll $(LibDir)\AWSSDK.dll $(LibDir)\Ionic.Zip.Reduced.dll $(LibDir)\Npgsql.dll $(LibDir)\Mono.Security.dll'/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize $(KeyFileArgs) /out:$(BuildDir)\Library\Tasty.dll "$(LibraryDir)\bin\$(Configuration)\Tasty.dll" "$(LibDir)\Ionic.Zip.Reduced.dll" "$(LibDir)\Npgsql.dll" "$(LibDir)\Mono.Security.dll"'/>
 
+    <Message Text='Merging assemblies into "TastyConsole.exe".'/>
+    <Exec Command='"$(ILMergePath)" /ndebug /internalize $(KeyFileArgs) /out:"$(BuildDir)\Console\TastyConsole.exe" "$(ConsoleDir)\bin\$(Configuration)\TastyConsole.exe" "$(LibDir)\log4net.dll" "$(LibDir)\NDesk.Options.dll"'/>
+    
     <ItemGroup>
       <LibraryFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.xml"/>
+      <LibraryFiles Include="$(LibDir)\AWSSDK.dll"/>
       <LibraryFiles Include="$(LibDir)\DocumentFormat.OpenXml.dll"/>
-      <LibraryFiles Include="$(LibDir)\DocumentFormat.OpenXml.xml"/>
     </ItemGroup>
+    <Copy SourceFiles="@(LibraryFiles)" DestinationFolder="$(BuildDir)\Library"/>
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\Source\Templates\App.config.template" DestinationFiles="$(BuildDir)\Library\App.config"/>
 
     <ItemGroup>
       <ConsoleFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.dll"/>
-      <ConsoleFiles Include="@(LibraryFiles)"/>
-      <ConsoleFiles Include="$(ConsoleDir)\bin\$(Configuration)\TastyConsole.exe"/>
-      <ConsoleFiles Include="$(LibDir)\log4net.dll"/>
-      <ConsoleFiles Include="$(LibDir)\NDesk.Options.dll"/>
+      <ConsoleFiles Include="$(LibDir)\AWSSDK.dll"/>
+      <ConsoleFiles Include="$(LibDir)\DocumentFormat.OpenXml.dll"/>
     </ItemGroup>
+    <Copy SourceFiles="@(ConsoleFiles)" DestinationFolder="$(BuildDir)\Console"/>
+
+    <Copy SourceFiles="$(SqlServerDir)\bin\$(Configuration)\Tasty.SqlServer.dll" DestinationFolder="$(BuildDir)\SqlServer"/>
 
     <ItemGroup>
-      <SqlServerFiles Include="$(SqlServerDir)\bin\$(Configuration)\Tasty.SqlServer.dll"/>
-      <SqlServerFiles Include="$(SqlServerDir)\bin\$(Configuration)\Tasty.SqlServer.xml"/>
-    </ItemGroup>
-
-    <ItemGroup>
-      <JobServiceFiles Include="@(ConsoleFiles)"/>
+      <JobServiceFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.dll"/>
       <JobServiceFiles Include="$(JobServiceDir)\bin\$(Configuration)\TastyJobService.exe"/>
       <JobServiceFiles Include="$(JobServiceDir)\bin\$(Configuration)\TastyJobService.exe.config"/>
     </ItemGroup>
-
-    <Copy SourceFiles="@(LibraryFiles)" DestinationFolder="$(BuildDir)\Library"/>
-    <Copy SourceFiles="@(ConsoleFiles)" DestinationFolder="$(BuildDir)\Console"/>
-    <Copy SourceFiles="@(SqlServerFiles)" DestinationFolder="$(BuildDir)\SqlServer"/>
     <Copy SourceFiles="@(JobServiceFiles)" DestinationFolder="$(BuildDir)\JobService"/>
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\Source\Templates\JobService.config.template" DestinationFiles="$(BuildDir)\JobService\TastyJobService.exe.config"/>
   </Target>
 
-  
+  <Target Name="EnsureConfigs">
+    <Copy Condition="!Exists('$(JobServiceDir)\App.config')" SourceFiles="$(MSBuildProjectDirectory)\Source\Templates\JobService.config.template" DestinationFiles="$(JobServiceDir)\App.config"/>
+    <Copy Condition="!Exists('$(TestDir)\App.config')" SourceFiles="$(MSBuildProjectDirectory)\Source\Templates\Test.config.template" DestinationFiles="$(TestDir)\App.config"/>
+  </Target>
 </Project>

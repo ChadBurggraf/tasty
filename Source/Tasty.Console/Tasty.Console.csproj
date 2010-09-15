@@ -12,8 +12,6 @@
     <AssemblyName>TastyConsole</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Tasty.Console.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -70,9 +68,6 @@
       <Project>{2FA9607D-DC0D-4318-B13D-028C2BA3FF85}</Project>
       <Name>Tasty</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Tasty.Console.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -12,8 +12,6 @@
     <AssemblyName>Tasty</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Tasty.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -227,7 +225,6 @@
   <ItemGroup>
     <None Include="Jobs\Sql\TastyJobs-Postgres.sql" />
     <None Include="Jobs\Sql\TastyJobs-SqlServer.sql" />
-    <None Include="Tasty.snk" />
     <EmbeddedResource Include="Template.ods" />
     <EmbeddedResource Include="Web\UrlTokens\Sql\TastyUrlTokens-Postgres.sql" />
   </ItemGroup>

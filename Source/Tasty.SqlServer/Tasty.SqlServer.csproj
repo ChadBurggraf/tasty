@@ -12,8 +12,6 @@
     <AssemblyName>Tasty.SqlServer</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Tasty.SqlServer.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,7 +29,8 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Tasty.SqlServer.xml</DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -51,9 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="AssemblyImport.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Tasty.SqlServer.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

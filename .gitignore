@@ -3,6 +3,7 @@
 *.vsmdi
 *.Cache
 *.snk
+*.config
 bin
 obj
 TestResults

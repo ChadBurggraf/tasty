@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <configSections>
+    <section name="tastyJobService" type="Tasty.JobService.TastyJobServiceSettings, TastyJobService"/>
+  </configSections>
+  <tastyJobService>
+    <!-- Add the bin path and configuration file path for each application you want the job service to run jobs for. -->
+    <applications>
+      <add name="" directory="" cfgFile=""/>
+    </applications>
+  </tastyJobService>
+</configuration>

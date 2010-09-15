@@ -30,7 +30,7 @@ IF @SystemCoreAssemblyPath NOT LIKE N'%System.Core.dll'
 	SET @SystemCoreAssemblyPath = N'C:\Program Files\Reference Assemblies\Microsoft\Framework\v3.5\System.Core.dll'
 
 IF @TastyAssemblyPath NOT LIKE N'%Tasty.SqlServer.dll'
-	SET @TastyAssemblyPath = N'C:\Program Files\Tasty\Tasty.SqlServer.dll'
+	SET @TastyAssemblyPath = N'C:\Program Files\Tasty\SqlServer\Tasty.SqlServer.dll'
 
 IF NOT EXISTS (SELECT * FROM sys.assemblies WHERE [name] = 'System.Core')
 BEGIN

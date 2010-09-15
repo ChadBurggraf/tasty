@@ -10,6 +10,8 @@ namespace Tasty.Test
     [DataContract(Namespace = UrlToken.XmlNamespace)]
     internal class TestIdUrlToken : UrlToken
     {
+        private Dictionary<string, string> metadata;
+
         public TestIdUrlToken()
         {
             Id = Guid.NewGuid();
@@ -22,5 +24,12 @@ namespace Tasty.Test
 
         [DataMember]
         public Guid Id { get; set; }
+
+        [DataMember]
+        public Dictionary<string, string> Metadata
+        {
+            get { return this.metadata ?? (this.metadata = new Dictionary<string, string>()); }
+            set { this.metadata = value; }
+        }
     }
 }

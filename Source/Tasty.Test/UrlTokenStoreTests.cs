@@ -26,7 +26,10 @@ namespace Tasty.Test
         {
             if (this.Store != null)
             {
-                IUrlToken token = new TestIdUrlToken();
+                TestIdUrlToken token = new TestIdUrlToken();
+                token.Metadata["Alpha"] = "One";
+                token.Metadata["Bravo"] = "Two";
+
                 string key = token.GenerateKey();
 
                 this.Store.CreateUrlToken(new UrlTokenRecord()

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Tasty.Configuration;
 using Tasty.Geocode;
 
 namespace Fuzz.Test
@@ -24,71 +25,86 @@ namespace Fuzz.Test
         [TestMethod]
         public void Geocode_CanGeocodeCity()
         {
-            GeocodeRequest request = new GeocodeRequest(new GeocodeRequestAddress()
+            if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
             {
-                City = "Scottsdale",
-                State = "AZ"
-            });
+                GeocodeRequest request = new GeocodeRequest(new GeocodeRequestAddress()
+                {
+                    City = "Scottsdale",
+                    State = "AZ"
+                });
 
-            GeocodeResponse response = request.GetResponse();
-            Assert.AreEqual<GeocodeResposeStatusCode>(GeocodeResposeStatusCode.Success, response.Status.Code);
+                GeocodeResponse response = request.GetResponse();
+                Assert.AreEqual<GeocodeResposeStatusCode>(GeocodeResposeStatusCode.Success, response.Status.Code);
 
-            var mark = (from p in response.Placemark
-                        orderby p.AddressDetails.Accuracy descending
-                        select p).First();
+                var mark = (from p in response.Placemark
+                            orderby p.AddressDetails.Accuracy descending
+                            select p).First();
 
-            Assert.IsTrue(mark.AddressDetails.Accuracy >= 4);
+                Assert.IsTrue(mark.AddressDetails.Accuracy >= 4);
+            }
         }
 
         [TestMethod]
         public void Geocode_CanMakeRequest()
         {
-            GeocodeRequest request = new GeocodeRequest(HomeAddress);
-            GeocodeResponse response = request.GetResponse();
-            Assert.AreEqual<GeocodeResposeStatusCode>(GeocodeResposeStatusCode.Success, response.Status.Code);
+            if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
+            {
+                GeocodeRequest request = new GeocodeRequest(HomeAddress);
+                GeocodeResponse response = request.GetResponse();
+                Assert.AreEqual<GeocodeResposeStatusCode>(GeocodeResposeStatusCode.Success, response.Status.Code);
+            }
         }
 
         [TestMethod]
         public void Geocode_GetsCorrectAdministrativeAreaForCity()
         {
-            GeocodeRequest request = new GeocodeRequest(new GeocodeRequestAddress()
+            if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
             {
-                City = "Scottsdale",
-                State = "AZ"
-            });
+                GeocodeRequest request = new GeocodeRequest(new GeocodeRequestAddress()
+                {
+                    City = "Scottsdale",
+                    State = "AZ"
+                });
 
-            GeocodeResponse response = request.GetResponse();
-            GeocodePlacemark mark = response.Placemark.First();
+                GeocodeResponse response = request.GetResponse();
+                GeocodePlacemark mark = response.Placemark.First();
 
-            Assert.AreEqual("AZ", mark.AddressDetails.Country.AdministrativeArea.AdministrativeAreaName);
-            Assert.AreEqual("Scottsdale", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.LocalityName);
+                Assert.AreEqual("AZ", mark.AddressDetails.Country.AdministrativeArea.AdministrativeAreaName);
+                Assert.AreEqual("Scottsdale", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.LocalityName);
+            }
         }
 
         [TestMethod]
         public void Geocode_GetsCorrectAdministrativeAreaForHome()
         {
-            GeocodeRequest request = new GeocodeRequest(HomeAddress);
-            GeocodeResponse response = request.GetResponse();
+            if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
+            {
+                GeocodeRequest request = new GeocodeRequest(HomeAddress);
+                GeocodeResponse response = request.GetResponse();
 
-            GeocodePlacemark mark = response.Placemark.First();
+                GeocodePlacemark mark = response.Placemark.First();
 
-            Assert.AreEqual("AZ", mark.AddressDetails.Country.AdministrativeArea.AdministrativeAreaName);
-            Assert.AreEqual("Scottsdale", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.LocalityName);
-            Assert.AreEqual("6840 E 2nd St #22", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.Thoroughfare.ThoroughfareName);
-            Assert.AreEqual("85251", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.PostalCode.PostalCodeNumber);
+                Assert.AreEqual("AZ", mark.AddressDetails.Country.AdministrativeArea.AdministrativeAreaName);
+                Assert.AreEqual("Scottsdale", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.LocalityName);
+                Assert.AreEqual("6840 E 2nd St #22", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.Thoroughfare.ThoroughfareName);
+                Assert.AreEqual("85251", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.PostalCode.PostalCodeNumber);
+            }
         }
 
         [TestMethod]
         public void Geocode_GetsCorrectLatLonForHome()
         {
-            GeocodeRequest request = new GeocodeRequest(HomeAddress);
-            GeocodeResponse response = request.GetResponse();
+            if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
+            {
+                GeocodeRequest request = new GeocodeRequest(HomeAddress);
+                GeocodeResponse response = request.GetResponse();
 
-            decimal latDiff = Math.Abs(HomeCoordinates.Latitude.Value - response.Placemark[0].Point.Latitude.Value);
-            decimal lonDIff = Math.Abs(HomeCoordinates.Longitude.Value - response.Placemark[0].Point.Longitude.Value);
+                decimal latDiff = Math.Abs(HomeCoordinates.Latitude.Value - response.Placemark[0].Point.Latitude.Value);
+                decimal lonDIff = Math.Abs(HomeCoordinates.Longitude.Value - response.Placemark[0].Point.Longitude.Value);
 
-            Assert.IsTrue(latDiff < 0.001m);
-            Assert.IsTrue(lonDIff < 0.001m);
+                Assert.IsTrue(latDiff < 0.001m);
+                Assert.IsTrue(lonDIff < 0.001m);
+            }
         }
     }
 }

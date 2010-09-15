@@ -12,6 +12,7 @@ namespace Tasty.Jobs
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Security.Permissions;
     using System.Security.Policy;
 
     /// <summary>
@@ -20,6 +21,8 @@ namespace Tasty.Jobs
     /// and automatically performs safe-shutdown and restart of the <see cref="JobRunner"/>
     /// when changes are detected.
     /// </summary>
+    [PermissionSetAttribute(SecurityAction.LinkDemand, Name = "FullTrust")]
+    [PermissionSetAttribute(SecurityAction.InheritanceDemand, Name = "FullTrust")]
     public class JobRunnerBootstraps : IDisposable
     {
         #region Private Fields

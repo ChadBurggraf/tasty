@@ -20,18 +20,18 @@ namespace Tasty.Web.UrlTokens
     [DataContract(Namespace = UrlToken.XmlNamespace)]
     public abstract class UrlToken : IUrlToken
     {
-        #region Private Fields
-
-        private DateTime? expires;
-
-        #endregion
-
         #region Public Fields
 
         /// <summary>
         /// Gets the XML namespace used during token serialization.
         /// </summary>
         public const string XmlNamespace = "http://tastycodes.com/tasty-dll/url-token/";
+
+        #endregion
+
+        #region Private Fields
+
+        private DateTime? expires;
 
         #endregion
 
@@ -47,6 +47,7 @@ namespace Tasty.Web.UrlTokens
             {
                 return (DateTime)(this.expires ?? (this.expires = DateTime.UtcNow.AddHours(this.ExpiryHours)));
             }
+
             set
             {
                 if (value.Kind != DateTimeKind.Utc)

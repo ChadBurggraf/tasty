@@ -12,11 +12,14 @@ namespace Tasty
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
+    using System.Security.Permissions;
 
     /// <summary>
     /// Wraps a <see cref="FileSystemWatcher"/> object to filter and raise
     /// a single event for each path that triggers a rapid series of events.
     /// </summary>
+    [PermissionSetAttribute(SecurityAction.LinkDemand, Name = "FullTrust")]
+    [PermissionSetAttribute(SecurityAction.InheritanceDemand, Name = "FullTrust")]
     public sealed class TastyFileSystemWatcher : IDisposable
     {
         #region Private Fields

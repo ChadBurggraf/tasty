@@ -12,11 +12,15 @@ namespace Tasty.JobService
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Security.Permissions;
     using System.ServiceProcess;
 
     /// <summary>
     /// <see cref="ServiceBase"/> implementation for the Tasty Job Service.
     /// </summary>
+    [PermissionSetAttribute(SecurityAction.InheritanceDemand, Name = "FullTrust")]
+    [HostProtectionAttribute(SecurityAction.LinkDemand, SharedState = true, Synchronization = true, ExternalProcessMgmt = true, SelfAffectingProcessMgmt = true)]
+    [PermissionSetAttribute(SecurityAction.LinkDemand, Name = "FullTrust")]
     public partial class Service : ServiceBase
     {
         #region Private Fields

@@ -21,7 +21,7 @@ namespace Tasty.JobService
         /// </summary>
         public ProjectInstaller()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
     }
 }

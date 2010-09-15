@@ -1,0 +1,37 @@
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="Tasty.Build.S3Publish" AssemblyFile="Tasty.dll"/>
+  <ItemGroup>
+    <S3PublishFiles Include="css\*.css"/>
+    <S3PublishFiles Include="images\*.png"/>
+    <S3PublishFiles Include="script/*.js"/>
+  </ItemGroup>
+  <!-- Fill in the access keys and bucket names to run the MSBuild script tests. -->
+  <Target Name="Build">
+    <S3Publish 
+      AccessKeyId="" 
+      SecretAccessKeyId=""
+      BucketName=""
+      BasePath=".\"
+      Files="@(S3PublishFiles)"
+      Prefix="S3PublishProjTest"
+      UseSsl="false"/> 
+    <S3Publish 
+      AccessKeyId="" 
+      SecretAccessKeyId=""
+      BucketName=""
+      BasePath=".\"
+      Files="$(css\yui-fonts-min.css)"
+      OverwriteExistingPrefix="false"
+      Prefix="S3PublishProjTest"
+      UseSsl="false"/>
+    <S3Publish
+      AccessKeyId=""
+      SecretAccessKeyId=""
+      BucketName=""
+      BasePath=".\"
+      Files="$(css\yui-fonts-min.css)"
+      OverwriteExisting="false"
+      Prefix="S3PublishProjTest"
+      UseSsl="false"/>
+  </Target>
+</Project>

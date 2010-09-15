@@ -1,15 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets" />
-  
-  <!-- 
-    NOTE: At least one debug build must have been performed before this script can be used in order to import 
-    the following tasks. 
-  -->
-
-  <UsingTask TaskName="Tasty.Build.GetVersion" AssemblyFile="$(MSBuildProjectDirectory)\Source\Tasty\bin\Debug\Tasty.dll"/>
-  <UsingTask TaskName="Tasty.Build.SetVersion" AssemblyFile="$(MSBuildProjectDirectory)\Source\Tasty\bin\Debug\Tasty.dll"/>
-  
   <PropertyGroup>
     <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <ConsoleDir>$(MSBuildProjectDirectory)\Source\Tasty.Console</ConsoleDir>
@@ -62,16 +53,5 @@
     <Copy SourceFiles="@(JobServiceFiles)" DestinationFolder="$(BuildDir)\JobService"/>
   </Target>
 
-  <Target Name="GetVersion">
-    <GetVersion AssemblyInfoFile="$(SolutionInfoPath)">
-      <Output TaskParameter="Major" PropertyName="Major"/>
-      <Output TaskParameter="Minor" PropertyName="Minor"/>
-      <Output TaskParameter="Build" PropertyName="Build"/>
-      <Output TaskParameter="Revision" PropertyName="Revision"/>
-    </GetVersion>
-
-    <Math.Add Numbers="$(Revision);1">
-      <Output TaskParameter="Result" PropertyName="IncrementedRevision"/>
-    </Math.Add>
-  </Target>
+  
 </Project>

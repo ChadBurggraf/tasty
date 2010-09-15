@@ -56,7 +56,12 @@ namespace Tasty.Test
         [TestMethod]
         public void S3Publisher_PublishMsBuild()
         {
-            Assert.IsTrue(Engine.GlobalEngine.BuildProjectFile("S3Publish.proj"));
+            const string ProjectFile = "S3Publish.proj";
+
+            if (File.Exists(ProjectFile))
+            {
+                Assert.IsTrue(Engine.GlobalEngine.BuildProjectFile(ProjectFile));
+            }
         }
 
         [TestMethod]

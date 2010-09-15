@@ -15,7 +15,7 @@ namespace Tasty.JobService
     /// <summary>
     /// Represents a collection of <see cref="ApplicationElement"/>s in the configuration.
     /// </summary>
-    public class ApplicationElementCollection : TastyConfigurationElementCollection<ApplicationElement>
+    public class ApplicationElementCollection : ConfigurationElementCollection<ApplicationElement>
     {
         /// <summary>
         /// Gets the element at the given index from the collection.

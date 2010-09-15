@@ -12,6 +12,7 @@ namespace Tasty.Web.UrlTokens
     using System.Runtime.Serialization;
     using System.Text;
     using System.Xml;
+    using Tasty.Configuration;
 
     /// <summary>
     /// Base <see cref="IUrlToken"/> implementation.
@@ -19,6 +20,12 @@ namespace Tasty.Web.UrlTokens
     [DataContract(Namespace = UrlToken.XmlNamespace)]
     public abstract class UrlToken : IUrlToken
     {
+        #region Private Fields
+
+        private DateTime? expires;
+
+        #endregion
+
         #region Public Fields
 
         /// <summary>
@@ -31,10 +38,43 @@ namespace Tasty.Web.UrlTokens
         #region Public Instance Properties
 
         /// <summary>
+        /// Gets or sets a value indicating when the token expires, in UTC.
+        /// </summary>
+        [IgnoreDataMember]
+        public DateTime Expires
+        {
+            get
+            {
+                return (DateTime)(this.expires ?? (this.expires = DateTime.UtcNow.AddHours(this.ExpiryHours)));
+            }
+            set
+            {
+                if (value.Kind != DateTimeKind.Utc)
+                {
+                    throw new ArgumentException("value must be in UTC.", "value");
+                }
+
+                this.expires = value;
+            }
+        }
+
+        /// <summary>
         /// Gets the number of hours from creation the URL token expires in.
         /// </summary>
         [IgnoreDataMember]
-        public abstract int ExpiryHours { get; }
+        public virtual int ExpiryHours
+        {
+            get { return TastySettings.Section.UrlTokens.DefaultExpiryHours; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the token is expired.
+        /// </summary>
+        [IgnoreDataMember]
+        public bool IsExpired
+        {
+            get { return this.Expires > DateTime.UtcNow; }
+        }
 
         #endregion
 
@@ -55,7 +95,7 @@ namespace Tasty.Web.UrlTokens
         /// <returns>The serialized URL token data.</returns>
         public virtual string Serialize()
         {
-            DataContractSerializer serializer = new DataContractSerializer(this.GetType());
+            DataContractSerializer serializer = new DataContractSerializer(GetType());
             StringBuilder sb = new StringBuilder();
 
             using (StringWriter sw = new StringWriter(sb, CultureInfo.InvariantCulture))

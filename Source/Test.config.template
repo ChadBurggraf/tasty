@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Anything left empty or removed will cause related tests to automatically pass. -->
+<configuration>
+  <configSections>
+    <section name="tasty" type="Tasty.Configuration.TastySettings, Tasty"/>
+  </configSections>
+  <appSettings>
+    <add key="PostgresConnectionString" value=""/>
+    <add key="S3AccessKeyId" value=""/>
+    <add key="S3SecretAccessKeyId" value=""/>
+    <!-- All S3 test data will be uploaded here. You should create a bucket specifically for it. -->
+    <add key="S3BucketName" value=""/>
+    <add key="SqlServerConnectionString" value=""/>
+  </appSettings>
+  <tasty>
+    <geocode apiKey=""/>
+  </tasty>
+</configuration>

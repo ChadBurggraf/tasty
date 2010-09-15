@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <configSections>
+    <section name="tasty" type="Tasty.Configuration.TastySettings, Tasty"/>
+  </configSections>
+  <!-- All configuration is optional. Only configure what you're going to use. -->
+  <tasty>
+    <geocode apiKey=""/>
+    <jobs heartbeat="10000" maximumConcurrency="25">
+      <schedules>
+        <add name="Daily" repeatHours="24" startOn="1/1/2010">
+          <scheduledJobs>
+            <add type=""/>
+          </scheduledJobs>
+        </add>
+      </schedules>
+      <store type="Tasty.Jobs.MemoryJobStore, Tasty"/>
+    </jobs>
+    <http>
+      <redirects>
+        <add pattern="" redirectsTo="" redirectType="Temporary"/>
+      </redirects>
+    </http>
+    <!-- serviceModel relates to X509Certificate whitelists. Just kill it all if you're not using them. -->
+    <serviceModel>
+      <!-- All service model certificate references can point to the filesystem or to embedded resources. -->
+      <endpoints>
+        <add contract="" clientCertificatePath="" clientCertificatePassword=""/>
+        <add contract="" clientCertificateResourceName="" clientCertificateResourceType=""/>
+      </endpoints>
+      <services>
+        <add name="" serverCertificatePath="" serverCertificatePassword="">
+          <clientCertificates>
+            <add name="" path="" password=""/>
+            <add nane="" resourceName="" resourceType=""/>
+          </clientCertificates>  
+        </add>
+        <add name="" serverCertificateResourceName="" serverCertificateResourceType="" serverCertificatePassword="">
+          <clientCertificates>
+            <add name="" path="" password=""/>
+            <add nane="" resourceName="" resourceType=""/>
+          </clientCertificates>
+        </add>
+      </services>
+    </serviceModel>
+    <urlTokens defaultExpiryHours="168" storeType="Tasty.Web.UrlTokens.HttpCacheUrlTokenStore, Tasty"/>
+  </tasty>
+</configuration>

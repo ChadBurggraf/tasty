@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="X509CertificateWhiteListValidator.cs" company="Tasty Codes">
-//     Copyright (c) 2010 Tasty Codes.
+//     Copyright (c) 2010 Chad Burggraf.
 //     Adapted from code by Davide Icardi, Copyright (c) Davide Icardi 2007.
 //     The original can be found at http://www.codeproject.com/KB/WCF/wcfcertificates.aspx
 // </copyright>

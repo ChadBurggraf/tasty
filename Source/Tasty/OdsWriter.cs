@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="OdsWriter.cs" company="Tasty Codes">
-//     Copyright (c) 2010 Tasty Codes.
+//     Copyright (c) 2010 Chad Burggraf.
 //     Adapted from code by Josip Kremenic, Copyright (c) Josip Kremenic 2009.
 //     The original can be found at http://www.codeproject.com/KB/office/ReadWriteOds.aspx
 // </copyright>

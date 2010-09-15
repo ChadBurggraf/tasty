@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="LambdaComparer.cs" company="Tasty Codes">
-//     Copyright (c) 2010 Tasty Codes.
+//     Copyright (c) 2010 Chad Burggraf.
 //     TODO: This code is adapted (almost verbatim) from an unknown source.
 //     Please help me find and credit the original author!
 // </copyright>

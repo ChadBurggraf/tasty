@@ -1,6 +1,6 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="ExceptionXElement.cs" company="Tasty Codes">
-//     Copyright (c) 2010 Tasty Codes.
+//     Copyright (c) 2010 Chad Burggraf.
 //     This was inspired from somewhere, but for the life of me I can't
 //     remember where. Credit goes here when I figure it out.
 // </copyright>

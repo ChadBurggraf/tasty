@@ -5,7 +5,7 @@
     <BuildDir>$(MSBuildProjectDirectory)\Build</BuildDir>
     <ConsoleDir>$(MSBuildProjectDirectory)\Source\Tasty.Console</ConsoleDir>
     <ILMergePath>$(MSBuildProjectDirectory)\Tools\ILMerge\ILMerge.exe</ILMergePath>
-    <KeyFile>$(MSBuildProjectDirectory)\Source\SThreeQL.snk</KeyFile>
+    <KeyFile>$(MSBuildProjectDirectory)\Source\Tasty.snk</KeyFile>
     <LibDir>$(MSBuildProjectDirectory)\Lib</LibDir>
     <LibraryDir>$(MSBuildProjectDirectory)\Source\Tasty</LibraryDir>
     <JobServiceDir>$(MSBuildProjectDirectory)\Source\Tasty.JobService</JobServiceDir>

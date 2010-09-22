@@ -1,12 +1,16 @@
 ﻿using System;
+using System.IO;
+using Microsoft.Build.BuildEngine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Web;
+using Tasty.GitHub;
 
 namespace Tasty.Test
 {
     [TestClass]
     public class GitHubTests
     {
+        #region WebhookSamplePayload
+
         private const string WebhookSamplePayload = @"{
           ""before"": ""5aef35982fb2d34e9d9d4502f6ede1072793222d"",
           ""repository"": {
@@ -48,14 +52,30 @@ namespace Tasty.Test
           ""ref"": ""refs/heads/master""
         }";
 
+        #endregion
+
         [TestMethod]
         public void GitHubWebhook_DeSerialize()
         {
-            var hook = GitHubWebhook.DeSerialize(WebhookSamplePayload);
+            var hook = GitHubWebhook.Deserialize(WebhookSamplePayload);
             Assert.IsNotNull(hook);
             Assert.IsFalse(String.IsNullOrEmpty(hook.Repository.Name));
             Assert.IsFalse(String.IsNullOrEmpty(hook.Repository.Owner.Name));
             Assert.AreEqual(2, hook.Commits.Length);
+        }
+
+        [TestMethod]
+        public void GitHubWebhookExecuter_PrepareProject()
+        {
+            Engine engine = new Engine();
+            Project project = new Project(engine);
+            project.Load("GitHubWebHookBefore.proj");
+
+            GitHubWebhookMSBuildExecuter.PrepareProject(project, GitHubWebhook.Deserialize(WebhookSamplePayload));
+            string outputProjectFile = Path.GetRandomFileName();
+            project.Save(outputProjectFile);
+
+            Assert.AreEqual(File.ReadAllText("GitHubWebHookAfter.proj"), File.ReadAllText(outputProjectFile));
         }
     }
 }

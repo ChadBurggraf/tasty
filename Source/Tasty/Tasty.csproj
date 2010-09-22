@@ -45,6 +45,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Lib\Ionic.Zip.Reduced.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Build.Engine" />
     <Reference Include="Microsoft.Build.Framework" />
     <Reference Include="Microsoft.Build.Utilities.v3.5">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -96,6 +97,11 @@
     </Compile>
     <Compile Include="Build\Extensions.cs" />
     <Compile Include="Build\GetVersion.cs" />
+    <Compile Include="Configuration\GitHubElement.cs" />
+    <Compile Include="Configuration\WebhookElement.cs" />
+    <Compile Include="Configuration\WebhookElementCollection.cs" />
+    <Compile Include="GitHub\GitHubWebhookHandler.cs" />
+    <Compile Include="GitHub\GitHubWebhookMSBuildExecuter.cs" />
     <Compile Include="Build\IS3PublisherDelegate.cs" />
     <Compile Include="Build\ISchemaUpgradeDelegate.cs" />
     <Compile Include="Build\S3Publisher.cs" />
@@ -193,10 +199,10 @@
     <Compile Include="SpreadsheetWriter.cs" />
     <Compile Include="TastyFileSystemWatcher.cs" />
     <Compile Include="TastyFileSystemWatcherMode.cs" />
-    <Compile Include="Web\GitHubWebhook.cs" />
-    <Compile Include="Web\GitHubWebhookPerson.cs" />
-    <Compile Include="Web\GitHubWebhookCommit.cs" />
-    <Compile Include="Web\GitHubWebhookRepository.cs" />
+    <Compile Include="GitHub\GitHubWebhook.cs" />
+    <Compile Include="GitHub\GitHubWebhookPerson.cs" />
+    <Compile Include="GitHub\GitHubWebhookCommit.cs" />
+    <Compile Include="GitHub\GitHubWebhookRepository.cs" />
     <Compile Include="Web\QueryStringMergeMode.cs" />
     <Compile Include="Web\UrlTokens\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\UrlTokens\IUrlToken.cs" />

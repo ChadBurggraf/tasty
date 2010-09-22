@@ -1,0 +1,38 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <GitHubAfter>de8251ff97ee194a289832576287d6f8ad74e3d0</GitHubAfter>
+    <GitHubBefore>5aef35982fb2d34e9d9d4502f6ede1072793222d</GitHubBefore>
+    <GitHubRef>refs/heads/master</GitHubRef>
+    <GitHubRepositoryDescription>You're lookin' at it.</GitHubRepositoryDescription>
+    <GitHubRepositoryForks>2</GitHubRepositoryForks>
+    <GitHubRepositoryHomepage>
+    </GitHubRepositoryHomepage>
+    <GitHubRepositoryName>github</GitHubRepositoryName>
+    <GitHubRepositoryOwnerName>defunkt</GitHubRepositoryOwnerName>
+    <GitHubRepositoryOwnerEmail>chris@ozmm.org</GitHubRepositoryOwnerEmail>
+    <GitHubRepositoryPlegie>
+    </GitHubRepositoryPlegie>
+    <GitHubRepositoryPrivate>True</GitHubRepositoryPrivate>
+    <GitHubRepositoryUrl>http://github.com/defunkt/github</GitHubRepositoryUrl>
+    <GitHubRepositoryWatchers>5</GitHubRepositoryWatchers>
+  </PropertyGroup>
+  <ItemGroup>
+    <GitHubCommit Include="http://github.com/defunkt/github/commit/41a212ee83ca127e3c8cf465891ab7216a705f59">
+      <Id>41a212ee83ca127e3c8cf465891ab7216a705f59</Id>
+      <Message>okay i give in</Message>
+      <Timestamp>2008-02-15T14:57:17-08:00</Timestamp>
+      <AuthorName>Chris Wanstrath</AuthorName>
+      <AuthorEmail>chris@ozmm.org</AuthorEmail>
+    </GitHubCommit>
+    <GitHubCommit Include="http://github.com/defunkt/github/commit/de8251ff97ee194a289832576287d6f8ad74e3d0">
+      <Id>de8251ff97ee194a289832576287d6f8ad74e3d0</Id>
+      <Message>update pricing a tad</Message>
+      <Timestamp>2008-02-15T14:36:34-08:00</Timestamp>
+      <AuthorName>Chris Wanstrath</AuthorName>
+      <AuthorEmail>chris@ozmm.org</AuthorEmail>
+    </GitHubCommit>
+  </ItemGroup>
+  <Target Name="Build">
+    <Message Text="$(GitHubRepositoryName)" />
+  </Target>
+</Project>

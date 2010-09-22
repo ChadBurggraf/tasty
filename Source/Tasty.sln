@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 		Templates\Test.config.template = Templates\Test.config.template
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.WebTest", "Tasty.WebTest\Tasty.WebTest.csproj", "{0FB4DF4A-46BE-492C-8035-A8A24F22B23C}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Tasty.vsmdi
@@ -59,6 +61,10 @@ Global
 		{133F9392-34CB-4F7C-817E-79E2C56612D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{133F9392-34CB-4F7C-817E-79E2C56612D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{133F9392-34CB-4F7C-817E-79E2C56612D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FB4DF4A-46BE-492C-8035-A8A24F22B23C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FB4DF4A-46BE-492C-8035-A8A24F22B23C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FB4DF4A-46BE-492C-8035-A8A24F22B23C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FB4DF4A-46BE-492C-8035-A8A24F22B23C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,14 +1,20 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="GitHubWebhookRepository.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace Tasty.Web
+namespace Tasty.GitHub
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
 
     /// <summary>
     /// Represents a repository in a GitHub webhook.
     /// </summary>
     [DataContract]
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class GitHubWebhookRepository
     {
         private string description, homepage, name, pledgie, url;
@@ -64,6 +70,7 @@ namespace Tasty.Web
         /// Gets or sets the repository's pledge ID.
         /// </summary>
         [DataMember(Name = "pledgie")]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "Consistent with the naming used by GitHub.")]
         public string Plegie
         {
             get { return this.pledgie ?? String.Empty; }
@@ -80,6 +87,7 @@ namespace Tasty.Web
         /// Gets or sets the repository's URL.
         /// </summary>
         [DataMember(Name = "url")]
+        [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Meant for serialization.")]
         public string Url
         {
             get { return this.url ?? String.Empty; }

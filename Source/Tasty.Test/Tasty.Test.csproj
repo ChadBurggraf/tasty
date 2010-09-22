@@ -113,6 +113,8 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="generate-test-certs.bat" />
+    <None Include="GitHubWebHookAfter.proj" />
+    <None Include="GitHubWebHookBefore.proj" />
     <None Include="S3Publish.proj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

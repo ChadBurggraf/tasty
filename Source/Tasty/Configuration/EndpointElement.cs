@@ -63,5 +63,14 @@ namespace Tasty.Configuration
             get { return (string)this["contract"]; }
             set { this["contract"] = value; }
         }
+
+        /// <summary>
+        /// Gets a value indicating if the System.Configuration.ConfigurationElement object is read-only.
+        /// </summary>
+        /// <returns>True if the System.Configuration.ConfigurationElement object is read-only, false otherwise.</returns>
+        public override bool IsReadOnly()
+        {
+            return false;
+        }
     }
 }

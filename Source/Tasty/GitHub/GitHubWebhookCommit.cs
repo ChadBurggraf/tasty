@@ -1,8 +1,13 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="GitHubWebhookCommit.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace Tasty.Web
+namespace Tasty.GitHub
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Runtime.Serialization;
 
@@ -10,6 +15,7 @@ namespace Tasty.Web
     /// Represents a commit in a GitHub webhook.
     /// </summary>
     [DataContract]
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class GitHubWebhookCommit
     {
         private string[] added, modified, removed;
@@ -21,6 +27,7 @@ namespace Tasty.Web
         /// Gets or sets the collection of added paths.
         /// </summary>
         [DataMember(Name = "added")]
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Meant for serialization.")]
         public string[] Added
         {
             get { return this.added ?? (this.added = new string[0]); }
@@ -61,6 +68,7 @@ namespace Tasty.Web
         /// Gets or sets the collection of modified paths.
         /// </summary>
         [DataMember(Name = "modified")]
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Meant for serialization.")]
         public string[] Modified
         {
             get { return this.modified ?? (this.modified = new string[0]); }
@@ -71,6 +79,7 @@ namespace Tasty.Web
         /// Gets or sets the collection of removed paths.
         /// </summary>
         [DataMember(Name = "removed")]
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Meant for serialization.")]
         public string[] Removed
         {
             get { return this.removed ?? (this.removed = new string[0]); }
@@ -87,6 +96,7 @@ namespace Tasty.Web
             { 
                 return this.timestamp ?? String.Empty; 
             }
+
             set
             {
                 this.timestamp = value;
@@ -114,9 +124,10 @@ namespace Tasty.Web
         }
 
         /// <summary>
-        /// Gets or set the commit URL.
+        /// Gets or sets the commit URL.
         /// </summary>
         [DataMember(Name = "url")]
+        [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Meant for serialization.")]
         public string Url
         {
             get { return this.url ?? String.Empty; }

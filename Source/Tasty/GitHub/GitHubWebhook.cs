@@ -1,8 +1,13 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="GitHubWebhook.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace Tasty.Web
+namespace Tasty.GitHub
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
@@ -12,13 +17,17 @@ namespace Tasty.Web
     /// Represents a GitHub post-receive webhook.
     /// </summary>
     [DataContract]
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class GitHubWebhook
     {
-        private static Type[] knownTypes = new Type[] {
+        private static Type[] knownTypes = new Type[] 
+        {
             typeof(GitHubWebhookCommit),
             typeof(GitHubWebhookPerson),
             typeof(GitHubWebhookRepository)
         };
+
+        private GitHubWebhookCommit[] commits;
 
         /// <summary>
         /// Gets or sets the commit ID of the ref after the last commit.
@@ -36,10 +45,15 @@ namespace Tasty.Web
         /// Gets or sets the commits that make up the push.
         /// </summary>
         [DataMember(Name = "commits")]
-        public GitHubWebhookCommit[] Commits { get; set; }
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Meant for serialization.")]
+        public GitHubWebhookCommit[] Commits
+        {
+            get { return this.commits ?? (this.commits = new GitHubWebhookCommit[0]); }
+            set { this.commits = value; }
+        }
 
         /// <summary>
-        /// Gets the ref that was pushed.
+        /// Gets or sets the ref that was pushed.
         /// </summary>
         [DataMember(Name = "ref")]
         public string Ref { get; set; }
@@ -55,11 +69,11 @@ namespace Tasty.Web
         /// </summary>
         /// <param name="value">The string value to de-serialize.</param>
         /// <returns>The de-serialized <see cref="GitHubWebhook"/>.</returns>
-        public static GitHubWebhook DeSerialize(string value)
+        public static GitHubWebhook Deserialize(string value)
         {
             using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(value)))
             {
-                return DeSerialize(stream);
+                return Deserialize(stream);
             }
         }
 
@@ -68,7 +82,7 @@ namespace Tasty.Web
         /// </summary>
         /// <param name="stream">The stream to de-serialize.</param>
         /// <returns>The de-serialized <see cref="GitHubWebhook"/>.</returns>
-        public static GitHubWebhook DeSerialize(Stream stream)
+        public static GitHubWebhook Deserialize(Stream stream)
         {
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(GitHubWebhook), knownTypes);
             return (GitHubWebhook)serializer.ReadObject(stream);

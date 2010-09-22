@@ -1,14 +1,20 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="GitHubWebhookPerson.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace Tasty.Web
+namespace Tasty.GitHub
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
 
     /// <summary>
     /// Represents an author in a GitHub webhook.
     /// </summary>
     [DataContract]
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class GitHubWebhookPerson
     {
         private string email, name;

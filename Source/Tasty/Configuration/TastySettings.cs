@@ -37,6 +37,16 @@ namespace Tasty.Configuration
         }
 
         /// <summary>
+        /// Gets the GitHub configuration element.
+        /// </summary>
+        [ConfigurationProperty("gitHub", IsRequired = false)]
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public GitHubElement GitHub
+        {
+            get { return (GitHubElement)(this["gitHub"] ?? (this["gitHub"] = new GitHubElement())); }
+        }
+
+        /// <summary>
         /// Gets the jobs configuration element.
         /// </summary>
         [ConfigurationProperty("jobs", IsRequired = false)]

@@ -72,6 +72,7 @@
     <Compile Include="DataSetsTests.cs" />
     <Compile Include="GeocodeTests.cs" />
     <Compile Include="GetVersionTests.cs" />
+    <Compile Include="GitHubTests.cs" />
     <Compile Include="HttpCacheUrlTokenStoreTests.cs" />
     <Compile Include="HttpTests.cs" />
     <Compile Include="JobRunnerTests.cs" />

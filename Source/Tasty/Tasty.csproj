@@ -193,6 +193,10 @@
     <Compile Include="SpreadsheetWriter.cs" />
     <Compile Include="TastyFileSystemWatcher.cs" />
     <Compile Include="TastyFileSystemWatcherMode.cs" />
+    <Compile Include="Web\GitHubWebhook.cs" />
+    <Compile Include="Web\GitHubWebhookPerson.cs" />
+    <Compile Include="Web\GitHubWebhookCommit.cs" />
+    <Compile Include="Web\GitHubWebhookRepository.cs" />
     <Compile Include="Web\QueryStringMergeMode.cs" />
     <Compile Include="Web\UrlTokens\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\UrlTokens\IUrlToken.cs" />

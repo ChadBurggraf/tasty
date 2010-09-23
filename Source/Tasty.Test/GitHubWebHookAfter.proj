@@ -33,6 +33,6 @@
     </GitHubCommit>
   </ItemGroup>
   <Target Name="Build">
-    <Message Text="$(GitHubRepositoryName)" />
+    <Message Text="Hello, $(GitHubRepositoryName)!"/>
   </Target>
 </Project>

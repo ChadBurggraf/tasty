@@ -65,6 +65,15 @@ namespace Tasty.Test
         }
 
         [TestMethod]
+        public void GitHubWebhookExecuter_Execute()
+        {
+            GitHubWebhookMSBuildExecuter executer = new GitHubWebhookMSBuildExecuter("GitHubWebhookBefore.proj", GitHubWebhook.Deserialize(WebhookSamplePayload));
+            executer.LogFile = Path.GetRandomFileName().WithExtension("log");
+            Assert.IsTrue(executer.Execute());
+            Assert.IsTrue(File.ReadAllText(executer.LogFile).Contains("Hello, github!", StringComparison.Ordinal));
+        }
+
+        [TestMethod]
         public void GitHubWebhookExecuter_PrepareProject()
         {
             Engine engine = new Engine();

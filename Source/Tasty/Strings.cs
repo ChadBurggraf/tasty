@@ -9,6 +9,7 @@ namespace Tasty
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Security.Cryptography;
     using System.Text;
@@ -144,6 +145,45 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Roots the path with the current value of <see cref="Environment.CurrentDirectory"/>, if it is not null or empty and is not already rooted.
+        /// </summary>
+        /// <param name="path">The path to root.</param>
+        /// <returns>The rooted path, or null or empty if the original path was null or empty.</returns>
+        public static string RootPath(this string path)
+        {
+            return RootPath(path, Environment.CurrentDirectory);
+        }
+
+        /// <summary>
+        /// Roots the path with the given path root, if it is not null or empty and is not already rooted.
+        /// </summary>
+        /// <param name="path">The path to root.</param>
+        /// <param name="pathRoot">The rooth path to apply.</param>
+        /// <returns>The rooted path, or null or empty if the original path was null or empty.</returns>
+        public static string RootPath(this string path, string pathRoot)
+        {
+            if (!String.IsNullOrEmpty(path))
+            {
+                if (!Path.IsPathRooted(path))
+                {
+                    if (String.IsNullOrEmpty(pathRoot))
+                    {
+                        throw new ArgumentNullException("pathRoot", "pathRoot must contain a value.");
+                    }
+
+                    if (!Path.IsPathRooted(pathRoot))
+                    {
+                        throw new ArgumentException("pathRoot must be a rooted path.", "pathRoot");
+                    }
+
+                    path = Path.Combine(pathRoot, path);
+                }
+            }
+
+            return path;
+        }
+
+        /// <summary>
         /// Splits the given string on the given character, removing any empty 
         /// results and trimming whitespace around the rest of the results.
         /// </summary>
@@ -267,13 +307,21 @@ namespace Tasty
         }
 
         /// <summary>
-        /// Gets a URL-friendly index name from the given name.
+        /// Replaces the file extension on the path with the given extension. If no file extension
+        /// exists on the given path, then appends the given extension.
         /// </summary>
-        /// <param name="name">The name to escape.</param>
-        /// <returns>The escaped name.</returns>
-        public static string ToIndexName(this string name)
+        /// <param name="path">The path to replace the extension of.</param>
+        /// <param name="extension">The file extension to set, without a "."</param>
+        /// <returns>The updated path.</returns>
+        public static string WithExtension(this string path, string extension)
         {
-            return Regex.Replace(Regex.Replace(name, @"[^0-9a-z]", " ", RegexOptions.IgnoreCase).Trim(), @"\s+", "-");
+            if (!String.IsNullOrEmpty(path))
+            {
+                string ext = Path.GetExtension(path);
+                path = String.Concat(path.Substring(0, path.Length - ext.Length), ".", extension);
+            }
+
+            return path;
         }
 
         /// <summary>

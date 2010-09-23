@@ -11,6 +11,7 @@ namespace Tasty.GitHub
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using System.Web;
     using Tasty.Configuration;
 
@@ -60,17 +61,18 @@ namespace Tasty.GitHub
 
                             if (pass)
                             {
-                                string path = element.ProjectFile;
-
-                                if (!Path.IsPathRooted(path))
+                                // Spawn this because MSBuild will warn about MTA aparment state, plus
+                                // the script might run for a while.
+                                Thread thread = new Thread(new ParameterizedThreadStart(delegate(object state)
                                 {
-                                    string directory = Path.GetDirectoryName(TastySettings.Section.ElementInformation.Source);
-                                    path = Path.Combine(directory, path);
-                                }
+                                    string projectFile = element.ProjectFile.RootPath(Path.GetDirectoryName(TastySettings.Section.ElementInformation.Source));
+                                    GitHubWebhookMSBuildExecuter executer = new GitHubWebhookMSBuildExecuter(projectFile, hook);
+                                    executer.SetTargets(element.Targets);
+                                    executer.Execute();
+                                }));
 
-                                GitHubWebhookMSBuildExecuter executer = new GitHubWebhookMSBuildExecuter(path, hook);
-                                executer.SetTargets(element.Targets);
-                                executer.Execute();
+                                thread.SetApartmentState(ApartmentState.STA);
+                                thread.Start();
                             }
                         }
                     }

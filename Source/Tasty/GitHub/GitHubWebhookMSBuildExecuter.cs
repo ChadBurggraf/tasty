@@ -22,6 +22,7 @@ namespace Tasty.GitHub
     [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class GitHubWebhookMSBuildExecuter
     {
+        private string logFile;
         private StringCollection targets;
 
         /// <summary>
@@ -35,6 +36,8 @@ namespace Tasty.GitHub
             {
                 throw new ArgumentNullException("projectFile", "projectFile must contain a value.");
             }
+
+            projectFile = projectFile.RootPath();
 
             if (!File.Exists(projectFile))
             {
@@ -54,6 +57,22 @@ namespace Tasty.GitHub
         /// Gets the <see cref="GitHubWebhook"/> properties and items are being injected from.
         /// </summary>
         public GitHubWebhook Hook { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the path to log MSBuild output to, if desired.
+        /// </summary>
+        public string LogFile
+        {
+            get 
+            { 
+                return this.logFile ?? String.Empty; 
+            }
+
+            set
+            {
+                this.logFile = (value ?? String.Empty).RootPath();
+            }
+        }
 
         /// <summary>
         /// Gets the path of the MSBuild project file being executed.
@@ -109,22 +128,42 @@ namespace Tasty.GitHub
         /// <returns>True if the project executed successfully, false otherwise.</returns>
         public bool Execute()
         {
-            Environment.CurrentDirectory = Path.GetDirectoryName(this.ProjectFile);
-
             Engine engine = new Engine();
-            Project project = new Project(engine);
-            project.Load(this.ProjectFile);
+            bool success = false;
+            string currentDir = Environment.CurrentDirectory;
 
-            PrepareProject(project, this.Hook);
-
-            string[] targets = null;
-
-            if (this.Targets.Count > 0)
+            try
             {
-                targets = this.Targets.Cast<string>().ToArray();
+                Environment.CurrentDirectory = Path.GetDirectoryName(this.ProjectFile);
+
+                if (!String.IsNullOrEmpty(this.LogFile))
+                {
+                    FileLogger logger = new FileLogger();
+                    logger.Parameters = String.Concat("logfile=", this.LogFile);
+                    engine.RegisterLogger(logger);
+                }
+
+                Project project = new Project(engine);
+                project.Load(this.ProjectFile);
+
+                PrepareProject(project, this.Hook);
+
+                string[] targets = null;
+
+                if (this.Targets.Count > 0)
+                {
+                    targets = this.Targets.Cast<string>().ToArray();
+                }
+
+                success = project.Build(targets);
+            }
+            finally
+            {
+                engine.UnregisterAllLoggers();
+                Environment.CurrentDirectory = currentDir;
             }
 
-            return project.Build(targets);
+            return success;
         }
 
         /// <summary>

@@ -16,6 +16,12 @@
       </schedules>
       <store type="Tasty.Jobs.MemoryJobStore, Tasty"/>
     </jobs>
+    <gitHub>
+      <webhooks>
+        <!-- Add each repository you want the GitHubWebhook handler to respond to. projectFile is relative to this file, if not rooted. -->
+        <add repository="" projectFile=""/>
+      </webhooks>
+    </gitHub>
     <http>
       <redirects>
         <add pattern="" redirectsTo="" redirectType="Temporary"/>

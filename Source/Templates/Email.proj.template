@@ -1,0 +1,29 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="Tasty.Build.Email" AssemblyFile="Tasty.dll"/>
+  <PropertyGroup>
+    <From></From>
+    <FromName></FromName>
+    <Password></Password>
+    <Port></Port>
+    <SmtpServer></SmtpServer>
+    <Username></Username>
+    <UseSsl></UseSsl>
+  </PropertyGroup>
+  <ItemGroup>
+    <To Include=""/>
+    <To Include=""/>
+  </ItemGroup>
+  <Target Name="Build">
+    <Email
+      From="$(From)"
+      FromName="$(FromName)"
+      To="@(To)"
+      Subject="Hello, world! From the Tasty Email Task."
+      Body="Rockin' good news, baby."
+      SmtpServer="$(SmtpServer)"
+      Port="$(Port)"
+      Username="$(Username)"
+      Password="$(Password)"
+      UseSsl="$(UseSsl)"/>
+  </Target>
+</Project>

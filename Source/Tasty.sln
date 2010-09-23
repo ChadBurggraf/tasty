@@ -24,6 +24,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{5890438D-C5F7-4EC3-B878-5875926C985A}"
 	ProjectSection(SolutionItems) = preProject
 		Templates\App.config.template = Templates\App.config.template
+		Templates\Email.proj.template = Templates\Email.proj.template
 		Templates\JobService.config.template = Templates\JobService.config.template
 		Templates\S3Publish.proj.template = Templates\S3Publish.proj.template
 		Templates\Test.config.template = Templates\Test.config.template

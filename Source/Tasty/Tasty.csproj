@@ -95,6 +95,7 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
+    <Compile Include="Build\Email.cs" />
     <Compile Include="Build\Extensions.cs" />
     <Compile Include="Build\GetVersion.cs" />
     <Compile Include="Configuration\GitHubElement.cs" />

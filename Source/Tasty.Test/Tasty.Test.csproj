@@ -70,6 +70,7 @@
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="DataSetsTests.cs" />
+    <Compile Include="EmailTaskTests.cs" />
     <Compile Include="GeocodeTests.cs" />
     <Compile Include="GetVersionTests.cs" />
     <Compile Include="GitHubTests.cs" />
@@ -112,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Email.proj" />
     <None Include="generate-test-certs.bat" />
     <None Include="GitHubWebHookAfter.proj" />
     <None Include="GitHubWebHookBefore.proj" />

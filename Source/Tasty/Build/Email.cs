@@ -152,12 +152,15 @@ namespace Tasty.Build
                 message.Body = this.Body;
                 message.IsBodyHtml = this.IsHtml;
 
+                Log.LogMessage("Sending email to {0} recipients...", this.To.Length);
+
                 foreach (var to in this.To)
                 {
                     message.To.Clear();
                     message.To.Add(to.ItemSpec);
                     client.Send(message);
                     sentEmails.Add(to.ItemSpec);
+                    Log.LogMessage("Email sent to {0}.", to.ItemSpec);
                 }
             }
 

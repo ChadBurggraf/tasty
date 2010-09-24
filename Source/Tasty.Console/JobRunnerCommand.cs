@@ -408,7 +408,7 @@ namespace Tasty.Console
                     this.bootstaps.PullUp();
 
                     this.pullUpFailCount = 0;
-                    StandardOut.WriteLine("The tasty job runner is active.\nPress Q+Enter to safely shut down, Ctl+C to exit immediately.\n");
+                    this.logger.Info("The tasty job runner is active.\nPress Q+Enter to safely shut down, Ctl+C to exit immediately.");
                 }
                 catch (Exception ex)
                 {

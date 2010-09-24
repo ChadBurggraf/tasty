@@ -49,7 +49,7 @@
     <Copy SourceFiles="$(MSBuildProjectDirectory)\Source\Templates\App.config.template" DestinationFiles="$(BuildDir)\Library\App.config"/>
 
     <ItemGroup>
-      <ConsoleFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.dll"/>
+      <ConsoleFiles Include="$(BuildDir)\Library\Tasty.dll"/>
       <ConsoleFiles Include="$(LibDir)\AWSSDK.dll"/>
       <ConsoleFiles Include="$(LibDir)\DocumentFormat.OpenXml.dll"/>
     </ItemGroup>
@@ -58,7 +58,8 @@
     <Copy SourceFiles="$(SqlServerDir)\bin\$(Configuration)\Tasty.SqlServer.dll" DestinationFolder="$(BuildDir)\SqlServer"/>
 
     <ItemGroup>
-      <JobServiceFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.dll"/>
+      <JobServiceFiles Include="$(BuildDir)\Library\Tasty.dll"/>
+      <JobServiceFiles Include="$(BuildDir)\Console\TastyConsole.exe"/>
       <JobServiceFiles Include="$(JobServiceDir)\bin\$(Configuration)\TastyJobService.exe"/>
       <JobServiceFiles Include="$(JobServiceDir)\bin\$(Configuration)\TastyJobService.exe.config"/>
     </ItemGroup>

@@ -29,11 +29,11 @@ namespace Tasty.JobService
         /// <summary>
         /// Gets or sets the path of the target application to run jobs for.
         /// </summary>
-        [ConfigurationProperty("directory", IsRequired = true)]
-        public string Directory
+        [ConfigurationProperty("binDirectory", IsRequired = true)]
+        public string BinDirectory
         {
-            get { return (string)this["directory"]; }
-            set { this["directory"] = value; }
+            get { return (string)this["binDirectory"]; }
+            set { this["binDirectory"] = value; }
         }
 
         /// <summary>

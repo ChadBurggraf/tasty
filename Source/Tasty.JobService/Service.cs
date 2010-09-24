@@ -136,7 +136,7 @@ namespace Tasty.JobService
                         Arguments = String.Format(
                             CultureInfo.InvariantCulture,
                             @"jobs -d ""{0}"" -c ""{1}"" -l",
-                            appElement.Directory,
+                            appElement.BinDirectory,
                             appElement.CfgFile)
                     }
                 };

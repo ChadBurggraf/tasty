@@ -8,5 +8,6 @@ bin
 obj
 TestResults
 Build
+!Source/Tasty/Build
 Source/Tasty.Test/Email.proj
 Source/Tasty.Test/S3Publish.proj

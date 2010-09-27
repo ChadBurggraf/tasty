@@ -267,6 +267,46 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Formats the given <see cref="TimeSpan"/> into a pretty time string.
+        /// Example: 3d 6h or 4h 36m or 12m 17s or 2.8s
+        /// </summary>
+        /// <param name="timeSpan">The <see cref="TimeSpan"/> to format.</param>
+        /// <returns>The format result.</returns>
+        public static string ToPrettyString(this TimeSpan timeSpan)
+        {
+            string result = String.Empty;
+
+            if (timeSpan.TotalDays >= 1)
+            {
+                result += timeSpan.Days.ToString(CultureInfo.InvariantCulture) + "d";
+            }
+
+            if (timeSpan.TotalHours >= 1)
+            {
+                result += " " + timeSpan.Hours.ToString(CultureInfo.InvariantCulture) + "h";
+            }
+
+            if (timeSpan.TotalMinutes >= 1 && timeSpan.TotalDays < 1)
+            {
+                result += " " + timeSpan.Minutes.ToString(CultureInfo.InvariantCulture) + "m";
+            }
+
+            if ((timeSpan.TotalSeconds >= 1 && timeSpan.TotalHours < 1) || timeSpan.TotalMinutes < 1)
+            {
+                result += " " + timeSpan.Seconds.ToString(CultureInfo.InvariantCulture);
+                
+                if (timeSpan.TotalMinutes < 1)
+                {
+                    result += "." + ((int)(timeSpan.Milliseconds / 100)).ToString(CultureInfo.InvariantCulture);
+                }
+
+                result += "s";
+            }
+
+            return result.Trim();
+        }
+
+        /// <summary>
         /// Gets the spreadhseet column name (i.e., A or AB or EF) for the given column number.
         /// </summary>
         /// <param name="columnNumber">The column number (the first column is 1, not 0).</param>

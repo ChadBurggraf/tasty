@@ -21,6 +21,25 @@ namespace Tasty.Test
             Assert.AreEqual(source1.Number, dest1.Number);
             Assert.AreEqual(source1.Date, dest1.Date);
         }
+
+        [TestMethod]
+        public void Utility_ToPrettyTime()
+        {
+            TimeSpan timeSpan = new TimeSpan(3, 6, 27, 38);
+            Assert.AreEqual("3d 6h", timeSpan.ToPrettyString());
+
+            timeSpan = new TimeSpan(0, 4, 36, 59, 875);
+            Assert.AreEqual("4h 36m", timeSpan.ToPrettyString());
+
+            timeSpan = new TimeSpan(0, 0, 12, 17, 0);
+            Assert.AreEqual("12m 17s", timeSpan.ToPrettyString());
+
+            timeSpan = new TimeSpan(0, 0, 0, 2, 850);
+            Assert.AreEqual("2.8s", timeSpan.ToPrettyString());
+            
+            timeSpan = new TimeSpan(0, 0, 0, 0, 300);
+            Assert.AreEqual("0.3s", timeSpan.ToPrettyString());
+        }
     }
 
     internal class CopyPropertiesTest

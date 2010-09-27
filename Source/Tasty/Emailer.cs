@@ -18,17 +18,17 @@ namespace Tasty
     /// <summary>
     /// Sends emails based on <see cref="MailModel"/>s and <see cref="MailTemplate"/>s.
     /// </summary>
-    public class Email
+    public class Emailer
     {
         private MailTemplate template;
         private int? port;
         private int sent;
 
         /// <summary>
-        /// Initializes a new instance of the Email class.
+        /// Initializes a new instance of the Emailer class.
         /// </summary>
         /// <param name="template">The <see cref="MailTemplate"/> to use when processing the email(s).</param>
-        public Email(MailTemplate template)
+        public Emailer(MailTemplate template)
         {
             if (template == null)
             {
@@ -143,6 +143,8 @@ namespace Tasty
                 foreach (string to in this.To)
                 {
                     model.Email = to;
+                    message.To.Clear();
+                    message.To.Add(to);
                     message.Body = this.template.Transform(model);
                     client.Send(message);
 
@@ -269,6 +271,7 @@ namespace Tasty
 
             message.From = new MailAddress(this.From, this.FromDisplayName);
             message.Subject = this.Subject;
+            message.IsBodyHtml = true;
 
             return message;
         }

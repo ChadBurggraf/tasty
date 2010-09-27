@@ -9,7 +9,7 @@ namespace Tasty
     using System;
 
     /// <summary>
-    /// Event arguments for <see cref="Email.Sent"/> events.
+    /// Event arguments for <see cref="Emailer.Sent"/> events.
     /// </summary>
     public class EmailSentEventArgs : EventArgs
     {

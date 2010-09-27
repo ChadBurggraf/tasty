@@ -101,7 +101,7 @@
     <Compile Include="Configuration\GitHubElement.cs" />
     <Compile Include="Configuration\WebhookElement.cs" />
     <Compile Include="Configuration\WebhookElementCollection.cs" />
-    <Compile Include="Email.cs" />
+    <Compile Include="Emailer.cs" />
     <Compile Include="EmailSentEventArgs.cs" />
     <Compile Include="GitHub\GitHubWebhookHandler.cs" />
     <Compile Include="GitHub\GitHubWebhookMSBuildExecuter.cs" />

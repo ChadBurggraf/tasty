@@ -52,7 +52,7 @@ namespace Tasty.Console
             {
                 System.Console.Error.Write("Tasty: ");
                 System.Console.Error.WriteLine(ex.Message);
-                System.Console.Error.WriteLine("Try 'Tasty --help' for more information.");
+                System.Console.Error.WriteLine("Try 'TastyConsole --help' for more information.");
                 return 1;
             }
 
@@ -83,9 +83,9 @@ namespace Tasty.Console
         /// <param name="output">The output stream to write the help message to.</param>
         private static void Help(OptionSet options, TextWriter output)
         {
-            output.WriteLine("Usage: tasty command [COMMAND_ARGUMENTS]+");
+            output.WriteLine("Usage: TastyConsole command [COMMAND_ARGUMENTS]+");
             output.WriteLine("Executes one of the available Tasty.dll command actions.");
-            output.WriteLine("Use 'Tasty command -man' to show the manual for any command listed below.");
+            output.WriteLine("Use 'TastyConsole command --man' to show the manual for any command listed below.");
             output.WriteLine();
             output.WriteLine("Commands:");
             output.WriteLine("  sql-install                a SQL install script generator.");

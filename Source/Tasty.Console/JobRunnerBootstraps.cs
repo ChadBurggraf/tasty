@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Tasty.Jobs
+namespace Tasty.Console
 {
     using System;
     using System.Collections.Generic;
@@ -14,6 +14,7 @@ namespace Tasty.Jobs
     using System.Reflection;
     using System.Security.Permissions;
     using System.Security.Policy;
+    using Tasty.Jobs;
 
     /// <summary>
     /// Provides bootup and teardown services for a <see cref="JobRunner"/>.

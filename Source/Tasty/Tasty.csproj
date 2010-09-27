@@ -140,7 +140,6 @@
     <Compile Include="Jobs\IJobStore.cs" />
     <Compile Include="Jobs\IJobStoreTransaction.cs" />
     <Compile Include="Jobs\Job.cs" />
-    <Compile Include="Jobs\JobRunnerBootstraps.cs" />
     <Compile Include="Jobs\JobErrorEventArgs.cs" />
     <Compile Include="Jobs\JobRecord.cs" />
     <Compile Include="Jobs\JobRecordEventArgs.cs" />

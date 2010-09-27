@@ -135,9 +135,10 @@ namespace Tasty.JobService
                         FileName = exePath,
                         Arguments = String.Format(
                             CultureInfo.InvariantCulture,
-                            @"jobs -d ""{0}"" -c ""{1}"" -l",
+                            @"jobs -d ""{0}"" -c ""{1}"" -l -p ""{2}""",
                             appElement.BinDirectory,
-                            appElement.CfgFile)
+                            appElement.CfgFile,
+                            appElement.LogFile)
                     }
                 };
             }

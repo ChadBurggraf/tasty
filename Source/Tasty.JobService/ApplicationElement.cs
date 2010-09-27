@@ -37,6 +37,16 @@ namespace Tasty.JobService
         }
 
         /// <summary>
+        /// Gets or sets the path override to use for the log file, if overriding is desired.
+        /// </summary>
+        [ConfigurationProperty("logFile", IsRequired = false)]
+        public string LogFile
+        {
+            get { return (string)this["logFile"]; }
+            set { this["logFile"] = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the display/reference name of the target application to run jobs for.
         /// </summary>
         [ConfigurationProperty("name", IsRequired = true, IsKey = true)]

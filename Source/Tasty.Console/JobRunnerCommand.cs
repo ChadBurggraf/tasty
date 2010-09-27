@@ -79,7 +79,7 @@ namespace Tasty.Console
         /// <returns>A value indicating whether the command completed successfully.</returns>
         public override bool Execute()
         {
-            string config = null, directory = null;
+            string config = null, directory = null, logPath = null;
             int enableLogging = 0, verbose = 0, man = 0;
 
             var options = new OptionSet()
@@ -88,6 +88,7 @@ namespace Tasty.Console
                 { "c|config=", "(required) the path to a configuration file to use.", v => config = v },
                 { "v|verbose", "write session output to the console.", v => { ++verbose; } },
                 { "l|log", "enable logging to a file.", v => { ++enableLogging; } },
+                { "p|path=", "the path to the log file, if overriding is desired.", v => logPath = v },
                 { "m|man", "show this message", v => { ++man; } }
             };
 
@@ -95,8 +96,9 @@ namespace Tasty.Console
             {
                 options.Parse(this.InputArgs());
 
-                directory = Regex.Replace(directory, PathQuotesExp, "$1");
-                config = Regex.Replace(config, PathQuotesExp, "$1");
+                directory = Regex.Replace(directory ?? String.Empty, PathQuotesExp, "$1");
+                config = Regex.Replace(config ?? String.Empty, PathQuotesExp, "$1");
+                logPath = Regex.Replace(logPath ?? String.Empty, PathQuotesExp, "$1");
             }
             catch (OptionException ex)
             {
@@ -141,7 +143,7 @@ namespace Tasty.Console
             this.config = config;
             this.autoReload = true;
             this.exitHandle = new ManualResetEvent(false);
-            this.logger = this.ConfigureAndGetLogger(verbose > 0, enableLogging > 0);
+            this.logger = this.ConfigureAndGetLogger(verbose > 0, enableLogging > 0, logPath);
 
             this.CreateAndPullUpBootstraps();
 
@@ -195,8 +197,8 @@ namespace Tasty.Console
         /// <param name="options">The option set to use when generating the help message.</param>
         protected override void Help(OptionSet options)
         {
-            StandardOut.WriteLine("Usage: tasty jobs -d:APPLICATION_DIRECTORY -c:CONFIG_PATH [OPTIONS]+");
-            StandardOut.WriteLine("Starts a tasty job runner session and executes jobs until the process is ended. You must provide an application directory that contains a copy of Tasty.dll, along with your job assemblies and a configuration file for the job runner to use.");
+            StandardOut.WriteLine("Usage: TastyConsole jobs -d:APPLICATION_DIRECTORY -c:CONFIG_PATH [OPTIONS]+");
+            StandardOut.WriteLine("Starts a tasty job runner session and executes jobs until the process is ended. You must provide an application directory that contains a copy of Tasty.dll along with your job assemblies, and a configuration file for the job runner to use.");
             StandardOut.WriteLine();
 
             base.Help(options);
@@ -325,8 +327,9 @@ namespace Tasty.Console
         /// </summary>
         /// <param name="outputToConsole">A value indicating whether to output to the console.</param>
         /// <param name="outputToFile">A value indicating whether to output to a log file.</param>
+        /// <param name="logPath">The path to the log file, of overriding is desired.</param>
         /// <returns>The configured logger instance.</returns>
-        private ILog ConfigureAndGetLogger(bool outputToConsole, bool outputToFile)
+        private ILog ConfigureAndGetLogger(bool outputToConsole, bool outputToFile, string logPath)
         {
             Hierarchy hierarchy = (Hierarchy)LogManager.GetRepository();
 
@@ -363,6 +366,18 @@ namespace Tasty.Console
 
             if (outputToFile)
             {
+                if (!String.IsNullOrEmpty(logPath))
+                {
+                    if (!Path.IsPathRooted(logPath))
+                    {
+                        logPath = Path.Combine(Environment.CurrentDirectory, logPath);
+                    }
+                }
+                else
+                {
+                    logPath = Path.Combine(this.directory, "tasty-jobs.log");
+                }
+
                 RollingFileAppender roller = new RollingFileAppender();
                 roller.Layout = layout;
                 roller.AppendToFile = true;
@@ -370,7 +385,7 @@ namespace Tasty.Console
                 roller.MaxSizeRollBackups = 10;
                 roller.MaximumFileSize = "1MB";
                 roller.StaticLogFileName = true;
-                roller.File = Path.Combine(this.directory, "tasty-jobs-log.txt");
+                roller.File = Path.GetFullPath(logPath);
                 roller.ActivateOptions();
                 hierarchy.Root.AddAppender(roller);
             }

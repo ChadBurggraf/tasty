@@ -58,6 +58,7 @@
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="ConsoleCommand.cs" />
+    <Compile Include="JobRunnerBootstraps.cs" />
     <Compile Include="JobRunnerCommand.cs" />
     <Compile Include="TastyConsole.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

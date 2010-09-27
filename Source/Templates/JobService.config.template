@@ -5,8 +5,9 @@
   </configSections>
   <tastyJobService>
     <!-- Add the bin path and configuration file path for each application you want the job service to run jobs for. -->
+    <!-- logPath is optional, and will default to a file within the given binDirectory if not specified. -->
     <applications>
-      <add name="" binDirectory="" cfgFile=""/>
+      <add name="" binDirectory="" cfgFile="" logPath=""/>
     </applications>
   </tastyJobService>
 </configuration>

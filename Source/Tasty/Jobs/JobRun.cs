@@ -42,6 +42,18 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
+        /// Initializes a new instance of the JobRun class.
+        /// </summary>
+        /// <param name="jobId">The ID of the job to run.</param>
+        /// <param name="job">The job to run.</param>
+        /// <param name="scheduleName">The name of the schedule to run the job for.</param>
+        public JobRun(int jobId, IJob job, string scheduleName)
+            : this(jobId, job)
+        {
+            this.ScheduleName = scheduleName;
+        }
+
+        /// <summary>
         /// Event fired when the job run has finished.
         /// </summary>
         public event EventHandler<JobRunEventArgs> Finished;
@@ -75,6 +87,12 @@ namespace Tasty.Jobs
         /// </summary>
         [DataMember]
         public int JobId { get; private set; }
+
+        /// <summary>
+        /// Gets the name of the schedule the job run is executing for.
+        /// </summary>
+        [DataMember]
+        public string ScheduleName { get; private set; }
 
         /// <summary>
         /// Gets the date the job was started, if applicable.

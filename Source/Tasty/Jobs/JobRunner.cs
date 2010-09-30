@@ -547,41 +547,49 @@ namespace Tasty.Jobs
                         {
                             JobRecord record = ScheduledJob.CreateRecord(tuple.Schedule, tuple.ScheduledJob, now);
 
-                            IJob job = null;
-                            Exception toJobEx = null;
+                            bool isRunning = 0 < (from r in this.runs.GetAll()
+                                                  where tuple.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
+                                                        tuple.ScheduledJob.JobType.StartsWith(record.JobType, StringComparison.OrdinalIgnoreCase)
+                                                  select r).Count();
 
-                            try
+                            if (!isRunning)
                             {
-                                job = ScheduledJob.CreateFromConfiguration(tuple.ScheduledJob);
-                            }
-                            catch (ConfigurationErrorsException ex)
-                            {
-                                toJobEx = ex;
-                                this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
-                            }
+                                IJob job = null;
+                                Exception toJobEx = null;
 
-                            if (job != null)
-                            {
-                                record.Name = job.Name;
-                                record.JobType = JobRecord.JobTypeString(job);
-                                record.Data = job.Serialize();
-                                this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
+                                try
+                                {
+                                    job = ScheduledJob.CreateFromConfiguration(tuple.ScheduledJob);
+                                }
+                                catch (ConfigurationErrorsException ex)
+                                {
+                                    toJobEx = ex;
+                                    this.RaiseEvent(this.Error, new JobErrorEventArgs(record, toJobEx));
+                                }
 
-                                JobRun run = new JobRun(record.Id.Value, job);
-                                run.Finished += new EventHandler<JobRunEventArgs>(this.JobRunFinished);
-                                this.runs.Add(run);
+                                if (job != null)
+                                {
+                                    record.Name = job.Name;
+                                    record.JobType = JobRecord.JobTypeString(job);
+                                    record.Data = job.Serialize();
+                                    this.store.SaveJob(record); // Save out of transaction to ensure it is peristed immediately.
 
-                                run.Start();
+                                    JobRun run = new JobRun(record.Id.Value, job);
+                                    run.Finished += new EventHandler<JobRunEventArgs>(this.JobRunFinished);
+                                    this.runs.Add(run);
+
+                                    run.Start();
+                                }
+                                else
+                                {
+                                    record.Status = JobStatus.FailedToLoadType;
+                                    record.FinishDate = now;
+                                    record.Exception = new ExceptionXElement(toJobEx).ToString();
+                                }
+
+                                trans.AddForSave(record);
+                                this.RaiseEvent(this.ExecuteScheduledJob, new JobRecordEventArgs(record));
                             }
-                            else
-                            {
-                                record.Status = JobStatus.FailedToLoadType;
-                                record.FinishDate = now;
-                                record.Exception = new ExceptionXElement(toJobEx).ToString();
-                            }
-
-                            trans.AddForSave(record);
-                            this.RaiseEvent(this.ExecuteScheduledJob, new JobRecordEventArgs(record));
                         }
 
                         this.runs.Flush();

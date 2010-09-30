@@ -39,5 +39,11 @@ namespace Tasty.Web.UrlTokens
         /// </summary>
         /// <returns>The serialized URL token data.</returns>
         string Serialize();
+
+        /// <summary>
+        /// Creates a <see cref="UrlTokenRecord"/> from this instance.
+        /// </summary>
+        /// <returns>A <see cref="UrlTokenRecord"/> representing this instance.</returns>
+        UrlTokenRecord ToUrlTokenRecord();
     }
 }

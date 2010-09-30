@@ -77,18 +77,10 @@ namespace Tasty.Web.UrlTokens
                 throw new InvalidOperationException("Url must be set to a value.");
             }
 
-            string key = token.GenerateKey();
+            UrlTokenRecord record = token.ToUrlTokenRecord();
+            tokenStore.CreateUrlToken(record);
 
-            tokenStore.CreateUrlToken(new UrlTokenRecord()
-            {
-                Created = DateTime.UtcNow,
-                Data = token.Serialize(),
-                Expires = DateTime.UtcNow.AddHours(token.ExpiryHours),
-                Key = key,
-                TokenType = token.GetType()
-            });
-
-            return this.Url.SetQueryValue(this.QueryStringKey, key);
+            return this.Url.SetQueryValue(this.QueryStringKey, record.Key);
         }
     }
 }

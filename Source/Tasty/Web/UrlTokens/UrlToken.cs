@@ -74,7 +74,7 @@ namespace Tasty.Web.UrlTokens
         [IgnoreDataMember]
         public bool IsExpired
         {
-            get { return this.Expires > DateTime.UtcNow; }
+            get { return this.Expires < DateTime.UtcNow; }
         }
 
         #endregion
@@ -108,6 +108,22 @@ namespace Tasty.Web.UrlTokens
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="UrlTokenRecord"/> from this instance.
+        /// </summary>
+        /// <returns>A <see cref="UrlTokenRecord"/> representing this instance.</returns>
+        public virtual UrlTokenRecord ToUrlTokenRecord()
+        {
+            return new UrlTokenRecord()
+            {
+                Created = DateTime.UtcNow,
+                Data = this.Serialize(),
+                Expires = this.Expires,
+                Key = this.GenerateKey(),
+                TokenType = GetType()
+            };
         }
 
         #endregion

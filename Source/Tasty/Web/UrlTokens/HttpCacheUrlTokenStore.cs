@@ -96,8 +96,6 @@ namespace Tasty.Web.UrlTokens
                 dict[record.Key] = new UrlTokenRecord(record);
                 SaveDictionary(dict);
             }
-
-            this.CleanExpiredUrlTokens();
         }
 
         /// <summary>

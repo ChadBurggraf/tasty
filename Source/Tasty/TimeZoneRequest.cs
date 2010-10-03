@@ -96,7 +96,7 @@ namespace Tasty
         {
             TimeZoneRequest request = new TimeZoneRequest(latitude, longitude);
             TimeZoneResponse response = request.GetResponse();
-            
+
             return new TimeZoneCallResult()
             {
                 Status = response.Status,
@@ -114,11 +114,7 @@ namespace Tasty
             if (this.response == null)
             {
                 WebRequest request = WebRequest.Create(this.RequestUri);
-                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-
-                this.response = response.StatusCode == HttpStatusCode.OK ?
-                    TimeZoneResponse.FromXml(response.GetResponseStream()) :
-                    new TimeZoneResponse();
+                this.response = CreateResponse((HttpWebResponse)request.GetResponse());
             }
 
             return this.response;
@@ -137,12 +133,7 @@ namespace Tasty
                 request.BeginGetResponse(
                     delegate(IAsyncResult result)
                     {
-                        HttpWebResponse response = (HttpWebResponse)request.EndGetResponse(result);
-
-                        this.response = response.StatusCode == HttpStatusCode.OK ?
-                            TimeZoneResponse.FromXml(response.GetResponseStream()) :
-                            new TimeZoneResponse();
-
+                        this.response = CreateResponse((HttpWebResponse)request.EndGetResponse(result));
                         callback(this.response);
                     },
                     null);
@@ -151,6 +142,25 @@ namespace Tasty
             {
                 callback(this.response);
             }
+        }
+
+        /// <summary>
+        /// Creates a <see cref="TimeZoneResponse"/> from the given <see cref="HttpWebResponse"/>.
+        /// </summary>
+        /// <param name="webResponse">The web response to create the time zone response from.</param>
+        /// <returns>The created time zone response.</returns>
+        private static TimeZoneResponse CreateResponse(HttpWebResponse webResponse)
+        {
+            TimeZoneResponse response = webResponse.StatusCode == HttpStatusCode.OK ?
+                TimeZoneResponse.FromXml(webResponse.GetResponseStream()) :
+                new TimeZoneResponse();
+
+            if (response.Status == TimeZoneCallStatus.Success && String.IsNullOrEmpty(response.TimeZone))
+            {
+                response = new TimeZoneResponse();
+            }
+
+            return response;
         }
     }
 }

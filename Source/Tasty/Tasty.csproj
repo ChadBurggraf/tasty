@@ -207,6 +207,10 @@
     <Compile Include="GitHub\GitHubWebhookPerson.cs" />
     <Compile Include="GitHub\GitHubWebhookCommit.cs" />
     <Compile Include="GitHub\GitHubWebhookRepository.cs" />
+    <Compile Include="TimeZoneRequest.cs" />
+    <Compile Include="TimeZoneResponse.cs" />
+    <Compile Include="TimeZoneCallResult.cs" />
+    <Compile Include="TimeZoneCallStatus.cs" />
     <Compile Include="Web\QueryStringMergeMode.cs" />
     <Compile Include="Web\UrlTokens\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\UrlTokens\IUrlToken.cs" />

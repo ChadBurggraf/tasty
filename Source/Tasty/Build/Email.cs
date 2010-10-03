@@ -98,7 +98,7 @@ namespace Tasty.Build
         /// <summary>
         /// Gets or sets the username to use when authenticating with the mail server.
         /// </summary>
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to use SSL when connecting to the mail server.
@@ -116,9 +116,9 @@ namespace Tasty.Build
             SmtpClient client = new SmtpClient(this.SmtpServer, this.Port);
             client.EnableSsl = this.UseSsl;
 
-            if (!String.IsNullOrEmpty(this.Username) && !String.IsNullOrEmpty(this.Password))
+            if (!String.IsNullOrEmpty(this.UserName) && !String.IsNullOrEmpty(this.Password))
             {
-                client.Credentials = new NetworkCredential(this.Username, this.Password);
+                client.Credentials = new NetworkCredential(this.UserName, this.Password);
             }
 
             using (MailMessage message = new MailMessage())

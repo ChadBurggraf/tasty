@@ -21,6 +21,26 @@ namespace Tasty
     public static class Strings
     {
         /// <summary>
+        /// A regular expression that can be used to validate email addresses.
+        /// </summary>
+        public const string EmailExpression = @"^[a-z0-9._%'+-]+@[a-z0-9.-]+\.[a-z]{2,4}$";
+
+        /// <summary>
+        /// A rough regular expression for validating URLs.
+        /// </summary>
+        public const string UrlExpression = @"^((https?://)|(~/))" // http or asp ~/
+            + @"?(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?" // user@
+            + @"localhost|"
+            + @"(([0-9]{1,3}\.){3}[0-9]{1,3}" // IP- 199.194.52.184
+            + @"|" // allows either IP or domain
+            + @"([0-9a-z_!~*'()-]+\.)*" // tertiary domain(s)- www.
+            + @"([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\." // second level domain
+            + @"[a-z]{2,6})" // first level domain- .com or .museum
+            + @"(:[0-9]{1,4})?" // port number- :80
+            + @"((/?)|" // a slash isn't required if there is no file name
+            + @"(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$";
+
+        /// <summary>
         /// Alias of <see cref="String.IndexOf(String)"/> to get a value indicating whether the string contains
         /// the given string value using the specified comparison type.
         /// </summary>
@@ -76,6 +96,22 @@ namespace Tasty
             }
 
             return pathPart;
+        }
+
+        /// <summary>
+        /// Gets the decoded value of the base-64 string.
+        /// </summary>
+        /// <param name="value">A base-64 encoded string.</param>
+        /// <returns>The decoded string value.</returns>
+        public static string FromBase64(this string value)
+        {
+            Decoder decoder = Encoding.UTF8.GetDecoder();
+
+            byte[] buffer = Convert.FromBase64String(value);
+            char[] chars = new char[decoder.GetCharCount(buffer, 0, buffer.Length)];
+            decoder.GetChars(buffer, 0, buffer.Length, chars, 0);
+
+            return new string(chars);
         }
 
         /// <summary>
@@ -142,6 +178,26 @@ namespace Tasty
 
             byte[] buffer = encoding.GetBytes(value);
             return BitConverter.ToString(crypto.ComputeHash(buffer)).Replace("-", String.Empty);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the string contains a valid email address.
+        /// </summary>
+        /// <param name="value">The value to check.</param>
+        /// <returns>True if the string is a valid email address, false otherwise.</returns>
+        public static bool IsValidEmail(this string value)
+        {
+            return Regex.IsMatch(value, EmailExpression, RegexOptions.IgnoreCase);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the string contains a valid URL.
+        /// </summary>
+        /// <param name="value">The value to check.</param>
+        /// <returns>True if the string is a valid URL, false otherwise.</returns>
+        public static bool IsValidUrl(this string value)
+        {
+            return Regex.IsMatch(value, UrlExpression, RegexOptions.IgnoreCase);
         }
 
         /// <summary>
@@ -254,6 +310,16 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Base-64 encodes the string value.
+        /// </summary>
+        /// <param name="value">The string value to encode.</param>
+        /// <returns>The base-64 encoded value.</returns>
+        public static string ToBase64(this string value)
+        {
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(value));
+        }
+
+        /// <summary>
         /// Combines the string dictionary with semi-colon (;) separators to form a connection string.
         /// </summary>
         /// <param name="dictionary">The string dictionary to combine.</param>
@@ -301,6 +367,55 @@ namespace Tasty
             foreach (byte b in buffer)
             {
                 sb.AppendFormat(CultureInfo.InvariantCulture, "{0:x2}", b);
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Converts the camelCase or PascalCase string to a lower_case_underscore string.
+        /// </summary>
+        /// <param name="value">The string to convert.</param>
+        /// <returns>The converted string.</returns>
+        public static string ToLowercaseUnderscore(this string value)
+        {
+            value = (value ?? String.Empty).Trim();
+
+            if (String.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            int wordLetterNumber = 0;
+
+            while (i < value.Length)
+            {
+                if (Char.IsLetterOrDigit(value, i))
+                {
+                    wordLetterNumber++;
+                }
+                else
+                {
+                    wordLetterNumber = 0;
+                }
+
+                if (Char.IsUpper(value, i))
+                {
+                    if (wordLetterNumber > 1)
+                    {
+                        sb.Append("_");
+                    }
+
+                    sb.Append(Char.ToLowerInvariant(value[i]));
+                }
+                else
+                {
+                    sb.Append(value[i]);
+                }
+
+                i++;
             }
 
             return sb.ToString();

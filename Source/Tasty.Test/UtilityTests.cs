@@ -10,6 +10,14 @@ namespace Tasty.Test
     public class UtilityTests
     {
         [TestMethod]
+        public void Utility_CamelCaseToLowercaseUnderscore()
+        {
+            Assert.AreEqual("pascal_case", "PascalCase".ToLowercaseUnderscore());
+            Assert.AreEqual("camel_case", "camelCase".ToLowercaseUnderscore());
+            Assert.AreEqual("'camel0_case'", "'Camel0Case'".ToLowercaseUnderscore());
+        }
+
+        [TestMethod]
         public void Utility_CopyProperties()
         {
             var source1 = new CopyPropertiesTest() { Name = Guid.NewGuid().ToString(), Number = 42, Date = DateTime.UtcNow };

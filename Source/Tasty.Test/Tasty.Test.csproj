@@ -98,6 +98,7 @@
     </Compile>
     <Compile Include="TestService.cs" />
     <Compile Include="TestUrlTokens.cs" />
+    <Compile Include="TimeZoneTests.cs" />
     <Compile Include="UrlTokenStoreTests.cs" />
     <Compile Include="UrlTokenTests.cs" />
     <Compile Include="UtilityTests.cs" />

@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="Email.cs" company="Tasty Codes">
+// <copyright file="Emailer.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Chad Burggraf.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -116,7 +116,7 @@ namespace Tasty
         /// Gets or sets the username to use when authenticating with the server.
         /// Defaults to value found in <mailSettings/> if not set.
         /// </summary>
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to use SSL when connecting to the server.
@@ -206,7 +206,7 @@ namespace Tasty
                 {
                     this.SmtpServer = smtp.Network.Host;
                     this.Port = smtp.Network.Port;
-                    this.Username = smtp.Network.UserName;
+                    this.UserName = smtp.Network.UserName;
                     this.Password = smtp.Network.Password;
                 }
             }
@@ -238,9 +238,9 @@ namespace Tasty
             SmtpClient client = new SmtpClient(this.SmtpServer, this.Port);
             client.EnableSsl = this.UseSsl;
 
-            if (!String.IsNullOrEmpty(this.Username) && !String.IsNullOrEmpty(this.Password))
+            if (!String.IsNullOrEmpty(this.UserName) && !String.IsNullOrEmpty(this.Password))
             {
-                client.Credentials = new NetworkCredential(this.Username, this.Password);
+                client.Credentials = new NetworkCredential(this.UserName, this.Password);
             }
 
             return client;

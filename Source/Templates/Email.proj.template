@@ -6,7 +6,7 @@
     <Password></Password>
     <Port></Port>
     <SmtpServer></SmtpServer>
-    <Username></Username>
+    <UserName></UserName>
     <UseSsl></UseSsl>
   </PropertyGroup>
   <ItemGroup>
@@ -22,7 +22,7 @@
       Body="Rockin' good news, baby."
       SmtpServer="$(SmtpServer)"
       Port="$(Port)"
-      Username="$(Username)"
+      UserName="$(UserName)"
       Password="$(Password)"
       UseSsl="$(UseSsl)"/>
   </Target>

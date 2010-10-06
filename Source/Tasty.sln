@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 		SolutionInfo.cs = SolutionInfo.cs
 		Tasty2.vsmdi = Tasty2.vsmdi
-		Tasty3.vsmdi = Tasty3.vsmdi
+		Tasty4.vsmdi = Tasty4.vsmdi
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Test", "Tasty.Test\Tasty.Test.csproj", "{E5B6327D-3E79-424F-8BF2-126D3905631C}"
@@ -34,7 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = Tasty3.vsmdi
+		CategoryFile = Tasty4.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

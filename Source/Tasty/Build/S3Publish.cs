@@ -21,7 +21,7 @@ namespace Tasty.Build
     {
         #region Private Fields
 
-        private List<ITaskItem> filesPublished;
+        private List<ITaskItem> filesPublished, filesSkipped;
 
         #endregion
 
@@ -71,6 +71,13 @@ namespace Tasty.Build
         public ITaskItem[] FilesPublished { get; set; }
 
         /// <summary>
+        /// Gets or sets the collection of files that were skipped because
+        /// <see cref="OverwriteExisting"/> is false and the objects exist.
+        /// </summary>
+        [Output]
+        public ITaskItem[] FilesSkipped{ get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to overwrite existing objects.
         /// Defaults to true.
         /// </summary>
@@ -88,6 +95,13 @@ namespace Tasty.Build
         /// Gets or sets the object prefix to use for object keys when publishing files.
         /// </summary>
         public string Prefix { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the prefix was skipped because
+        /// <see cref="OverwriteExistingPrefix"/> is false and it exists.
+        /// </summary>
+        [Output]
+        public bool PrefixSkipped { get; set; }
 
         /// <summary>
         /// Gets or sets the Amazon S3 secret access key ID to use when connecting to the service.
@@ -111,6 +125,7 @@ namespace Tasty.Build
         public override bool Execute()
         {
             this.filesPublished = new List<ITaskItem>();
+            this.filesSkipped = new List<ITaskItem>();
 
             if (this.Files != null && this.Files.Length > 0)
             {
@@ -127,6 +142,7 @@ namespace Tasty.Build
             }
 
             this.FilesPublished = this.filesPublished.ToArray();
+            this.FilesSkipped = this.filesSkipped.ToArray();
 
             return true;
         }
@@ -158,6 +174,10 @@ namespace Tasty.Build
         /// <param name="objectKey">The object key of the file on the service.</param>
         public void OnFileSkipped(string path, string objectKey)
         {
+            ITaskItem item = new TaskItem(objectKey);
+            item.SetMetadata("Path", path);
+            this.filesSkipped.Add(item);
+
             Log.LogMessage("{0} skipped because it exists at {1}.", path, objectKey);
         }
 
@@ -167,6 +187,7 @@ namespace Tasty.Build
         /// <param name="prefix">The prefix that was skipped.</param>
         public void OnPrefixSkipped(string prefix)
         {
+            this.PrefixSkipped = true;
             Log.LogMessage("Prefix \"{0}\" skipped because it already exists.", prefix);
         }
 

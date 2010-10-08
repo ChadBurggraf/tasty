@@ -132,6 +132,68 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Converts the lower_case_underscore string into a PascalCase or camelCalse string.
+        /// </summary>
+        /// <param name="value">The string to convert.</param>
+        /// <returns>The converted string.</returns>
+        public static string FromLowercaseUnderscore(this string value)
+        {
+            return FromLowercaseUnderscore(value, false);
+        }
+
+        /// <summary>
+        /// Converts the lower_case_underscore string into a PascalCase or camelCalse string.
+        /// </summary>
+        /// <param name="value">The string to convert.</param>
+        /// <param name="camel">A value indicating whether to convert to camelCalse. If false, will convert to PascalCase.</param>
+        /// <returns>The converted string.</returns>
+        public static string FromLowercaseUnderscore(this string value, bool camel)
+        {
+            value = (value ?? String.Empty).ToLowerInvariant().Trim();
+
+            if (String.IsNullOrEmpty(value))
+            {
+                return value;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            int i = 0;
+            int wordLetterNumber = 0;
+
+            while (i < value.Length)
+            {
+                if (Char.IsLetterOrDigit(value, i))
+                {
+                    wordLetterNumber++;
+                }
+                else
+                {
+                    wordLetterNumber = 0;
+                }
+
+                if (wordLetterNumber == 1)
+                {
+                    if (camel && i == 0)
+                    {
+                        sb.Append(value[i]);
+                    }
+                    else
+                    {
+                        sb.Append(value[i].ToString().ToUpperInvariant());
+                    }
+                }
+                else if (value[i] != '_')
+                {
+                    sb.Append(value[i]);
+                }
+
+                i++;
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
         /// Computes the SHA1 hash of the string.
         /// </summary>
         /// <param name="value">The value to hash.</param>

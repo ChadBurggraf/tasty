@@ -268,16 +268,16 @@ namespace Tasty
                 cellValueName = "value",
                 cellValueType = String.Empty;
 
-            if (value != null)
+            if (value != null && value != DBNull.Value)
             {
                 if (typeof(bool).IsAssignableFrom(columnType))
                 {
-                    cellText = cellValue = (bool)value ? "1" : "0";
+                    cellText = cellValue = Convert.ToBoolean(value) ? "1" : "0";
                     cellValueType = "float";
                 }
                 else if (typeof(DateTime).IsAssignableFrom(columnType))
                 {
-                    DateTime dateValue = (DateTime)value;
+                    DateTime dateValue = Convert.ToDateTime(value);
 
                     if (dateValue.Date == DateTime.MinValue)
                     {

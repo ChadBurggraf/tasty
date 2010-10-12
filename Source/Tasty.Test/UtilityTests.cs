@@ -15,6 +15,9 @@ namespace Tasty.Test
             Assert.AreEqual("pascal_case", "PascalCase".ToLowercaseUnderscore());
             Assert.AreEqual("camel_case", "camelCase".ToLowercaseUnderscore());
             Assert.AreEqual("'camel0_case'", "'Camel0Case'".ToLowercaseUnderscore());
+            Assert.AreEqual("cc", "CC".ToLowercaseUnderscore());
+            Assert.AreEqual("bcc", "Bcc".ToLowercaseUnderscore());
+            Assert.AreEqual("bcc", "BCC".ToLowercaseUnderscore()); 
         }
 
         [TestMethod]

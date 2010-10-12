@@ -451,6 +451,7 @@ namespace Tasty
             StringBuilder sb = new StringBuilder();
             int i = 0;
             int wordLetterNumber = 0;
+            bool prevUpper = false;
 
             while (i < value.Length)
             {
@@ -465,16 +466,18 @@ namespace Tasty
 
                 if (Char.IsUpper(value, i))
                 {
-                    if (wordLetterNumber > 1)
+                    if (wordLetterNumber > 1 && !prevUpper)
                     {
                         sb.Append("_");
                     }
 
                     sb.Append(Char.ToLowerInvariant(value[i]));
+                    prevUpper = true;
                 }
                 else
                 {
                     sb.Append(value[i]);
+                    prevUpper = false;
                 }
 
                 i++;

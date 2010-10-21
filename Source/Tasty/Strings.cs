@@ -310,7 +310,20 @@ namespace Tasty
         /// <returns>The split string.</returns>
         public static string[] SplitAndTrim(this string value, char separator)
         {
-            return SplitAndTrim(value, new char[] { separator });
+            return SplitAndTrim(value, separator, false);
+        }
+
+        /// <summary>
+        /// Splits the given string on the given character, removing any empty 
+        /// results and trimming whitespace around the rest of the results.
+        /// </summary>
+        /// <param name="value">The string value to split.</param>
+        /// <param name="separator">The character to split the string on.</param>
+        /// <param name="removeEmptyEntries">A value indicating whether to remove empty entries from the results.</param>
+        /// <returns>The split string.</returns>
+        public static string[] SplitAndTrim(this string value, char separator, bool removeEmptyEntries)
+        {
+            return SplitAndTrim(value, new char[] { separator }, removeEmptyEntries);
         }
 
         /// <summary>
@@ -322,12 +335,25 @@ namespace Tasty
         /// <returns>The split string.</returns>
         public static string[] SplitAndTrim(this string value, string separator)
         {
+            return SplitAndTrim(value, separator, false);
+        }
+
+        /// <summary>
+        /// Splits the given string on the given separator, removing any empty 
+        /// results and trimming whitespace around the rest of the results.
+        /// </summary>
+        /// <param name="value">The string value to split.</param>
+        /// <param name="separator">The string to split the string on.</param>
+        /// <param name="removeEmptyEntries">A value indicating whether to remove empty entries from the results.</param>
+        /// <returns>The split string.</returns>
+        public static string[] SplitAndTrim(this string value, string separator, bool removeEmptyEntries)
+        {
             if (String.IsNullOrEmpty(separator))
             {
                 throw new ArgumentNullException("separator", "separator must have a value.");
             }
 
-            return SplitAndTrim(value, separator.ToCharArray());
+            return SplitAndTrim(value, separator.ToCharArray(), removeEmptyEntries);
         }
 
         /// <summary>
@@ -510,8 +536,9 @@ namespace Tasty
         /// </summary>
         /// <param name="value">The string value to split.</param>
         /// <param name="separator">The separator characters to split the string on.</param>
+        /// <param name="removeEmptyEntries">A value indicating whether to remove empty entries from the result.</param>
         /// <returns>The split string.</returns>
-        private static string[] SplitAndTrim(string value, char[] separator)
+        private static string[] SplitAndTrim(string value, char[] separator, bool removeEmptyEntries)
         {
             if (separator == null || separator.Length == 0)
             {
@@ -519,7 +546,9 @@ namespace Tasty
             }
 
             return (from s in (value ?? String.Empty).Split(separator, StringSplitOptions.RemoveEmptyEntries)
-                    select s.Trim()).ToArray();
+                    let result = s.Trim()
+                    where !removeEmptyEntries || !String.IsNullOrEmpty(result)
+                    select result).ToArray();
         }
     }
 }

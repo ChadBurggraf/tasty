@@ -15,6 +15,8 @@ namespace Tasty.Jobs
     /// </summary>
     public class JobsInProcessModule : IHttpModule
     {
+        private static bool isStarted = false;
+
         /// <summary>
         /// Disposes of any unmanaged resources held by the module.
         /// </summary>
@@ -30,7 +32,11 @@ namespace Tasty.Jobs
         {
             context.BeginRequest += new EventHandler(delegate(object sender, EventArgs e)
             {
-                JobRunner.GetInstance().Start();
+                if (!isStarted)
+                {
+                    JobRunner.GetInstance().Start();
+                    isStarted = true;
+                }
             });
         }
     }

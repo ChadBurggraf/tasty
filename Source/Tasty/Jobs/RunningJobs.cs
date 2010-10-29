@@ -13,6 +13,8 @@ namespace Tasty.Jobs
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
+    using System.Security;
+    using System.Security.Permissions;
 
     /// <summary>
     /// Represents a collection of running jobs that can be flushed to disk.
@@ -27,7 +29,7 @@ namespace Tasty.Jobs
         /// </summary>
         public RunningJobs()
         {
-            this.PersistencePath = Path.Combine(Path.GetDirectoryName(GetType().Assembly.Location), GeneratePersistenceFileName(JobStore.Current));
+            this.PersistencePath = Path.Combine(Path.GetTempPath(), GeneratePersistenceFileName(JobStore.Current));
             this.runs = new List<JobRun>(LoadFromPersisted(this.PersistencePath));
         }
 
@@ -45,11 +47,6 @@ namespace Tasty.Jobs
             if (!Path.IsPathRooted(persistencePath))
             {
                 persistencePath = Path.GetFullPath(persistencePath);
-            }
-
-            if (!persistencePath.StartsWith(Path.GetDirectoryName(GetType().Assembly.Location), StringComparison.OrdinalIgnoreCase))
-            {
-                throw new ArgumentException("persistencePath must point to a path inside the current application directory.", "persistencePath");
             }
 
             this.PersistencePath = persistencePath;
@@ -143,15 +140,18 @@ namespace Tasty.Jobs
         {
             lock (this.runs)
             {
-                var exceptionTypes = (from r in this.runs
-                                      where r.ExecutionException != null
-                                      select r.ExecutionException.GetType()).Distinct();
-
-                DataContractSerializer serializer = new DataContractSerializer(typeof(JobRun[]), exceptionTypes);
-
-                using (FileStream stream = File.Create(this.PersistencePath))
+                if (SecurityManager.IsGranted(new FileIOPermission(FileIOPermissionAccess.Write, this.PersistencePath)))
                 {
-                    serializer.WriteObject(stream, this.runs.ToArray());
+                    var exceptionTypes = (from r in this.runs
+                                          where r.ExecutionException != null
+                                          select r.ExecutionException.GetType()).Distinct();
+
+                    DataContractSerializer serializer = new DataContractSerializer(typeof(JobRun[]), exceptionTypes);
+
+                    using (FileStream stream = File.Create(this.PersistencePath))
+                    {
+                        serializer.WriteObject(stream, this.runs.ToArray());
+                    }
                 }
             }
         }
@@ -178,18 +178,25 @@ namespace Tasty.Jobs
         {
             IEnumerable<JobRun> runs;
 
-            if (File.Exists(persistencPath))
+            if (SecurityManager.IsGranted(new FileIOPermission(FileIOPermissionAccess.Read, persistencPath)))
             {
-                DataContractSerializer serializer = new DataContractSerializer(typeof(JobRun[]));
-
-                try
+                if (File.Exists(persistencPath))
                 {
-                    using (FileStream stream = File.OpenRead(persistencPath))
+                    DataContractSerializer serializer = new DataContractSerializer(typeof(JobRun[]));
+
+                    try
                     {
-                        runs = (JobRun[])serializer.ReadObject(stream);
+                        using (FileStream stream = File.OpenRead(persistencPath))
+                        {
+                            runs = (JobRun[])serializer.ReadObject(stream);
+                        }
+                    }
+                    catch
+                    {
+                        runs = new JobRun[0];
                     }
                 }
-                catch
+                else
                 {
                     runs = new JobRun[0];
                 }

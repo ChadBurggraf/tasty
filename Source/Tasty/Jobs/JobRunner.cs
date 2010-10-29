@@ -50,7 +50,7 @@ namespace Tasty.Jobs
                 throw new ArgumentNullException("store", "store cannot be null.");
             }
 
-            this.runs = new RunningJobs(Path.Combine(Path.GetDirectoryName(GetType().Assembly.Location), RunningJobs.GeneratePersistenceFileName(store)));
+            this.runs = new RunningJobs(Path.Combine(Path.GetTempPath(), RunningJobs.GeneratePersistenceFileName(store)));
             this.store = store;
         }
 

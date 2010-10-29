@@ -17,15 +17,6 @@ namespace Tasty.Jobs
     public class MemoryJobStore : JobStore
     {
         private static List<JobRecord> committed = new List<JobRecord>();
-        private int hashCode;
-
-        /// <summary>
-        /// Initializes a new instance of the MemoryJobStore class.
-        /// </summary>
-        public MemoryJobStore()
-        {
-            this.hashCode = Guid.NewGuid().GetHashCode();
-        }
 
         /// <summary>
         /// Deletes a job by ID.
@@ -53,7 +44,7 @@ namespace Tasty.Jobs
         /// <returns>This instance's hash code.</returns>
         public override int GetHashCode()
         {
-            return this.hashCode;
+            return committed.GetHashCode();
         }
 
         /// <summary>

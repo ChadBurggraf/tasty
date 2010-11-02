@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tasty.Configuration;
 using Tasty.Jobs;
@@ -36,61 +37,18 @@ namespace Tasty.Test
         }
 
         [TestMethod]
-        public void ScheduledJobs_GetNextExecuteDate()
+        public void ScheduledJobs_ShouldExecute()
         {
-            //
-            // This all needs to be more thorough, but I'm feeling lazy and I'm pretty confident it works.
-            //
+            JobScheduleElement element = new JobScheduleElement() { StartOn = DateTime.UtcNow.AddHours(-48), RepeatHours = 1 };
+            Assert.IsTrue(ScheduledJob.ShouldExecute(element, 500, DateTime.UtcNow));
+            Thread.Sleep(600);
+            Assert.IsFalse(ScheduledJob.ShouldExecute(element, 500, DateTime.UtcNow));
 
-            DateTime now = DateTime.UtcNow;
-            DateTime nowPlusOneHour = now.AddHours(1);
-            DateTime nowPlusOneDay = now.AddDays(1);
-            DateTime nowPlusOneWeek = now.AddDays(7);
-            DateTime nowMinusOneWeek = now.AddDays(-7);
-            DateTime nowMinusOneDay = now.AddDays(-1);
-            DateTime nowMinusOneHour = now.AddHours(-1);
-
-            Assert.AreEqual(nowPlusOneHour, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
-            {
-                StartOn = nowPlusOneHour,
-                RepeatHours = 24
-            }, null, now));
-
-            Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
-            {
-                StartOn = nowPlusOneHour,
-                RepeatHours = 1
-            }, nowMinusOneHour, now));
-
-            Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
-            {
-                StartOn = nowPlusOneHour,
-                RepeatHours = 1
-            }, nowMinusOneDay, now));
-
-            Assert.AreEqual(nowPlusOneWeek, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
-            {
-                StartOn = nowPlusOneWeek,
-                RepeatHours = 168
-            }, null, now));
-
-            Assert.AreEqual(nowPlusOneDay, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
-            {
-                StartOn = now,
-                RepeatHours = 24
-            }, null, now));
-
-            Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
-            {
-                StartOn = now,
-                RepeatHours = 168
-            }, null, nowMinusOneHour));
-
-            Assert.AreEqual(now, ScheduledJob.GetNextExecuteDate(new JobScheduleElement()
-            {
-                StartOn = nowMinusOneDay,
-                RepeatHours = 24
-            }, null, now));
+            element.StartOn = DateTime.UtcNow.AddYears(-5);
+            element.RepeatHours = .0166666667; // This kinda sucks - 10 significant digits to have accuracy < 500ms over 5 years.
+            Assert.IsTrue(ScheduledJob.ShouldExecute(element, 500, DateTime.UtcNow));
+            Thread.Sleep(600);
+            Assert.IsTrue(ScheduledJob.ShouldExecute(element, 500, DateTime.UtcNow));
         }
     }
 }

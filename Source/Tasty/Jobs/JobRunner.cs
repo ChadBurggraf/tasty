@@ -34,6 +34,7 @@ namespace Tasty.Jobs
         private IJobStore store;
         private Thread god;
         private int heartbeat, maximumConcurrency;
+        private DateTime? lastScheduleCheck;
 
         #endregion
 
@@ -526,6 +527,8 @@ namespace Tasty.Jobs
                     try
                     {
                         DateTime now = DateTime.UtcNow;
+                        long heartbeat = this.lastScheduleCheck == null ? this.Heartbeat : (long)Math.Ceiling(now.Subtract(this.lastScheduleCheck.Value).TotalMilliseconds);
+                        this.lastScheduleCheck = now;
 
                         var scheduleNames = this.Schedules.Select(s => s.Name);
                         var records = this.store.GetLatestScheduledJobs(scheduleNames, trans);
@@ -538,21 +541,21 @@ namespace Tasty.Jobs
                                                       sj.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
                                                       r.JobType.StartsWith(sj.ScheduledJob.JobType, StringComparison.OrdinalIgnoreCase)
                                                 select r).DefaultIfEmpty()
-                                           select new ScheduledJobTuple(sj, r, now))
-                                      where t.NextExecuteDate <= now
-                                      orderby t.NextExecuteDate
+                                           select new ScheduledJobTuple(sj, r, now, heartbeat))
+                                      where t.ShouldExecute
+                                      orderby t.LastExecuteDate
                                       select t).Take(count);
 
-                        foreach (var tuple in tuples)
+                        foreach (ScheduledJobTuple tuple in tuples)
                         {
                             JobRecord record = ScheduledJob.CreateRecord(tuple.Schedule, tuple.ScheduledJob, now);
 
-                            bool isRunning = 0 < (from r in this.runs.GetAll()
-                                                  where tuple.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
-                                                        tuple.ScheduledJob.JobType.StartsWith(record.JobType, StringComparison.OrdinalIgnoreCase)
-                                                  select r).Count();
+                            bool running = 0 < (from r in this.runs.GetAll()
+                                                where tuple.Schedule.Name.Equals(r.ScheduleName, StringComparison.OrdinalIgnoreCase) &&
+                                                      tuple.ScheduledJob.JobType.StartsWith(record.JobType, StringComparison.OrdinalIgnoreCase)
+                                                select r).Count();
 
-                            if (!isRunning)
+                            if (!running)
                             {
                                 IJob job = null;
                                 Exception toJobEx = null;

@@ -211,6 +211,7 @@
     <Compile Include="TimeZoneResponse.cs" />
     <Compile Include="TimeZoneCallResult.cs" />
     <Compile Include="TimeZoneCallStatus.cs" />
+    <Compile Include="Web\HttpContexts.cs" />
     <Compile Include="Web\QueryStringMergeMode.cs" />
     <Compile Include="Web\UrlTokens\HttpCacheUrlTokenStore.cs" />
     <Compile Include="Web\UrlTokens\IUrlToken.cs" />

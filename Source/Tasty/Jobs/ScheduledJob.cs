@@ -132,13 +132,14 @@ namespace Tasty.Jobs
         }
 
         /// <summary>
-        /// Gets the next execute date for the scheduled job identified by the given configuration element.
+        /// Gets a value indicating whether the schedule identified by the given element is ready for execution
+        /// given the provided heartbeat window and current date.
         /// </summary>
-        /// <param name="element">The configuration element of the scheduled job to get the next execute date for.</param>
-        /// <param name="lastExecuteDate">The schedule's last execution date, if applicable (in UTC).</param>
-        /// <param name="now">The current date (in UTC).</param>
-        /// <returns>The schedule's next execute date.</returns>
-        public static DateTime GetNextExecuteDate(JobScheduleElement element, DateTime? lastExecuteDate, DateTime now)
+        /// <param name="element">The element to check.</param>
+        /// <param name="heartbeat">The heartbeat window, in milliseconds.</param>
+        /// <param name="now">The current date, in UTC.</param>
+        /// <returns>True if the schedule should be executed now, false otherwise.</returns>
+        public static bool ShouldExecute(JobScheduleElement element, long heartbeat, DateTime now)
         {
             if (element == null)
             {
@@ -150,37 +151,27 @@ namespace Tasty.Jobs
                 throw new ConfigurationErrorsException("A job schedule's repeatHours must be greater than 0.", element.ElementInformation.Source, element.ElementInformation.LineNumber);
             }
 
-            if (lastExecuteDate != null && lastExecuteDate.Value.Kind != DateTimeKind.Utc)
-            {
-                throw new ArgumentException("lastExecuteDate must be in UTC.", "lastExecuteDate");
-            }
-
             if (now.Kind != DateTimeKind.Utc)
             {
                 throw new ArgumentException("now must be in UTC.", "now");
             }
 
-            if (lastExecuteDate == null)
+            bool shouldExecute = false;
+
+            if (now >= element.StartOn)
             {
-                lastExecuteDate = element.StartOn.ToUniversalTime();
+                double milliseconds = now.Subtract(element.StartOn).TotalMilliseconds;
+                double repeatMilliseconds = element.RepeatHours * 3600000;
+                int repeats = (int)Math.Floor(milliseconds / repeatMilliseconds);
+
+                if (Math.Abs(now.Subtract(element.StartOn.AddMilliseconds(repeats * repeatMilliseconds)).TotalMilliseconds) <= heartbeat ||
+                    Math.Abs(now.Subtract(element.StartOn.AddMilliseconds((repeats + 1) * repeatMilliseconds)).TotalMilliseconds) <= heartbeat)
+                {
+                    shouldExecute = true;
+                }
             }
 
-            if (now < lastExecuteDate.Value)
-            {
-                return lastExecuteDate.Value;
-            }
-
-            double hours = now.Subtract(lastExecuteDate.Value).TotalHours;
-            int repeats = (int)(hours / element.RepeatHours);
-
-            DateTime date = lastExecuteDate.Value.AddHours(repeats * element.RepeatHours);
-
-            if (date == lastExecuteDate.Value)
-            {
-                date = date.AddHours(element.RepeatHours);
-            }
-
-            return date;
+            return shouldExecute;
         }
     }
 }

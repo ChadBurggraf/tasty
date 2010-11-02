@@ -57,6 +57,7 @@
     <Reference Include="System.ServiceModel">
       <RequiredTargetFramework>3.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -75,6 +76,7 @@
     <Compile Include="GetVersionTests.cs" />
     <Compile Include="GitHubTests.cs" />
     <Compile Include="HttpCacheUrlTokenStoreTests.cs" />
+    <Compile Include="HttpContextTests.cs" />
     <Compile Include="HttpTests.cs" />
     <Compile Include="JobRunnerTests.cs" />
     <Compile Include="JobStoreTests.cs">

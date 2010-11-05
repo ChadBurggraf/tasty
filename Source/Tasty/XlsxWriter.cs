@@ -9,6 +9,7 @@ namespace Tasty
     using System;
     using System.Data;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using DocumentFormat.OpenXml;
@@ -89,14 +90,7 @@ namespace Tasty
 
                         for (int k = 0; k < dataRow.ItemArray.Length; k++)
                         {
-                            Cell cell = new Cell()
-                            {
-                                CellReference = (k + 1).ToSpreadsheetColumnName() + rowNum,
-                                DataType = CellValues.InlineString,
-                                InlineString = new InlineString(new Text(dataRow[k] != null ? dataRow[k].ToString() : String.Empty))
-                            };
-
-                            row.Append(cell);
+                            row.Append(CreateCell(dataSet.Tables[i], dataRow, (int)rowNum, k));
                         }
                     }
 
@@ -133,6 +127,57 @@ namespace Tasty
             workbookPart.Workbook.Save();
 
             return worksheetPart;
+        }
+
+        /// <summary>
+        /// Creates a new cell for the given data table, row and column index.
+        /// </summary>
+        /// <param name="table">The data table to create the cell for.</param>
+        /// <param name="row">The data row to create the cell for.</param>
+        /// <param name="rowNumber">The row number to name the cell with.</param>
+        /// <param name="columnIndex">The column index to create the cell for.</param>
+        /// <returns>The created cell.</returns>
+        private static Cell CreateCell(DataTable table, DataRow row, int rowNumber, int columnIndex)
+        {
+            Type columnType = table.Columns[columnIndex].DataType;
+            EnumValue<CellValues> dataType;
+            CellValue value;
+
+            if (typeof(bool).IsAssignableFrom(columnType))
+            {
+                dataType = new EnumValue<CellValues>(CellValues.Boolean);
+                value = new CellValue(row[columnIndex] != null ? row[columnIndex].ToString() : String.Empty);
+            }
+            else if (typeof(DateTime).IsAssignableFrom(columnType))
+            {
+                dataType = new EnumValue<CellValues>(CellValues.Date);
+                value = new CellValue(row[columnIndex] != null ? ((DateTime)row[columnIndex]).ToOADate().ToString() : String.Empty);
+            }
+            else if (typeof(decimal).IsAssignableFrom(columnType) ||
+                     typeof(double).IsAssignableFrom(columnType) ||
+                     typeof(float).IsAssignableFrom(columnType))
+            {
+                dataType = new EnumValue<CellValues>(CellValues.Number);
+                value = new CellValue(row[columnIndex] != null ? String.Format(CultureInfo.InvariantCulture, "{0:N2}", row[columnIndex]) : String.Empty);
+            }
+            else if (typeof(int).IsAssignableFrom(columnType) ||
+                     typeof(long).IsAssignableFrom(columnType))
+            {
+                dataType = new EnumValue<CellValues>(CellValues.Number);
+                value = new CellValue(row[columnIndex] != null ? row[columnIndex].ToString() : String.Empty);
+            }
+            else
+            {
+                dataType = new EnumValue<CellValues>(CellValues.InlineString);
+                value = new CellValue(row[columnIndex] != null ? row[columnIndex].ToString() : String.Empty);
+            }
+
+            return new Cell()
+            {
+                CellReference = (columnIndex + 1).ToSpreadsheetColumnName() + rowNumber,
+                DataType = dataType,
+                CellValue = value
+            };
         }
     }
 }

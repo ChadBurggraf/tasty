@@ -47,11 +47,12 @@ namespace Tasty.Test
 
             DataTable dt2 = ds.Tables.Add("Data Table 02");
             dt2.Columns.Add("Date", typeof(DateTime));
+            dt2.Columns.Add("Float", typeof(float));
 
-            dt2.Rows.Add(DateTime.Now);
-            dt2.Rows.Add(new DateTime(1970, 1, 1));
-            dt2.Rows.Add(new DateTime(2012, 1, 1));
-            dt2.Rows.Add(new DateTime(1982, 5, 28));
+            dt2.Rows.Add(DateTime.Now, 42.67);
+            dt2.Rows.Add(new DateTime(1970, 1, 1), -112);
+            dt2.Rows.Add(new DateTime(2012, 1, 1), 0);
+            dt2.Rows.Add(new DateTime(1982, 5, 28), 356.9999999);
 
             return ds;
         }

@@ -228,6 +228,7 @@
     <Compile Include="Web\UrlTokens\UrlTokenRecord.cs" />
     <Compile Include="Web\UrlTokens\UrlTokenStore.cs" />
     <Compile Include="Web\UrlTokens\UrlTokenUrlProvider.cs" />
+    <Compile Include="XlsxDocument.cs" />
     <Compile Include="XlsxWriter.cs" />
   </ItemGroup>
   <ItemGroup>

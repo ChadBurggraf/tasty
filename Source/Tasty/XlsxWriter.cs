@@ -53,12 +53,25 @@ namespace Tasty
                 File.Delete(path);
             }
 
-            using (SpreadsheetDocument document = SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook))
-            {
-                WorkbookPart workbookPart = document.AddWorkbookPart();
-                workbookPart.Workbook = new Workbook();
+            new XlsxDocument().CreatePackage(path);
 
-                Sheets sheets = workbookPart.Workbook.AppendChild<Sheets>(new Sheets());
+            using (SpreadsheetDocument document = SpreadsheetDocument.Open(path, true))
+            {
+                WorkbookPart workbookPart = document.WorkbookPart;
+                Sheets sheets = workbookPart.Workbook.Sheets;
+                Stylesheet stylesheet = document.WorkbookPart.WorkbookStylesPart.Stylesheet;
+
+                CellFormat dateFormat = new CellFormat();
+                dateFormat.NumberFormatId = 14;
+                dateFormat.ApplyNumberFormat = BooleanValue.FromBoolean(true);
+                stylesheet.CellFormats.Append(dateFormat);
+                uint dateFormatIndex = stylesheet.CellFormats.Count++;
+
+                CellFormat timeFormat = new CellFormat();
+                timeFormat.NumberFormatId = 19;
+                timeFormat.ApplyNumberFormat = BooleanValue.FromBoolean(true);
+                stylesheet.CellFormats.Append(timeFormat);
+                uint timeFormatIndex = stylesheet.CellFormats.Count++;
 
                 for (int i = 0; i < dataSet.Tables.Count; i++)
                 {
@@ -90,7 +103,7 @@ namespace Tasty
 
                         for (int k = 0; k < dataRow.ItemArray.Length; k++)
                         {
-                            row.Append(CreateCell(dataSet.Tables[i], dataRow, (int)rowNum, k));
+                            row.Append(CreateCell(dataSet.Tables[i], dataRow, (int)rowNum, k, dateFormatIndex, timeFormatIndex));
                         }
                     }
 
@@ -136,12 +149,15 @@ namespace Tasty
         /// <param name="row">The data row to create the cell for.</param>
         /// <param name="rowNumber">The row number to name the cell with.</param>
         /// <param name="columnIndex">The column index to create the cell for.</param>
+        /// <param name="dateStyleIndex">The index of the date format style in the workbook's stylesheet.</param>
+        /// <param name="timeStyleIndex">The index of the time format style in the workbook's stylesheet.</param>
         /// <returns>The created cell.</returns>
-        private static Cell CreateCell(DataTable table, DataRow row, int rowNumber, int columnIndex)
+        private static Cell CreateCell(DataTable table, DataRow row, int rowNumber, int columnIndex, uint dateStyleIndex, uint timeStyleIndex)
         {
             Type columnType = table.Columns[columnIndex].DataType;
             EnumValue<CellValues> dataType;
             CellValue value;
+            uint? styleIndex = null;
 
             if (typeof(bool).IsAssignableFrom(columnType))
             {
@@ -150,8 +166,27 @@ namespace Tasty
             }
             else if (typeof(DateTime).IsAssignableFrom(columnType))
             {
-                dataType = new EnumValue<CellValues>(CellValues.Date);
-                value = new CellValue(row[columnIndex] != null ? ((DateTime)row[columnIndex]).ToOADate().ToString() : String.Empty);
+                dataType = new EnumValue<CellValues>(CellValues.Number);
+
+                if (row[columnIndex] != null)
+                {
+                    DateTime date = (DateTime)row[columnIndex];
+                    value = new CellValue(date.ToOADate().ToString());
+
+                    if (date.Date == DateTime.MinValue)
+                    {
+                        styleIndex = timeStyleIndex;
+                    }
+                    else
+                    {
+                        styleIndex = dateStyleIndex;
+                    }
+                }
+                else
+                {
+                    value = new CellValue(String.Empty);
+                    styleIndex = dateStyleIndex;
+                }
             }
             else if (typeof(decimal).IsAssignableFrom(columnType) ||
                      typeof(double).IsAssignableFrom(columnType) ||
@@ -168,16 +203,23 @@ namespace Tasty
             }
             else
             {
-                dataType = new EnumValue<CellValues>(CellValues.InlineString);
+                dataType = new EnumValue<CellValues>(CellValues.String);
                 value = new CellValue(row[columnIndex] != null ? row[columnIndex].ToString() : String.Empty);
             }
 
-            return new Cell()
+            Cell cell = new Cell()
             {
                 CellReference = (columnIndex + 1).ToSpreadsheetColumnName() + rowNumber,
                 DataType = dataType,
                 CellValue = value
             };
+
+            if (styleIndex.HasValue)
+            {
+                cell.StyleIndex = styleIndex;
+            }
+
+            return cell;
         }
     }
 }

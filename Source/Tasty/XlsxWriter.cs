@@ -86,8 +86,8 @@ namespace Tasty
                         Cell cell = new Cell()
                         {
                             CellReference = (j + 1).ToSpreadsheetColumnName() + 1,
-                            DataType = CellValues.InlineString,
-                            InlineString = new InlineString(new Text(dataSet.Tables[i].Columns[j].ColumnName))
+                            DataType = CellValues.String,
+                            CellValue = new CellValue(dataSet.Tables[i].Columns[j].ColumnName)
                         };
 
                         headerRow.Append(cell);
@@ -134,7 +134,7 @@ namespace Tasty
                 sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
             }
 
-            Sheet sheet = new Sheet() { Id = id, SheetId = sheetId, Name = sheetName };
+            Sheet sheet = new Sheet() { Id = id, SheetId = sheetId, Name = sheetName.Length <= 31 ? sheetName : sheetName.Substring(0, 31) };
             sheets.Append(sheet);
 
             workbookPart.Workbook.Save();
@@ -158,17 +158,18 @@ namespace Tasty
             EnumValue<CellValues> dataType;
             CellValue value;
             uint? styleIndex = null;
+            bool isNull = row[columnIndex] == null || row[columnIndex] == DBNull.Value;
 
             if (typeof(bool).IsAssignableFrom(columnType))
             {
                 dataType = new EnumValue<CellValues>(CellValues.Boolean);
-                value = new CellValue(row[columnIndex] != null ? row[columnIndex].ToString() : String.Empty);
+                value = new CellValue(!isNull ? row[columnIndex].ToString() : String.Empty);
             }
             else if (typeof(DateTime).IsAssignableFrom(columnType))
             {
                 dataType = new EnumValue<CellValues>(CellValues.Number);
 
-                if (row[columnIndex] != null)
+                if (!isNull)
                 {
                     DateTime date = (DateTime)row[columnIndex];
                     value = new CellValue(date.ToOADate().ToString());
@@ -193,18 +194,18 @@ namespace Tasty
                      typeof(float).IsAssignableFrom(columnType))
             {
                 dataType = new EnumValue<CellValues>(CellValues.Number);
-                value = new CellValue(row[columnIndex] != null ? String.Format(CultureInfo.InvariantCulture, "{0:N2}", row[columnIndex]) : String.Empty);
+                value = new CellValue(!isNull ? String.Format(CultureInfo.InvariantCulture, "{0:N2}", row[columnIndex]) : String.Empty);
             }
             else if (typeof(int).IsAssignableFrom(columnType) ||
                      typeof(long).IsAssignableFrom(columnType))
             {
                 dataType = new EnumValue<CellValues>(CellValues.Number);
-                value = new CellValue(row[columnIndex] != null ? row[columnIndex].ToString() : String.Empty);
+                value = new CellValue(!isNull ? row[columnIndex].ToString() : String.Empty);
             }
             else
             {
                 dataType = new EnumValue<CellValues>(CellValues.String);
-                value = new CellValue(row[columnIndex] != null ? row[columnIndex].ToString() : String.Empty);
+                value = new CellValue(!isNull ? row[columnIndex].ToString() : String.Empty);
             }
 
             Cell cell = new Cell()

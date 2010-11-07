@@ -18,7 +18,7 @@ namespace Tasty
     /// Creates Excel documents.
     /// This class was generated using the Open XML SDK v2.0 Tools.
     /// </summary>
-    public class XlsxDocument
+    internal class XlsxDocument
     {
         /// <summary>
         /// Creates a new spreadsheet document packaage at the given path.

@@ -19,6 +19,15 @@ namespace Tasty.SqlServer
         /// <summary>
         /// Gets the <see cref="Tasty.SqlServer"/> assembly import SQL script.
         /// </summary>
+        /// <returns>The <see cref="Tasty.SqlServer"/> import script.</returns>
+        public static string Get()
+        {
+            return Get(Assembly.GetAssembly(typeof(System.Linq.Queryable)).Location);
+        }
+
+        /// <summary>
+        /// Gets the <see cref="Tasty.SqlServer"/> assembly import SQL script.
+        /// </summary>
         /// <param name="systemAssembliesPath">The path to v3.5 reference assemblies on the SQL Server machine
         /// (e.g., C:\Program Files\Reference Assemblies\Microsoft\Framework\v3.5).</param>
         /// <returns>The <see cref="Tasty.SqlServer"/> import script.</returns>

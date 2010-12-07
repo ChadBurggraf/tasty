@@ -162,8 +162,8 @@ namespace Tasty
 
             if (typeof(bool).IsAssignableFrom(columnType))
             {
-                dataType = new EnumValue<CellValues>(CellValues.Boolean);
-                value = new CellValue(!isNull ? row[columnIndex].ToString() : String.Empty);
+                dataType = new EnumValue<CellValues>(CellValues.Number);
+                value = new CellValue(!isNull ? (bool)row[columnIndex] ? "1" : "0" : String.Empty);
             }
             else if (typeof(DateTime).IsAssignableFrom(columnType))
             {

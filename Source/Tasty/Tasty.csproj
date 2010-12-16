@@ -98,6 +98,9 @@
     <Compile Include="Build\Email.cs" />
     <Compile Include="Build\Extensions.cs" />
     <Compile Include="Build\GetVersion.cs" />
+    <Compile Include="Build\S3Exists.cs" />
+    <Compile Include="Build\S3KeyExists.cs" />
+    <Compile Include="Build\S3PrefixExists.cs" />
     <Compile Include="Configuration\GitHubElement.cs" />
     <Compile Include="Configuration\WebhookElement.cs" />
     <Compile Include="Configuration\WebhookElementCollection.cs" />

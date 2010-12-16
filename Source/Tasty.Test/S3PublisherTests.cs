@@ -16,41 +16,66 @@ using Tasty.Web;
 namespace Tasty.Test
 {
     [TestClass]
-    public class S3PublisherTests : IS3PublisherDelegate
+    public class S3PublisherTests : S3TestBase, IS3PublisherDelegate
     {
-        private static string accessKeyId = ConfigurationManager.AppSettings["S3AccessKeyId"];
-        private static string secretAccessKeyId = ConfigurationManager.AppSettings["S3SecretAccessKeyId"];
-        private static string bucketName = ConfigurationManager.AppSettings["S3BucketName"];
-        private static AmazonS3 s3Client;
+        private static List<string> cleanupKeys = new List<string>();
         private bool assertPublished, skipFileDelegateCalled, skipPrefixDelegateCalled;
 
-        static S3PublisherTests()
+        [ClassCleanup]
+        public static void Cleanup()
         {
-            AmazonS3Config config = new AmazonS3Config() { CommunicationProtocol = Protocol.HTTP };
-            s3Client = AWSClientFactory.CreateAmazonS3Client(accessKeyId, secretAccessKeyId, config);
+            foreach (string key in cleanupKeys)
+            {
+                try
+                {
+                    DeleteObjectRequest request = new DeleteObjectRequest()
+                        .WithBucketName(BucketName)
+                        .WithKey(key);
+
+                    using (DeleteObjectResponse response = Client.DeleteObject(request))
+                    {
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        [ClassInitialize]
+        public static void Initialize(TestContext context)
+        {
+            cleanupKeys.Clear();
         }
 
         [TestMethod]
         public void S3Publisher_Publisher()
         {
             this.assertPublished = true;
+            string prefix = DateTime.UtcNow.ToIso8601UtcPathSafeString();
+            string[] files = new[]
+            {
+                @"css\yui-fonts-min.css",
+                @"css\yui-reset-min.css",
+                @"images\accept.png",
+                @"images\add.png",
+                @"images\anchor.png",
+                @"script\jquery-ui.min.js",
+                @"script\jquery.min.js"
+            };
 
-            new S3Publisher(accessKeyId, secretAccessKeyId)
+            new S3Publisher(AccessKeyId, SecretAccessKeyId)
                 .WithBasePath(@".\")
-                .WithBucketName(bucketName)
-                .WithFiles(new string[] {
-                    @"css\yui-fonts-min.css",
-                    @"css\yui-reset-min.css",
-                    @"images\accept.png",
-                    @"images\add.png",
-                    @"images\anchor.png",
-                    @"script\jquery-ui.min.js",
-                    @"script\jquery.min.js"
-                })
-                .WithPrefix(DateTime.UtcNow.ToIso8601UtcPathSafeString())
+                .WithBucketName(BucketName)
+                .WithFiles(files)
+                .WithPrefix(prefix)
                 .WithPublisherDelegate(this) // Asserts are happening in the delegate.
-                .WithUseSsl(false)
+                .WithUseSsl(UseSsl)
                 .Publish();
+
+            cleanupKeys.AddRange(from f in files
+                                 let k = f.Replace(@"\", "/")
+                                 select prefix + "/" + k);
         }
 
         [TestMethod]
@@ -73,14 +98,14 @@ namespace Tasty.Test
 
             string prefix = DateTime.UtcNow.ToIso8601UtcPathSafeString();
 
-            var publisher = new S3Publisher(accessKeyId, secretAccessKeyId)
+            var publisher = new S3Publisher(AccessKeyId, SecretAccessKeyId)
                 .WithBasePath(@".\")
-                .WithBucketName(bucketName)
+                .WithBucketName(BucketName)
                 .WithFiles(new string[] { @"css\yui-fonts-min.css" })
                 .WithOverwriteExisting(false)
                 .WithPrefix(prefix)
                 .WithPublisherDelegate(this) // Asserts are happening in the delegate.
-                .WithUseSsl(false);
+                .WithUseSsl(UseSsl);
 
             publisher.Publish();
 
@@ -100,14 +125,14 @@ namespace Tasty.Test
 
             string prefix = DateTime.UtcNow.ToIso8601UtcPathSafeString();
 
-            var publisher = new S3Publisher(accessKeyId, secretAccessKeyId)
+            var publisher = new S3Publisher(AccessKeyId, SecretAccessKeyId)
                 .WithBasePath(@".\")
-                .WithBucketName(bucketName)
+                .WithBucketName(BucketName)
                 .WithFiles(new string[] { @"css\yui-fonts-min.css" })
                 .WithOverwriteExistingPrefix(false)
                 .WithPrefix(prefix)
                 .WithPublisherDelegate(this) // Asserts are happening in the delegate.
-                .WithUseSsl(false);
+                .WithUseSsl(UseSsl);
 
             publisher.Publish();
             publisher.Publish();
@@ -122,10 +147,10 @@ namespace Tasty.Test
             if (this.assertPublished)
             {
                 GetObjectMetadataRequest request = new GetObjectMetadataRequest()
-                    .WithBucketName(bucketName)
+                    .WithBucketName(BucketName)
                     .WithKey(objectKey);
 
-                using (GetObjectMetadataResponse response = s3Client.GetObjectMetadata(request))
+                using (GetObjectMetadataResponse response = Client.GetObjectMetadata(request))
                 {
                     Assert.AreEqual(MimeType.FromCommon(objectKey).ContentType, response.ContentType);
 
@@ -133,14 +158,6 @@ namespace Tasty.Test
                     {
                         Assert.AreEqual("gzip", response.Headers["Content-Encoding"]);
                     }
-                }
-
-                DeleteObjectRequest deleteRequest = new DeleteObjectRequest()
-                    .WithBucketName(bucketName)
-                    .WithKey(objectKey);
-
-                using (DeleteObjectResponse deleteResponse = s3Client.DeleteObject(deleteRequest))
-                {
                 }
             }
         }

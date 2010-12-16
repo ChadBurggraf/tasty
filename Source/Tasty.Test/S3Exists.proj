@@ -1,0 +1,22 @@
+﻿<Project ToolsVersion="3.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="Tasty.Build.S3KeyExists" AssemblyFile="Tasty.dll"/>
+  <UsingTask TaskName="Tasty.Build.S3PrefixExists" AssemblyFile="Tasty.dll"/>
+  <PropertyGroup>
+    <Key></Key>
+    <Prefix></Prefix>
+    <S3AccessKeyId></S3AccessKeyId>
+    <S3BucketName></S3BucketName>
+    <S3SecretAccessKeyId></S3SecretAccessKeyId>
+    <S3UseSsl></S3UseSsl>
+  </PropertyGroup>
+  <Target Name="KeyExists">
+    <S3KeyExists AccessKeyId="$(S3AccessKeyId)" BucketName="$(S3BucketName)" Key="$(Key)" SecretAccessKeyId="$(S3SecretAccessKeyId)" UseSsl="$(S3UseSsl)">
+      <Output TaskParamter="Exists" PropertyName="KeyExists"/>
+    </S3KeyExists>
+  </Target>
+  <Target Name="PrefixExists">
+    <S3PrefixExists AccessKeyId="$(S3AccessKeyId)" BucketName="$(S3BucketName)" Prefix="$(Prefix)" SecretAccessKeyId="$(S3SecretAccessKeyId)" UseSsl="$(S3UseSsl)">
+      <Output TaskParamter="Exists" PropertyName="PrefixExists"/>
+    </S3PrefixExists>
+  </Target>
+</Project>

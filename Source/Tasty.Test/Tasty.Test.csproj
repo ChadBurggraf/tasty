@@ -87,7 +87,9 @@
     <Compile Include="PostgresJobStoreTests.cs" />
     <Compile Include="PostgresUrlTokenStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="S3ExistsTests.cs" />
     <Compile Include="S3PublisherTests.cs" />
+    <Compile Include="S3TestBase.cs" />
     <Compile Include="ScheduledJobTests.cs" />
     <Compile Include="ServiceModelTests.cs" />
     <Compile Include="SetVersionTests.cs" />
@@ -121,6 +123,7 @@
     <None Include="generate-test-certs.bat" />
     <None Include="GitHubWebHookAfter.proj" />
     <None Include="GitHubWebHookBefore.proj" />
+    <None Include="S3Exists.proj" />
     <None Include="S3Publish.proj">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

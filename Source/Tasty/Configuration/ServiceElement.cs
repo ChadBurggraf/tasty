@@ -24,6 +24,16 @@ namespace Tasty.Configuration
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether validation is enabled for the service.
+        /// </summary>
+        [ConfigurationProperty("enabled", IsRequired = true, DefaultValue = true)]
+        public bool Enabled
+        {
+            get { return (bool)this["enabled"]; }
+            set { this["enabled"] = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the service's name.
         /// </summary>
         [ConfigurationProperty("name", IsRequired = true, IsKey = true)]

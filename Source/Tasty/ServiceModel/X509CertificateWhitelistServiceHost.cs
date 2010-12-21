@@ -44,17 +44,20 @@ namespace Tasty.ServiceModel
 
             if (element != null)
             {
-                Credentials.ClientCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.Custom;
-                Credentials.ServiceCertificate.Certificate = element.LoadCertificate();
-
-                X509CertificateWhiteListValidator validator = new X509CertificateWhiteListValidator();
-
-                foreach (ClientCertificateElement clientElement in element.ClientCertificates)
+                if (element.Enabled)
                 {
-                    validator.WhiteList.Add(clientElement.LoadCertificate());
-                }
+                    Credentials.ClientCertificate.Authentication.CertificateValidationMode = X509CertificateValidationMode.Custom;
+                    Credentials.ServiceCertificate.Certificate = element.LoadCertificate();
 
-                Credentials.ClientCertificate.Authentication.CustomCertificateValidator = validator;
+                    X509CertificateWhiteListValidator validator = new X509CertificateWhiteListValidator();
+
+                    foreach (ClientCertificateElement clientElement in element.ClientCertificates)
+                    {
+                        validator.WhiteList.Add(clientElement.LoadCertificate());
+                    }
+
+                    Credentials.ClientCertificate.Authentication.CustomCertificateValidator = validator;
+                }
             }
             else
             {

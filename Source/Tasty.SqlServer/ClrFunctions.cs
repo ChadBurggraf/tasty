@@ -10,7 +10,6 @@ namespace Tasty.SqlServer
     using System.Collections;
     using System.Data.SqlTypes;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
     using System.Text.RegularExpressions;
     using Microsoft.SqlServer.Server;
 
@@ -89,21 +88,40 @@ namespace Tasty.SqlServer
 
             if (String.IsNullOrEmpty(separator))
             {
-                separator = @"\n";
+                separator = "\n";
             }
 
-            char[] separatorChars = separator.ToCharArray();
+            string[] separatros = new string[] { separator };
             bool contains = String.IsNullOrEmpty(referenceSet) && String.IsNullOrEmpty(askingSet);
 
             if (!contains)
             {
-                var r = from s in referenceSet.Split(separatorChars, StringSplitOptions.RemoveEmptyEntries)
-                        select s.Trim();
+                string[] reference = referenceSet.Split(separatros, StringSplitOptions.RemoveEmptyEntries);
+                string[] asking = askingSet.Split(separatros, StringSplitOptions.RemoveEmptyEntries);
 
-                var a = from s in askingSet.Split(separatorChars, StringSplitOptions.RemoveEmptyEntries)
-                        select s.Trim();
+                foreach (string r in reference)
+                {
+                    string rtr = r.Trim();
 
-                contains = 0 < r.Intersect(a, StringComparer.OrdinalIgnoreCase).Count();
+                    if (!String.IsNullOrEmpty(rtr))
+                    {
+                        foreach (string a in asking)
+                        {
+                            string atr = a.Trim();
+
+                            if (!String.IsNullOrEmpty(atr) && rtr.Equals(atr, StringComparison.OrdinalIgnoreCase))
+                            {
+                                contains = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (contains)
+                    {
+                        break;
+                    }
+                }
             }
 
             return contains;

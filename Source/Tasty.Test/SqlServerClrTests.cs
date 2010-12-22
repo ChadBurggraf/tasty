@@ -14,11 +14,8 @@ namespace Tasty.Test
         [TestMethod]
         public void SqlServerClr_AssemblyImportScript()
         {
-            string system = @"C:\Program Files\Reference Assemblies\Microsoft\Framework\v3.5\System.Core.dll";
             string tasty = Assembly.GetAssembly(typeof(AssemblyImportScript)).Location;
-            string script = AssemblyImportScript.Get(system);
-
-            Assert.IsTrue(script.Contains("@SystemCoreAssemblyPath = '" + system + "'"));
+            string script = AssemblyImportScript.Get();
             Assert.IsTrue(script.Contains("@TastyAssemblyPath = '" + tasty + "'"));
         }
 
@@ -40,6 +37,11 @@ namespace Tasty.Test
 
             b = String.Empty;
             Assert.IsFalse(ClrFunctions.StringSetContainsAny(a, b, separator).IsTrue);
+
+            a = "ApplicationAdmin";
+            b = "ApplicationUser\n?";
+            Assert.IsFalse(ClrFunctions.StringSetContainsAny(a, b, separator).IsTrue);
+            Assert.IsFalse(ClrFunctions.StringSetContainsAny(a, b, "\n").IsTrue);
         }
     }
 }

@@ -20,30 +20,11 @@ IF EXISTS (SELECT * FROM sys.assemblies WHERE [name] = 'Tasty.SqlServer')
 	DROP ASSEMBLY [Tasty.SqlServer]
 GO
 
-DECLARE 
-	@SystemCoreAssemblyPath nvarchar(256),
-	@TastyAssemblyPath nvarchar(256)
-
-SELECT @SystemCoreAssemblyPath = '{0}', @TastyAssemblyPath = '{1}'
-
-IF @SystemCoreAssemblyPath NOT LIKE N'%System.Core.dll'
-	SET @SystemCoreAssemblyPath = N'C:\Program Files\Reference Assemblies\Microsoft\Framework\v3.5\System.Core.dll'
+DECLARE @TastyAssemblyPath nvarchar(256)
+SELECT @TastyAssemblyPath = '{0}'
 
 IF @TastyAssemblyPath NOT LIKE N'%Tasty.SqlServer.dll'
 	SET @TastyAssemblyPath = N'C:\Program Files\Tasty\SqlServer\Tasty.SqlServer.dll'
-
-IF NOT EXISTS (SELECT * FROM sys.assemblies WHERE [name] = 'System.Core')
-BEGIN
-	BEGIN TRY
-		CREATE ASSEMBLY [System.Core]
-		AUTHORIZATION [dbo]
-		FROM @SystemCoreAssemblyPath
-		WITH PERMISSION_SET = UNSAFE
-	END TRY
-	BEGIN CATCH
-		-- Hopefully this means we're on SQL Server 2008 and it's known by the system.
-	END CATCH
-END
 
 CREATE ASSEMBLY [Tasty.SqlServer]
 AUTHORIZATION [dbo] 

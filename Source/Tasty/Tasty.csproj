@@ -106,6 +106,7 @@
     <Compile Include="Configuration\WebhookElementCollection.cs" />
     <Compile Include="Emailer.cs" />
     <Compile Include="EmailSentEventArgs.cs" />
+    <Compile Include="EmptyMailModel.cs" />
     <Compile Include="GitHub\GitHubWebhookHandler.cs" />
     <Compile Include="GitHub\GitHubWebhookMSBuildExecuter.cs" />
     <Compile Include="Build\IS3PublisherDelegate.cs" />

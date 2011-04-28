@@ -12,6 +12,7 @@ namespace Tasty
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Text.RegularExpressions;
     using DocumentFormat.OpenXml;
     using DocumentFormat.OpenXml.Packaging;
     using DocumentFormat.OpenXml.Spreadsheet;
@@ -134,11 +135,15 @@ namespace Tasty
                 sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
             }
 
-            Sheet sheet = new Sheet() { Id = id, SheetId = sheetId, Name = sheetName.Length <= 31 ? sheetName : sheetName.Substring(0, 31) };
-            sheets.Append(sheet);
+            sheets.Append(
+                new Sheet()
+                {
+                    Id = id,
+                    SheetId = sheetId,
+                    Name = NormalizeSheetName(sheetName, sheetId)
+                });
 
             workbookPart.Workbook.Save();
-
             return worksheetPart;
         }
 
@@ -221,6 +226,44 @@ namespace Tasty
             }
 
             return cell;
+        }
+
+        /// <summary>
+        /// Normalizes the given sheet name to a valid name.
+        /// </summary>
+        /// <param name="sheetName">The name of the sheet to normalize.</param>
+        /// <param name="sheetId">The sheet ID.</param>
+        /// <returns>The normalized sheet name.</returns>
+        private static string NormalizeSheetName(string sheetName, uint sheetId)
+        {
+            sheetName = (sheetName ?? String.Empty).Trim();
+
+            Func<bool> empty = () =>
+            {
+                if (String.IsNullOrEmpty(sheetName)) 
+                {
+                    sheetName = "Sheet " + sheetId;
+                    return true;
+                }
+
+                return false;
+            };
+
+            if (!empty())
+            {
+                if (sheetName.Length > 31)
+                {
+                    sheetName = sheetName.Substring(0, 31).Trim();
+                }
+
+                if (!empty())
+                {
+                    sheetName = Regex.Replace(sheetName, @"['*\[\]/\\:?]+", String.Empty).Trim();
+                    empty();
+                }
+            }
+
+            return sheetName;
         }
     }
 }

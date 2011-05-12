@@ -124,10 +124,21 @@ namespace Tasty.Web
                         {
                             string[] values = HttpUtility.UrlDecode(pair[1]).Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                            foreach (string value in values)
+                            if (values.Length > 0)
                             {
-                                collection.Add(key, value);
+                                foreach (string value in values)
+                                {
+                                    collection.Add(key, value);
+                                }
                             }
+                            else
+                            {
+                                collection.Add(key, String.Empty);
+                            }
+                        }
+                        else
+                        {
+                            collection.Add(key, String.Empty);
                         }
                     }
                 }

@@ -89,7 +89,6 @@ namespace Tasty.Console
             output.WriteLine();
             output.WriteLine("Commands:");
             output.WriteLine("  sql-install                a SQL install script generator.");
-            output.WriteLine("  jobs                       start a tasty jobs session.");
             options.WriteOptionDescriptions(output);
         }
     }

@@ -4,10 +4,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Tasty
+namespace Tasty.Spreadsheets
 {
     using System;
-    using System.Data;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
@@ -40,12 +39,12 @@ namespace Tasty
         }
 
         /// <summary>
-        /// Writes the given <see cref="DataSet"/> to a spreadsheet file at the given path.
+        /// Writes the given <see cref="ISpreadsheetDataSet"/> to a spreadsheet file at the given path.
         /// The path's extension will be replaced by the value of this instance's <see cref="Extension"/> property.
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> to write.</param>
+        /// <param name="dataSet">The <see cref="ISpreadsheetDataSet"/> to write.</param>
         /// <param name="path">The path to write to.</param>
-        public override void Write(DataSet dataSet, string path)
+        public override void Write(ISpreadsheetDataSet dataSet, string path)
         {
             path = CreatePath(path);
 
@@ -76,7 +75,7 @@ namespace Tasty
 
                 for (int i = 0; i < dataSet.Tables.Count; i++)
                 {
-                    WorksheetPart worksheetPart = AddWorksheet(workbookPart, sheets, dataSet.Tables[i].TableName);
+                    WorksheetPart worksheetPart = AddWorksheet(workbookPart, sheets, dataSet.Tables[i].Name);
                     SheetData sheetData = worksheetPart.Worksheet.GetFirstChild<SheetData>();
 
                     Row headerRow = new Row { RowIndex = 1 };
@@ -88,7 +87,7 @@ namespace Tasty
                         {
                             CellReference = (j + 1).ToSpreadsheetColumnName() + 1,
                             DataType = CellValues.String,
-                            CellValue = new CellValue(dataSet.Tables[i].Columns[j].ColumnName)
+                            CellValue = new CellValue(dataSet.Tables[i].Columns[j].Name)
                         };
 
                         headerRow.Append(cell);
@@ -96,13 +95,13 @@ namespace Tasty
 
                     for (int j = 0; j < dataSet.Tables[i].Rows.Count; j++)
                     {
-                        DataRow dataRow = dataSet.Tables[i].Rows[j];
+                        ISpreadsheetDataRow dataRow = dataSet.Tables[i].Rows[j];
                         uint rowNum = (uint)(j + 2);
 
                         Row row = new Row() { RowIndex = rowNum };
                         sheetData.Append(row);
 
-                        for (int k = 0; k < dataRow.ItemArray.Length; k++)
+                        for (int k = 0; k < dataRow.Items.Count(); k++)
                         {
                             row.Append(CreateCell(dataSet.Tables[i], dataRow, (int)rowNum, k, dateFormatIndex, timeFormatIndex));
                         }
@@ -157,7 +156,7 @@ namespace Tasty
         /// <param name="dateStyleIndex">The index of the date format style in the workbook's stylesheet.</param>
         /// <param name="timeStyleIndex">The index of the time format style in the workbook's stylesheet.</param>
         /// <returns>The created cell.</returns>
-        private static Cell CreateCell(DataTable table, DataRow row, int rowNumber, int columnIndex, uint dateStyleIndex, uint timeStyleIndex)
+        private static Cell CreateCell(ISpreadsheetDataTable table, ISpreadsheetDataRow row, int rowNumber, int columnIndex, uint dateStyleIndex, uint timeStyleIndex)
         {
             Type columnType = table.Columns[columnIndex].DataType;
             EnumValue<CellValues> dataType;

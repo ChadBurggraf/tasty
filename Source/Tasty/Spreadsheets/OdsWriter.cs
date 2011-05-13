@@ -6,12 +6,12 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Tasty
+namespace Tasty.Spreadsheets
 {
     using System;
-    using System.Data;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using System.Reflection;
     using System.Xml;
     using Ionic.Zip;
@@ -92,12 +92,12 @@ namespace Tasty
         }
 
         /// <summary>
-        /// Writes the given <see cref="DataSet"/> to a spreadsheet file at the given path.
+        /// Writes the given <see cref="ISpreadsheetDataSet"/> to a spreadsheet file at the given path.
         /// The path's extension will be replaced by the value of this instance's <see cref="Extension"/> property.
         /// </summary>
-        /// <param name="dataSet">The <see cref="DataSet"/> to write.</param>
+        /// <param name="dataSet">The <see cref="ISpreadsheetDataSet"/> to write.</param>
         /// <param name="path">The path to write to.</param>
-        public override void Write(DataSet dataSet, string path)
+        public override void Write(ISpreadsheetDataSet dataSet, string path)
         {
             XmlDocument document = new XmlDocument();
             LoadDocumentWithTemplate(document);
@@ -109,12 +109,12 @@ namespace Tasty
             string officeUri = namespaceManager.LookupNamespace("office");
             string textUri = namespaceManager.LookupNamespace("text");
 
-            foreach (DataTable table in dataSet.Tables)
+            foreach (ISpreadsheetDataTable table in dataSet.Tables)
             {
                 XmlNode sheetNode = document.CreateElement("table:table", tableUri);
 
                 XmlAttribute sheetNameAttribute = document.CreateAttribute("table:name", tableUri);
-                sheetNameAttribute.Value = table.TableName;
+                sheetNameAttribute.Value = table.Name;
                 sheetNode.Attributes.Append(sheetNameAttribute);
 
                 XmlAttribute sheetStyleAttribute = document.CreateAttribute("table:style-name", tableUri);
@@ -131,20 +131,20 @@ namespace Tasty
 
                 XmlNode headerNode = document.CreateElement("table:table-row", tableUri);
 
-                foreach (DataColumn column in table.Columns)
+                foreach (ISpreadsheetDataColumn column in table.Columns)
                 {
                     XmlNode cellNode = document.CreateElement("table:table-cell", tableUri);
-                    SetCellValue(document, cellNode, officeUri, tableUri, textUri, typeof(string), column.ColumnName);
+                    SetCellValue(document, cellNode, officeUri, tableUri, textUri, typeof(string), column.Name);
                     headerNode.AppendChild(cellNode);
                 }
 
                 sheetNode.AppendChild(headerNode);
 
-                foreach (DataRow row in table.Rows)
+                foreach (ISpreadsheetDataRow row in table.Rows)
                 {
                     XmlNode rowNode = document.CreateElement("table:table-row", tableUri);
 
-                    for (int i = 0; i < row.ItemArray.Length; i++)
+                    for (int i = 0; i < row.Items.Count(); i++)
                     {
                         XmlNode cellNode = document.CreateElement("table:table-cell", tableUri);
                         SetCellValue(document, cellNode, officeUri, tableUri, textUri, table.Columns[i].DataType, row[i]);

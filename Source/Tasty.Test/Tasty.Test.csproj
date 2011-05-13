@@ -78,28 +78,16 @@
     <Compile Include="HttpCacheUrlTokenStoreTests.cs" />
     <Compile Include="HttpContextTests.cs" />
     <Compile Include="HttpTests.cs" />
-    <Compile Include="JobRunnerTests.cs" />
-    <Compile Include="JobStoreTests.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="JobTests.cs" />
-    <Compile Include="MemoryJobStoreTests.cs" />
-    <Compile Include="PostgresJobStoreTests.cs" />
     <Compile Include="PostgresUrlTokenStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="S3ExistsTests.cs" />
     <Compile Include="S3PublisherTests.cs" />
     <Compile Include="S3TestBase.cs" />
-    <Compile Include="ScheduledJobTests.cs" />
     <Compile Include="ServiceModelTests.cs" />
     <Compile Include="SetVersionTests.cs" />
     <Compile Include="SqlDateTimeAssert.cs" />
     <Compile Include="SqlServerClrTests.cs" />
-    <Compile Include="SqlServerJobStoreTests.cs" />
     <Compile Include="SqlServerUrlTokenStoreTests.cs" />
-    <Compile Include="TestJobs.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="TestService.cs" />
     <Compile Include="TestUrlTokens.cs" />
     <Compile Include="TimeZoneTests.cs" />

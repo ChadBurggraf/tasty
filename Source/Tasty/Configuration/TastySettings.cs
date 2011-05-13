@@ -47,15 +47,6 @@ namespace Tasty.Configuration
         }
 
         /// <summary>
-        /// Gets the jobs configuration element.
-        /// </summary>
-        [ConfigurationProperty("jobs", IsRequired = false)]
-        public JobsElement Jobs
-        {
-            get { return (JobsElement)(this["jobs"] ?? (this["jobs"] = new JobsElement())); }
-        }
-
-        /// <summary>
         /// Gets the HTTP configuration element.
         /// </summary>
         [ConfigurationProperty("http", IsRequired = false)]

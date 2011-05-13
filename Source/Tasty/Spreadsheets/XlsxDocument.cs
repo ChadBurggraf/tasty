@@ -4,7 +4,7 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-namespace Tasty
+namespace Tasty.Spreadsheets
 {
     using System;
     using DocumentFormat.OpenXml;

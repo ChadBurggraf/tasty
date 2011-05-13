@@ -32,7 +32,7 @@
     <RemoveDir Directories="$(BuildDir)"/>
     <MakeDir Directories="$(BuildDir);$(BuildDir)\Library;$(BuildDir)\Console;$(BuildDir)\SqlServer;$(BuildDir)\JobService"/>
     
-    <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj;$(JobServiceDir)\Tasty.JobService.csproj" Properties="Configuration=$(Configuration);SignAssembly=$(SignAssembly);AssemblyOriginatorKeyFile=$(KeyFile)"/>
+    <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration);SignAssembly=$(SignAssembly);AssemblyOriginatorKeyFile=$(KeyFile)"/>
   
     <Message Text='Merging assemblies into "Tasty.dll".'/>
     <Exec Command='"$(ILMergePath)" /ndebug /internalize $(KeyFileArgs) /out:$(BuildDir)\Library\Tasty.dll "$(LibraryDir)\bin\$(Configuration)\Tasty.dll" "$(LibDir)\Ionic.Zip.Reduced.dll" "$(LibDir)\Npgsql.dll" "$(LibDir)\Mono.Security.dll"'/>
@@ -56,19 +56,9 @@
     <Copy SourceFiles="@(ConsoleFiles)" DestinationFolder="$(BuildDir)\Console"/>
 
     <Copy SourceFiles="$(SqlServerDir)\bin\$(Configuration)\Tasty.SqlServer.dll" DestinationFolder="$(BuildDir)\SqlServer"/>
-
-    <ItemGroup>
-      <JobServiceFiles Include="$(BuildDir)\Library\Tasty.dll"/>
-      <JobServiceFiles Include="$(BuildDir)\Console\TastyConsole.exe"/>
-      <JobServiceFiles Include="$(JobServiceDir)\bin\$(Configuration)\TastyJobService.exe"/>
-      <JobServiceFiles Include="$(JobServiceDir)\bin\$(Configuration)\TastyJobService.exe.config"/>
-    </ItemGroup>
-    <Copy SourceFiles="@(JobServiceFiles)" DestinationFolder="$(BuildDir)\JobService"/>
-    <Copy SourceFiles="$(MSBuildProjectDirectory)\Source\Templates\JobService.config.template" DestinationFiles="$(BuildDir)\JobService\TastyJobService.exe.config"/>
   </Target>
 
   <Target Name="EnsureConfigs">
-    <Copy Condition="!Exists('$(JobServiceDir)\App.config')" SourceFiles="$(MSBuildProjectDirectory)\Source\Templates\JobService.config.template" DestinationFiles="$(JobServiceDir)\App.config"/>
     <Copy Condition="!Exists('$(TestDir)\App.config')" SourceFiles="$(MSBuildProjectDirectory)\Source\Templates\Test.config.template" DestinationFiles="$(TestDir)\App.config"/>
   </Target>
 </Project>

@@ -68,8 +68,6 @@ namespace Tasty.Console
             {
                 case "SQL-INSTALL":
                     return new SqlInstallCommand(args);
-                case "JOBS":
-                    return new JobRunnerCommand(args);
                 default:
                     throw new ArgumentException("The given command was not recognized.", "command");
             }

@@ -6,16 +6,6 @@
   <!-- All configuration is optional. Only configure what you're going to use. -->
   <tasty>
     <geocode apiKey=""/>
-    <jobs heartbeat="10000" maximumConcurrency="25">
-      <schedules>
-        <add name="Daily" repeatHours="24" startOn="1/1/2010">
-          <scheduledJobs>
-            <add type=""/>
-          </scheduledJobs>
-        </add>
-      </schedules>
-      <store type="Tasty.Jobs.MemoryJobStore, Tasty"/>
-    </jobs>
     <gitHub>
       <webhooks>
         <!-- Add each repository you want the GitHubWebhook handler to respond to. projectFile is relative to this file, if not rooted. -->

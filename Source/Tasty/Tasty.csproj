@@ -134,6 +134,14 @@
     <Compile Include="DataSets.cs" />
     <Compile Include="ExceptionXElement.cs" />
     <Compile Include="Files.cs" />
+    <Compile Include="QueuedDictionary.cs" />
+    <Compile Include="QueuedDictionaryAccess.cs" />
+    <Compile Include="QueuedDictionaryAccessCompareMode.cs" />
+    <Compile Include="QueuedDictionaryAccessComparer.cs" />
+    <Compile Include="QueuedDictionaryAccessComparerOfT.cs" />
+    <Compile Include="QueuedDictionaryAccessOfT.cs" />
+    <Compile Include="QueuedDictionaryEventArgs.cs" />
+    <Compile Include="QueuedDictionaryEventArgsItem.cs" />
     <Compile Include="Spreadsheets\ISpreadsheetDataColumn.cs" />
     <Compile Include="Spreadsheets\ISpreadsheetDataRow.cs" />
     <Compile Include="Spreadsheets\ISpreadsheetDataSet.cs" />

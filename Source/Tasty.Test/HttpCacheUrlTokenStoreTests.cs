@@ -1,48 +1,72 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Web.UrlTokens;
+﻿//-----------------------------------------------------------------------
+// <copyright file="HttpCacheUrlTokenStoreTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.Web.UrlTokens;
+
+    /// <summary>
+    /// HTTP-cache URL token store tests.
+    /// </summary>
     [TestClass]
     public class HttpCacheUrlTokenStoreTests : UrlTokenStoreTests
     {
+        /// <summary>
+        /// Initializes a new instance of the HttpCacheUrlTokenStoreTests class.
+        /// </summary>
         public HttpCacheUrlTokenStoreTests()
             : base(new HttpCacheUrlTokenStore())
         {
         }
 
+        /// <summary>
+        /// Current token store tests.
+        /// </summary>
         [TestMethod]
-        public void HttpCacheUrlTokenStore_CurrentTokenStore()
+        public void HttpCacheUrlTokenStoreCurrentTokenStore()
         {
-            base.CurrentTokenStore();
+            CurrentTokenStore();
         }
 
+        /// <summary>
+        /// Create URL token tests.
+        /// </summary>
         [TestMethod]
-        public void HttpCacheUrlTokenStore_CreateUrlToken()
+        public void HttpCacheUrlTokenStoreCreateUrlToken()
         {
-            base.CreateUrlToken();
+            CreateUrlToken();
         }
 
+        /// <summary>
+        /// Expire URL token tests.
+        /// </summary>
         [TestMethod]
-        public void HttpCacheUrlTokenStore_ExpireUrlToken()
+        public void HttpCacheUrlTokenStoreExpireUrlToken()
         {
-            base.ExpireUrlToken();
+            ExpireUrlToken();
         }
 
+        /// <summary>
+        /// Get URL token tests.
+        /// </summary>
         [TestMethod]
-        public void HttpCacheUrlTokenStore_GetUrlToken()
+        public void HttpCacheUrlTokenStoreGetUrlToken()
         {
-            base.GetUrlToken();
+            GetUrlToken();
         }
 
+        /// <summary>
+        /// Query string URL token provider tests.
+        /// </summary>
         [TestMethod]
-        public void HttpCacheUrlTokenStore_QueryStringUrlTokenUrlProvider()
+        public void HttpCacheUrlTokenStoreQueryStringUrlTokenUrlProvider()
         {
-            base.QueryStringUrlTokenUrlProvider();
+            QueryStringUrlTokenUrlProvider();
         }
     }
 }

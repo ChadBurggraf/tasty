@@ -1,27 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Configuration;
-using Tasty.Web.UrlTokens;
+﻿//-----------------------------------------------------------------------
+// <copyright file="UrlTokenStoreTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.Web.UrlTokens;
+
+    /// <summary>
+    /// Serves as the base class for URL token store tests.
+    /// </summary>
     public abstract class UrlTokenStoreTests
     {
+        /// <summary>
+        /// Initializes a new instance of the UrlTokenStoreTests class.
+        /// </summary>
+        /// <param name="store">The store to run tests against.</param>
         protected UrlTokenStoreTests(IUrlTokenStore store)
         {
             this.Store = store;
         }
 
+        /// <summary>
+        /// Gets the store to run tests against.
+        /// </summary>
         protected IUrlTokenStore Store { get; private set; }
 
+        /// <summary>
+        /// Current token store tests.
+        /// </summary>
         protected virtual void CurrentTokenStore()
         {
             Assert.IsNotNull(UrlTokenStore.Current);
         }
 
+        /// <summary>
+        /// Create URL token tests.
+        /// </summary>
         protected virtual void CreateUrlToken()
         {
             if (this.Store != null)
@@ -45,6 +63,9 @@ namespace Tasty.Test
             }
         }
 
+        /// <summary>
+        /// Expire URL token tests.
+        /// </summary>
         protected virtual void ExpireUrlToken()
         {
             if (this.Store != null)
@@ -67,6 +88,9 @@ namespace Tasty.Test
             }
         }
 
+        /// <summary>
+        /// Get URL token tests.
+        /// </summary>
         protected virtual void GetUrlToken()
         {
             if (this.Store != null)
@@ -105,6 +129,9 @@ namespace Tasty.Test
             }
         }
 
+        /// <summary>
+        /// Query string URL token URL provider tests.
+        /// </summary>
         protected virtual void QueryStringUrlTokenUrlProvider()
         {
             TestIdUrlToken source = new TestIdUrlToken();

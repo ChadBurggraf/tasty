@@ -1,12 +1,23 @@
-﻿using System;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Configuration;
-using Tasty.Geocode;
+﻿//-----------------------------------------------------------------------
+// <copyright file="GeocodeTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
-namespace Fuzz.Test
+namespace Tasty.Test
 {
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.Configuration;
+    using Tasty.Geocode;
+
+    /// <summary>
+    /// Geocode tests.
+    /// </summary>
     [TestClass]
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class GeocodeTests
     {
         private static readonly GeocodeRequestAddress HomeAddress = new GeocodeRequestAddress()
@@ -22,8 +33,12 @@ namespace Fuzz.Test
             Coordinates = new decimal[] { -111.93307m, 33.491697m }
         };
 
+        /// <summary>
+        /// City tests.
+        /// </summary>
         [TestMethod]
-        public void Geocode_CanGeocodeCity()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public void GeocodeCity()
         {
             if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
             {
@@ -44,8 +59,12 @@ namespace Fuzz.Test
             }
         }
 
+        /// <summary>
+        /// Make request tests.
+        /// </summary>
         [TestMethod]
-        public void Geocode_CanMakeRequest()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public void GeocodeMakeRequest()
         {
             if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
             {
@@ -55,8 +74,12 @@ namespace Fuzz.Test
             }
         }
 
+        /// <summary>
+        /// Administrative area relative to city tests.
+        /// </summary>
         [TestMethod]
-        public void Geocode_GetsCorrectAdministrativeAreaForCity()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public void GeocodeAdministrativeAreaForCity()
         {
             if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
             {
@@ -74,8 +97,12 @@ namespace Fuzz.Test
             }
         }
 
+        /// <summary>
+        /// Administrative area relative to HomeAddress tests.
+        /// </summary>
         [TestMethod]
-        public void Geocode_GetsCorrectAdministrativeAreaForHome()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public void GeocodeAdministrativeAreaForHome()
         {
             if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
             {
@@ -85,14 +112,18 @@ namespace Fuzz.Test
                 GeocodePlacemark mark = response.Placemark.First();
 
                 Assert.AreEqual("AZ", mark.AddressDetails.Country.AdministrativeArea.AdministrativeAreaName);
-                Assert.AreEqual("Scottsdale", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.LocalityName);
-                Assert.AreEqual("6840 E 2nd St #22", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.Thoroughfare.ThoroughfareName);
-                Assert.AreEqual("85251", mark.AddressDetails.Country.AdministrativeArea.SubAdministrativeArea.Locality.PostalCode.PostalCodeNumber);
+                Assert.AreEqual("Scottsdale", mark.AddressDetails.Country.AdministrativeArea.Locality.LocalityName);
+                Assert.AreEqual("6840 E 2nd St #22", mark.AddressDetails.Country.AdministrativeArea.Locality.Thoroughfare.ThoroughfareName);
+                Assert.AreEqual("85251", mark.AddressDetails.Country.AdministrativeArea.Locality.PostalCode.PostalCodeNumber);
             }
         }
 
+        /// <summary>
+        /// Lat/lon relative to HomeAddress tests.
+        /// </summary>
         [TestMethod]
-        public void Geocode_GetsCorrectLatLonForHome()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public void GeocodetLatLonForHome()
         {
             if (!String.IsNullOrEmpty(TastySettings.Section.Geocode.ApiKey))
             {

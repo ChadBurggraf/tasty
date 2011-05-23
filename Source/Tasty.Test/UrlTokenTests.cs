@@ -1,14 +1,26 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Web.UrlTokens;
+﻿//-----------------------------------------------------------------------
+// <copyright file="UrlTokenTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.Web.UrlTokens;
+
+    /// <summary>
+    /// URL token tests.
+    /// </summary>
     [TestClass]
     public class UrlTokenTests
     {
+        /// <summary>
+        /// Is expired tests.
+        /// </summary>
         [TestMethod]
-        public void UrlToken_IsExpired()
+        public void UrlTokenIsExpired()
         {
             IUrlTokenStore store = new HttpCacheUrlTokenStore();
 

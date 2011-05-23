@@ -1,4 +1,8 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="ServiceModelTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
@@ -7,11 +11,17 @@ namespace Tasty.Test
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Tasty.ServiceModel;
 
+    /// <summary>
+    /// Service model tests.
+    /// </summary>
     [TestClass]
     public class ServiceModelTests
     {
+        /// <summary>
+        /// Load file system certificates tests.
+        /// </summary>
         [TestMethod]
-        public void ServiceModel_LoadFilesystemCertificates()
+        public void ServiceModelLoadFileSystemCertificates()
         {
             using (X509CertificateLoader loader = new X509CertificateLoader(Path.GetFullPath("TastyClient.cer")))
             {
@@ -29,8 +39,11 @@ namespace Tasty.Test
             }
         }
 
+        /// <summary>
+        /// Load embedded resource certificates tests.
+        /// </summary>
         [TestMethod]
-        public void ServiceModel_LoadResourceCertificates()
+        public void ServiceModelLoadResourceCertificates()
         {
             using (X509CertificateLoader loader = new X509CertificateLoader(GetType(), "Tasty.Test.TastyClient.cer"))
             {

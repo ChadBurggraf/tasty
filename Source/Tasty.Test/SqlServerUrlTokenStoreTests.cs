@@ -1,51 +1,75 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Web.UrlTokens;
+﻿//-----------------------------------------------------------------------
+// <copyright file="SqlServerUrlTokenStoreTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using System.Configuration;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.Web.UrlTokens;
+
+    /// <summary>
+    /// SQL Server URL token store tests.
+    /// </summary>
     [TestClass]
     public class SqlServerUrlTokenStoreTests : UrlTokenStoreTests
     {
         private static string connectionString = ConfigurationManager.AppSettings["SqlServerConnectionString"];
 
+        /// <summary>
+        /// Initializes a new instance of the SqlServerUrlTokenStoreTests class.
+        /// </summary>
         public SqlServerUrlTokenStoreTests()
             : base(!String.IsNullOrEmpty(connectionString) ? new SqlServerUrlTokenStore(connectionString) : null)
         {
         }
 
+        /// <summary>
+        /// Current token store tests.
+        /// </summary>
         [TestMethod]
-        public void SqlServerUrlTokenStore_CurrentTokenStore()
+        public void SqlServerUrlTokenStoreCurrentTokenStore()
         {
-            base.CurrentTokenStore();
+            CurrentTokenStore();
         }
 
+        /// <summary>
+        /// Create URL token tests.
+        /// </summary>
         [TestMethod]
-        public void SqlServerUrlTokenStore_CreateUrlToken()
+        public void SqlServerUrlTokenStoreCreateUrlToken()
         {
-            base.CreateUrlToken();
+            CreateUrlToken();
         }
 
+        /// <summary>
+        /// Expire URL token tests.
+        /// </summary>
         [TestMethod]
-        public void SqlServerUrlTokenStore_ExpireUrlToken()
+        public void SqlServerUrlTokenStoreExpireUrlToken()
         {
-            base.ExpireUrlToken();
+            ExpireUrlToken();
         }
 
+        /// <summary>
+        /// Get URL token tests.
+        /// </summary>
         [TestMethod]
-        public void SqlServerUrlTokenStore_GetUrlToken()
+        public void SqlServerUrlTokenStoreGetUrlToken()
         {
-            base.GetUrlToken();
+            GetUrlToken();
         }
 
+        /// <summary>
+        /// Query string URL token URL provider tests.
+        /// </summary>
         [TestMethod]
-        public void SqlServerUrlTokenStore_QueryStringUrlTokenUrlProvider()
+        public void SqlServerUrlTokenStoreQueryStringUrlTokenUrlProvider()
         {
-            base.QueryStringUrlTokenUrlProvider();
+            QueryStringUrlTokenUrlProvider();
         }
     }
 }

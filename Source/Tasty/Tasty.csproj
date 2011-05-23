@@ -107,6 +107,7 @@
     <Compile Include="Emailer.cs" />
     <Compile Include="EmailSentEventArgs.cs" />
     <Compile Include="EmptyMailModel.cs" />
+    <Compile Include="Geocode\GeocodeSubAdministrativeArea.cs" />
     <Compile Include="GitHub\GitHubWebhookHandler.cs" />
     <Compile Include="GitHub\GitHubWebhookMSBuildExecuter.cs" />
     <Compile Include="Build\IS3PublisherDelegate.cs" />
@@ -178,7 +179,6 @@
     <Compile Include="Geocode\GeocodeResponse.cs" />
     <Compile Include="Geocode\GeocodeResponseStatus.cs" />
     <Compile Include="Geocode\GeocodeResposeStatusCode.cs" />
-    <Compile Include="Geocode\GeocodeSubAdministrativeArea.cs" />
     <Compile Include="Geocode\GeocodeThoroughFare.cs" />
     <Compile Include="Http\HttpRedirectModule.cs" />
     <Compile Include="Http\HttpRedirectRuleMatch.cs" />

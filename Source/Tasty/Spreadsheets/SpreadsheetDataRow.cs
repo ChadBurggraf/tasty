@@ -1,4 +1,8 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="SpreadsheetDataRow.cs" company="Tasty Codes">
+//     Copyright (c) 2011 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Spreadsheets
 {
@@ -28,6 +32,14 @@ namespace Tasty.Spreadsheets
         }
 
         /// <summary>
+        /// Gets the row's item collection.
+        /// </summary>
+        public IEnumerable<object> Items
+        {
+            get { return this.row.ItemArray; }
+        }
+
+        /// <summary>
         /// Gets the value of the item in the given column for this row.
         /// </summary>
         /// <param name="columnIndex">The index of the column to get the item value for.</param>
@@ -45,14 +57,6 @@ namespace Tasty.Spreadsheets
         public object this[string columnName]
         {
             get { return this.row[columnName]; }
-        }
-
-        /// <summary>
-        /// Gets the row's item collection.
-        /// </summary>
-        public IEnumerable<object> Items
-        {
-            get { return this.row.ItemArray; }
         }
     }
 }

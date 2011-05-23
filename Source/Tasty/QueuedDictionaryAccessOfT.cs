@@ -9,7 +9,7 @@ namespace Tasty
     using System;
 
     /// <summary>
-    /// Represents access statistics for a key in a <see cref="QueuedDictionary"/>.
+    /// Represents access statistics for a key in a <see cref="QueuedDictionary{TKey, TValue}"/>.
     /// </summary>
     /// <typeparam name="TKey">The key type.</typeparam>
     [Serializable]
@@ -36,6 +36,17 @@ namespace Tasty
         /// <summary>
         /// Gets or sets the key being referenced.
         /// </summary>
-        public new TKey Key { get; set; }
+        public new TKey Key
+        {
+            get
+            {
+                return (TKey)base.Key;
+            }
+
+            set
+            {
+                base.Key = value;
+            }
+        }
     }
 }

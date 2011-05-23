@@ -1,10 +1,24 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿//-----------------------------------------------------------------------
+// <copyright file="SqlDateTimeAssert.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+    /// <summary>
+    /// Provides an assert for comparing SQL date/times.
+    /// </summary>
     internal static class SqlDateTimeAssert
     {
+        /// <summary>
+        /// Asserts the given values are equal.
+        /// </summary>
+        /// <param name="expected">The expected value.</param>
+        /// <param name="actual">The actual value.</param>
         public static void AreEqual(DateTime? expected, DateTime? actual)
         {
             if (expected != null && actual != null)

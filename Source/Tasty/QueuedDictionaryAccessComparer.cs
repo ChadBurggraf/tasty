@@ -10,7 +10,7 @@ namespace Tasty
     using System.Collections.Generic;
     
     /// <summary>
-    /// Implements <see cref="IComparer{T}"/> to compare <see cref="QueuedDictionAccess"/> objects.
+    /// Implements <see cref="IComparer{T}"/> to compare <see cref="QueuedDictionaryAccess"/> objects.
     /// </summary>
     public class QueuedDictionaryAccessComparer : IComparer<QueuedDictionaryAccess>
     {

@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="S3KeyExists.cs" company="Tasty Codes">
+// <copyright file="S3Exists.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Chad Burggraf.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -34,6 +34,23 @@ namespace Tasty.Build
         public string BucketName { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the item exists.
+        /// </summary>
+        [Output]
+        public bool Exists { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Amazon S3 secret access key ID to use when connecting to the service.
+        /// </summary>
+        [Required]
+        public string SecretAccessKeyId { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to use SSL when connecting to the service.
+        /// </summary>
+        public bool UseSsl { get; set; }
+
+        /// <summary>
         /// Gets the client to use when connecting to the service.
         /// </summary>
         protected AmazonS3 Client
@@ -50,22 +67,5 @@ namespace Tasty.Build
                 return this.client;
             }
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the item exists.
-        /// </summary>
-        [Output]
-        public bool Exists { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Amazon S3 secret access key ID to use when connecting to the service.
-        /// </summary>
-        [Required]
-        public string SecretAccessKeyId { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to use SSL when connecting to the service.
-        /// </summary>
-        public bool UseSsl { get; set; }
     }
 }

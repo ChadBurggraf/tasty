@@ -1,12 +1,23 @@
-﻿using System;
-using System.IO;
-using Microsoft.Build.BuildEngine;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.GitHub;
+﻿//-----------------------------------------------------------------------
+// <copyright file="GitHubTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using System.Diagnostics.CodeAnalysis;
+    using System.IO;
+    using Microsoft.Build.BuildEngine;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.GitHub;
+
+    /// <summary>
+    /// GitHub tests.
+    /// </summary>
     [TestClass]
+    [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
     public class GitHubTests
     {
         #region WebhookSamplePayload
@@ -54,8 +65,12 @@ namespace Tasty.Test
 
         #endregion
 
+        /// <summary>
+        /// Webhook de-serialize tests.
+        /// </summary>
         [TestMethod]
-        public void GitHubWebhook_DeSerialize()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public void GitHubWebhookDeserialize()
         {
             var hook = GitHubWebhook.Deserialize(WebhookSamplePayload);
             Assert.IsNotNull(hook);
@@ -64,8 +79,12 @@ namespace Tasty.Test
             Assert.AreEqual(2, hook.Commits.Length);
         }
 
+        /// <summary>
+        /// Webhook executor tests.
+        /// </summary>
         [TestMethod]
-        public void GitHubWebhookExecuter_Execute()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public void GitHubWebhookExecuterExecute()
         {
             GitHubWebhookMSBuildExecuter executer = new GitHubWebhookMSBuildExecuter("GitHubWebhookBefore.proj", GitHubWebhook.Deserialize(WebhookSamplePayload));
             executer.LogFile = Path.GetRandomFileName().WithExtension("log");
@@ -73,8 +92,12 @@ namespace Tasty.Test
             Assert.IsTrue(File.ReadAllText(executer.LogFile).Contains("Hello, github!", StringComparison.Ordinal));
         }
 
+        /// <summary>
+        /// Webhook executer prepare project tests.
+        /// </summary>
         [TestMethod]
-        public void GitHubWebhookExecuter_PrepareProject()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "The spelling is correct.")]
+        public void GitHubWebhookExecuterPrepareProject()
         {
             Engine engine = new Engine();
             Project project = new Project(engine);

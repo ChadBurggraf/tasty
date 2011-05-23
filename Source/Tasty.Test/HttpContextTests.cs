@@ -1,15 +1,27 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.Web;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using Tasty.Web;
+﻿//-----------------------------------------------------------------------
+// <copyright file="HttpContextTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using System.Collections.Specialized;
+    using System.Web;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
+    using Tasty.Web;
+
+    /// <summary>
+    /// HTTP context tests.
+    /// </summary>
     [TestClass]
     public class HttpContextTests
     {
+        /// <summary>
+        /// Is fully qualified URL tests.
+        /// </summary>
         [TestMethod]
         public void HttpContextIsFullyQualifiedUrl()
         {
@@ -25,6 +37,9 @@ namespace Tasty.Test
             Assert.IsFalse(HttpContexts.IsFullyQualifiedUrl(url));
         }
 
+        /// <summary>
+        /// Resolve URL tests.
+        /// </summary>
         [TestMethod]
         public void HttpContextResolveUrl()
         {
@@ -40,6 +55,11 @@ namespace Tasty.Test
             Assert.AreEqual("https://example.com/tasty/some/path/file.png", url);
         }
 
+        /// <summary>
+        /// Creates a mock HTTP context.
+        /// </summary>
+        /// <param name="sslRequestUrl">A value indicating whether to use an HTTPS request URL.</param>
+        /// <returns>A mock HTTP context.</returns>
         private static Mock<HttpContextBase> MockHttpContext(bool sslRequestUrl)
         {
             var mockContext = new Mock<HttpContextBase>()

@@ -9,7 +9,7 @@ namespace Tasty
     using System;
 
     /// <summary>
-    /// Defines the compare modes for evicting items in a <see cref="QueuedDictionary"/>.
+    /// Defines the compare modes for evicting items in a <see cref="QueuedDictionary{TKey, TValue}"/>.
     /// </summary>
     public enum QueuedDictionaryAccessCompareMode
     {

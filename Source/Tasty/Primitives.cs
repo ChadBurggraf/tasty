@@ -117,7 +117,7 @@ namespace Tasty
                     }
                 }
 
-                throw new ArgumentException(String.Format(@"Value ""{0}"" could not be found in the members or descriptions of ""{1}"".", value, enumType), "value");
+                throw new ArgumentException(String.Format(CultureInfo.InvariantCulture, @"Value ""{0}"" could not be found in the members or descriptions of ""{1}"".", value, enumType), "value");
             }
 
             if (!isNullable)

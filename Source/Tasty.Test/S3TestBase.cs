@@ -1,12 +1,21 @@
-﻿using System;
-using System.Configuration;
-using System.Globalization;
-using Amazon;
-using Amazon.S3;
-using Amazon.S3.Model;
+﻿//-----------------------------------------------------------------------
+// <copyright file="S3TestBase.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using System.Configuration;
+    using System.Globalization;
+    using Amazon;
+    using Amazon.S3;
+    using Amazon.S3.Model;
+
+    /// <summary>
+    /// Serves as the base class for S3-related tests.
+    /// </summary>
     public abstract class S3TestBase
     {
         private static string accessKeyId, bucketName, secretAccessKeyId;
@@ -45,6 +54,14 @@ namespace Tasty.Test
 
                 return client;
             }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether any of the S3 configuration values are empty.
+        /// </summary>
+        protected static bool IsEmpty
+        {
+            get { return String.IsNullOrEmpty(AccessKeyId) || String.IsNullOrEmpty(SecretAccessKeyId) || String.IsNullOrEmpty(BucketName); }
         }
 
         /// <summary>

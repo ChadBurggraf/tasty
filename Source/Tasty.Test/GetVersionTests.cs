@@ -1,22 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Reflection;
-using Microsoft.Build.BuildEngine;
-using Microsoft.Build.Framework;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Build;
+﻿//-----------------------------------------------------------------------
+// <copyright file="GetVersionTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using System.IO;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.Build;
+
+    /// <summary>
+    /// Get version tests.
+    /// </summary>
     [TestClass]
     public class GetVersionTests
     {
+        /// <summary>
+        /// Assembly info get version tests.
+        /// </summary>
         [TestMethod]
-        public void GetVersion_AssemblyInfoVersion()
+        public void GetVersionAssemblyInfoVersion()
         {
             Version version = Assembly.GetAssembly(typeof(GetVersion)).GetName().Version;
 
@@ -32,8 +39,11 @@ namespace Tasty.Test
             Assert.AreEqual(version.Revision, task.Revision);
         }
 
+        /// <summary>
+        /// Assembly get version tests.
+        /// </summary>
         [TestMethod]
-        public void GetVersion_AssemblyVersion()
+        public void GetVersionAssemblyVersion()
         {
             Assembly assembly = Assembly.GetAssembly(typeof(GetVersion));
             Version version = assembly.GetName().Version;

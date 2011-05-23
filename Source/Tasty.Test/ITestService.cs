@@ -1,5 +1,5 @@
 ﻿//-----------------------------------------------------------------------
-// <copyright file="TestService.cs" company="Tasty Codes">
+// <copyright file="ITestService.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Chad Burggraf.
 // </copyright>
 //-----------------------------------------------------------------------
@@ -11,9 +11,10 @@ namespace Tasty.Test
     using System.ServiceModel;
     
     /// <summary>
-    /// Default implementation of <see cref="ITestService"/>.
+    /// Interface definition for the a service.
     /// </summary>
-    public class TestService : ITestService
+    [ServiceContract]
+    public interface ITestService
     {
         /// <summary>
         /// Sums the given values.
@@ -21,9 +22,7 @@ namespace Tasty.Test
         /// <param name="first">The first value.</param>
         /// <param name="second">The second value.</param>
         /// <returns>The sum of the given values.</returns>
-        public double Sum(double first, double second)
-        {
-            return first + second;
-        }
+        [OperationContract]
+        double Sum(double first, double second);
     }
 }

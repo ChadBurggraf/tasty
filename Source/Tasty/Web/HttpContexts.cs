@@ -7,6 +7,7 @@
 namespace Tasty.Web
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.Web;
 
     /// <summary>
@@ -21,6 +22,8 @@ namespace Tasty.Web
         /// <param name="httpContext">The HTTP context to use when resolving the URL.</param>
         /// <param name="url">The URL to resolve.</param>
         /// <returns>A resolved URL string.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Meant for ease of interoperability with ASP.NET stack.")]
+        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Meant for ease of interaperability with ASP.NET stack.")]
         public static string ResolveUrl(this HttpContext httpContext, string url)
         {
             return ResolveUrl(httpContext, url, false);
@@ -34,6 +37,8 @@ namespace Tasty.Web
         /// <param name="url">The URL to resolve.</param>
         /// <param name="fullyQualify">A value indicating whether to fully qualify the URL.</param>
         /// <returns>A resolved URL string.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Meant for ease of interoperability with ASP.NET stack.")]
+        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Meant for ease of interaperability with ASP.NET stack.")]
         public static string ResolveUrl(this HttpContext httpContext, string url, bool fullyQualify)
         {
             return ResolveUrl(httpContext, url, fullyQualify, false);
@@ -49,6 +54,8 @@ namespace Tasty.Web
         /// <param name="forceSsl">A value indicating whether to force the resolved URL to use SSL, even if
         /// the HTTP context's request does not. Leave false to use the same scheme as the HTTP context's request.</param>
         /// <returns>A resolved URL string.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Meant for ease of interoperability with ASP.NET stack.")]
+        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Meant for ease of interaperability with ASP.NET stack.")]
         public static string ResolveUrl(this HttpContext httpContext, string url, bool fullyQualify, bool forceSsl)
         {
             return ResolveUrl(new HttpContextWrapper(httpContext), url, fullyQualify, forceSsl);
@@ -61,6 +68,8 @@ namespace Tasty.Web
         /// <param name="httpContext">The HTTP context to use when resolving the URL.</param>
         /// <param name="url">The URL to resolve.</param>
         /// <returns>A resolved URL string.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Meant for ease of interoperability with ASP.NET stack.")]
+        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Meant for ease of interaperability with ASP.NET stack.")]
         public static string ResolveUrl(this HttpContextBase httpContext, string url)
         {
             return ResolveUrl(httpContext, url, false);
@@ -74,6 +83,8 @@ namespace Tasty.Web
         /// <param name="url">The URL to resolve.</param>
         /// <param name="fullyQualify">A value indicating whether to fully qualify the URL.</param>
         /// <returns>A resolved URL string.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Meant for ease of interoperability with ASP.NET stack.")]
+        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Meant for ease of interaperability with ASP.NET stack.")]
         public static string ResolveUrl(this HttpContextBase httpContext, string url, bool fullyQualify)
         {
             return ResolveUrl(httpContext, url, fullyQualify, false);
@@ -89,6 +100,8 @@ namespace Tasty.Web
         /// <param name="forceSsl">A value indicating whether to force the resolved URL to use SSL, even if
         /// the HTTP context's request does not. Leave false to use the same scheme as the HTTP context's request.</param>
         /// <returns>A resolved URL string.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Meant for ease of interoperability with ASP.NET stack.")]
+        [SuppressMessage("Microsoft.Design", "CA1055:UriReturnValuesShouldNotBeStrings", Justification = "Meant for ease of interaperability with ASP.NET stack.")]
         public static string ResolveUrl(this HttpContextBase httpContext, string url, bool fullyQualify, bool forceSsl)
         {
             if (httpContext == null)
@@ -115,7 +128,7 @@ namespace Tasty.Web
 
                 if (fullyQualify)
                 {
-                    Uri uri = new Uri(httpContext.Request.Url, url);
+                    Uri uri = new Uri(httpContext.Request.Url, new Uri(url, UriKind.Relative));
                     url = uri.ToString();
                     forceSsl = forceSsl || httpContext.Request.Url.Scheme == Uri.UriSchemeHttps;
                 }
@@ -123,7 +136,7 @@ namespace Tasty.Web
 
             if (forceSsl)
             {
-                UriBuilder builder = new UriBuilder(url);
+                UriBuilder builder = new UriBuilder(new Uri(url));
                 builder.Scheme = Uri.UriSchemeHttps;
                 builder.Port = 443;
                 url = builder.Uri.ToString();
@@ -137,6 +150,7 @@ namespace Tasty.Web
         /// </summary>
         /// <param name="url">The URL to check.</param>
         /// <returns>True if hte URL is fully qualified, false otherwise.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", Justification = "Meant for ease of interoperability with ASP.NET stack.")]
         public static bool IsFullyQualifiedUrl(string url)
         {
             bool isAbsolute = false;

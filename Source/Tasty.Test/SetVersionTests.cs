@@ -1,23 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Reflection;
-using Microsoft.Build.BuildEngine;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Tasty.Build;
+﻿//-----------------------------------------------------------------------
+// <copyright file="SetVersionTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using System.IO;
+    using System.Reflection;
+    using Microsoft.Build.Utilities;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.Build;
+
+    /// <summary>
+    /// Set version tests.
+    /// </summary>
     [TestClass]
     public class SetVersionTests
     {
+        /// <summary>
+        /// Set version tests.
+        /// </summary>
         [TestMethod]
-        public void SetVersion_SetVersion()
+        public void SetVersionSetVersion()
         {
             string version = Assembly.GetAssembly(typeof(SetVersion)).GetName().Version.ToString(4);
 

@@ -1,4 +1,8 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="SpreadsheetDataTable.cs" company="Tasty Codes">
+//     Copyright (c) 2011 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Spreadsheets
 {

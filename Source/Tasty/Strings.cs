@@ -8,6 +8,7 @@ namespace Tasty
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -147,6 +148,7 @@ namespace Tasty
         /// <param name="value">The string to convert.</param>
         /// <param name="camel">A value indicating whether to convert to camelCalse. If false, will convert to PascalCase.</param>
         /// <returns>The converted string.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Explicitly converting from an all lowercase string.")]
         public static string FromLowercaseUnderscore(this string value, bool camel)
         {
             value = (value ?? String.Empty).ToLowerInvariant().Trim();

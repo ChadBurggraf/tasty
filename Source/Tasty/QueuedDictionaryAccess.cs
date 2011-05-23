@@ -10,7 +10,7 @@ namespace Tasty
     using System.Collections.Generic;
 
     /// <summary>
-    /// Represents access statistics for a key in a <see cref="QueuedDictionary"/>.
+    /// Represents access statistics for a key in a <see cref="QueuedDictionary{TKey, TValue}"/>.
     /// </summary>
     [Serializable]
     public class QueuedDictionaryAccess :
@@ -66,6 +66,94 @@ namespace Tasty
         public DateTime LastAccessDate { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether the given objects are equal.
+        /// </summary>
+        /// <param name="left">The left object to compare.</param>
+        /// <param name="right">The right object to compare.</param>
+        /// <returns>True if the objects are equal, false otherwise.</returns>
+        public static bool operator ==(QueuedDictionaryAccess left, QueuedDictionaryAccess right)
+        {
+            if (left as object != null)
+            {
+                return left.Equals(right);
+            }
+            else if (right as object != null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the given objects are not-equal.
+        /// </summary>
+        /// <param name="left">The left object to compare.</param>
+        /// <param name="right">The right object to compare.</param>
+        /// <returns>True if the objects are not equal, false otherwise.</returns>
+        public static bool operator !=(QueuedDictionaryAccess left, QueuedDictionaryAccess right)
+        {
+            if (left as object != null)
+            {
+                return !left.Equals(right);
+            }
+            else if (right as object != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the left object precedes the right object.
+        /// </summary>
+        /// <param name="left">The left object to compare.</param>
+        /// <param name="right">The right object to compare.</param>
+        /// <returns>True if the left object precedes the right object, false otherwise.</returns>
+        public static bool operator <(QueuedDictionaryAccess left, QueuedDictionaryAccess right)
+        {
+            if (left as object != null)
+            {
+                return 0 > left.CompareTo(right);
+            }
+            else if (right as object != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the left object follows the right object.
+        /// </summary>
+        /// <param name="left">The left object to compare.</param>
+        /// <param name="right">The right object to compare.</param>
+        /// <returns>True if the left object follows the right object, false otherwise.</returns>
+        public static bool operator >(QueuedDictionaryAccess left, QueuedDictionaryAccess right)
+        {
+            if (left as object != null)
+            {
+                return 0 < left.CompareTo(right);
+            }
+            else if (right as object != null)
+            {
+                return false;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Compares the current instance with another object of the same type and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
         /// </summary>
         /// <param name="obj">An object to compare with this instance.</param>
@@ -78,7 +166,7 @@ namespace Tasty
         /// <summary>
         /// Compares the current instance with another object of the same type and returns an integer that indicates whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
         /// </summary>
-        /// <param name="obj">An object to compare with this instance.</param>
+        /// <param name="other">An object to compare with this instance.</param>
         /// <returns>A value that indicates the relative order of the objects being compared.</returns>
         public int CompareTo(QueuedDictionaryAccess other)
         {
@@ -117,7 +205,7 @@ namespace Tasty
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
         /// </summary>
-        /// <param name="obj">An object to compare with this object.</param>
+        /// <param name="other">An object to compare with this object.</param>
         /// <returns>True if the current object is equal to the given object, false otherwise.</returns>
         public bool Equals(QueuedDictionaryAccess other)
         {

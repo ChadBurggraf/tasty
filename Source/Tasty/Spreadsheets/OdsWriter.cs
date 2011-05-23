@@ -272,12 +272,12 @@ namespace Tasty.Spreadsheets
             {
                 if (typeof(bool).IsAssignableFrom(columnType))
                 {
-                    cellText = cellValue = Convert.ToBoolean(value) ? "1" : "0";
+                    cellText = cellValue = Convert.ToBoolean(value, CultureInfo.InvariantCulture) ? "1" : "0";
                     cellValueType = "float";
                 }
                 else if (typeof(DateTime).IsAssignableFrom(columnType))
                 {
-                    DateTime dateValue = Convert.ToDateTime(value);
+                    DateTime dateValue = Convert.ToDateTime(value, CultureInfo.InvariantCulture);
 
                     if (dateValue.Date == DateTime.MinValue)
                     {

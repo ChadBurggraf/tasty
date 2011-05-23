@@ -53,7 +53,7 @@ namespace Tasty.Spreadsheets
                 File.Delete(path);
             }
 
-            new XlsxDocument().CreatePackage(path);
+            XlsxDocument.CreatePackage(path);
 
             using (SpreadsheetDocument document = SpreadsheetDocument.Open(path, true))
             {
@@ -176,7 +176,7 @@ namespace Tasty.Spreadsheets
                 if (!isNull)
                 {
                     DateTime date = (DateTime)row[columnIndex];
-                    value = new CellValue(date.ToOADate().ToString());
+                    value = new CellValue(date.ToOADate().ToString(CultureInfo.InvariantCulture));
 
                     if (date.Date == DateTime.MinValue)
                     {

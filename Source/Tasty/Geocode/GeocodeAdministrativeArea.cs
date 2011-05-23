@@ -24,7 +24,13 @@ namespace Tasty.Geocode
         public string AdministrativeAreaName { get; set; }
 
         /// <summary>
-        /// Gets or sets the sub-administraive area.
+        /// Gets or sets the locality of the administrative area.
+        /// </summary>
+        [DataMember]
+        public GeocodeLocality Locality { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the administrative area's sub-administrative area.
         /// </summary>
         [DataMember]
         public GeocodeSubAdministrativeArea SubAdministrativeArea { get; set; }

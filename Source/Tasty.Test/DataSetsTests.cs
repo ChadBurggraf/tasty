@@ -1,15 +1,29 @@
-﻿using System;
-using System.Data;
-using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿//-----------------------------------------------------------------------
+// <copyright file="DataSetsTests.cs" company="Tasty Codes">
+//     Copyright (c) 2010 Chad Burggraf.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace Tasty.Test
 {
+    using System;
+    using System.Data;
+    using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
+    using System.IO;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+    /// <summary>
+    /// DataSet tests.
+    /// </summary>
     [TestClass]
     public class DataSetsTests
     {
+        /// <summary>
+        /// Write to ODS file tests.
+        /// </summary>
         [TestMethod]
-        public void DataSets_WriteToOdsFile()
+        public void DataSetsWriteToOdsFile()
         {
             if (File.Exists("dataset.ods"))
             {
@@ -20,8 +34,12 @@ namespace Tasty.Test
             Assert.IsTrue(File.Exists("dataset.ods"));
         }
 
+        /// <summary>
+        /// Write to XLSX file tests.
+        /// </summary>
         [TestMethod]
-        public void DataSets_WriteToXlsxFile()
+        [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", Justification = "Acronym.")]
+        public void DataSetsWriteToXlsxFile()
         {
             if (File.Exists("dataset.xlsx"))
             {
@@ -32,9 +50,13 @@ namespace Tasty.Test
             Assert.IsTrue(File.Exists("dataset.xlsx"));
         }
 
+        /// <summary>
+        /// Creates a test DataSet.
+        /// </summary>
+        /// <returns>A test DataSet.</returns>
         private static DataSet CreateTestDataSet()
         {
-            DataSet ds = new DataSet("Chad's Data Set");
+            DataSet ds = new DataSet("Chad's Data Set") { Locale = CultureInfo.InvariantCulture };
 
             DataTable dt1 = ds.Tables.Add("Data Table 01");
             dt1.Columns.Add("Name", typeof(string));

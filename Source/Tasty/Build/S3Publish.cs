@@ -75,7 +75,7 @@ namespace Tasty.Build
         /// <see cref="OverwriteExisting"/> is false and the objects exist.
         /// </summary>
         [Output]
-        public ITaskItem[] FilesSkipped{ get; set; }
+        public ITaskItem[] FilesSkipped { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to overwrite existing objects.

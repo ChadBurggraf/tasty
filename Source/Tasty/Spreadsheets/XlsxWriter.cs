@@ -101,7 +101,7 @@ namespace Tasty.Spreadsheets
                         Row row = new Row() { RowIndex = rowNum };
                         sheetData.Append(row);
 
-                        for (int k = 0; k < dataRow.Items.Count(); k++)
+                        for (int k = 0; k < dataSet.Tables[i].Columns.Count; k++)
                         {
                             row.Append(CreateCell(dataSet.Tables[i], dataRow, (int)rowNum, k, dateFormatIndex, timeFormatIndex));
                         }
@@ -162,12 +162,13 @@ namespace Tasty.Spreadsheets
             EnumValue<CellValues> dataType;
             CellValue value;
             uint? styleIndex = null;
-            bool isNull = row[columnIndex] == null || row[columnIndex] == DBNull.Value;
+            object objectValue = row[columnIndex];
+            bool isNull = objectValue == null || objectValue == DBNull.Value;
 
             if (typeof(bool).IsAssignableFrom(columnType))
             {
                 dataType = new EnumValue<CellValues>(CellValues.Number);
-                value = new CellValue(!isNull ? (bool)row[columnIndex] ? "1" : "0" : String.Empty);
+                value = new CellValue(!isNull ? (bool)objectValue ? "1" : "0" : String.Empty);
             }
             else if (typeof(DateTime).IsAssignableFrom(columnType))
             {
@@ -175,7 +176,7 @@ namespace Tasty.Spreadsheets
 
                 if (!isNull)
                 {
-                    DateTime date = (DateTime)row[columnIndex];
+                    DateTime date = (DateTime)objectValue;
                     value = new CellValue(date.ToOADate().ToString(CultureInfo.InvariantCulture));
 
                     if (date.Date == DateTime.MinValue)
@@ -198,18 +199,18 @@ namespace Tasty.Spreadsheets
                      typeof(float).IsAssignableFrom(columnType))
             {
                 dataType = new EnumValue<CellValues>(CellValues.Number);
-                value = new CellValue(!isNull ? String.Format(CultureInfo.InvariantCulture, "{0:N2}", row[columnIndex]) : String.Empty);
+                value = new CellValue(!isNull ? String.Format(CultureInfo.InvariantCulture, "{0:N2}", objectValue) : String.Empty);
             }
             else if (typeof(int).IsAssignableFrom(columnType) ||
                      typeof(long).IsAssignableFrom(columnType))
             {
                 dataType = new EnumValue<CellValues>(CellValues.Number);
-                value = new CellValue(!isNull ? row[columnIndex].ToString() : String.Empty);
+                value = new CellValue(!isNull ? objectValue.ToString() : String.Empty);
             }
             else
             {
                 dataType = new EnumValue<CellValues>(CellValues.String);
-                value = new CellValue(!isNull ? row[columnIndex].ToString() : String.Empty);
+                value = new CellValue(!isNull ? objectValue.ToString() : String.Empty);
             }
 
             Cell cell = new Cell()

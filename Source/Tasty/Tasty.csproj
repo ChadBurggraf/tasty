@@ -143,6 +143,7 @@
     <Compile Include="QueuedDictionaryAccessOfT.cs" />
     <Compile Include="QueuedDictionaryEventArgs.cs" />
     <Compile Include="QueuedDictionaryEventArgsItem.cs" />
+    <Compile Include="ReadOnlyDictionary.cs" />
     <Compile Include="Spreadsheets\ISpreadsheetDataColumn.cs" />
     <Compile Include="Spreadsheets\ISpreadsheetDataRow.cs" />
     <Compile Include="Spreadsheets\ISpreadsheetDataSet.cs" />

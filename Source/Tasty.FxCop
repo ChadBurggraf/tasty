@@ -23,8 +23,8 @@
  <Targets>
   <AssemblyReferenceDirectories>
    <Directory>$(ProjectDir)/Tasty.JobService/bin/Debug/</Directory>
-   <Directory>$(ProjectDir)/Tasty.JobService/bin/Debug/</Directory>
    <Directory>$(ProjectDir)/../../../Program Files/Microsoft Visual Studio 9.0/Common7/IDE/PublicAssemblies/</Directory>
+   <Directory>$(ProjectDir)/../Lib/</Directory>
   </AssemblyReferenceDirectories>
   <Target Name="$(ProjectDir)/Tasty.Console/bin/Debug/TastyConsole.exe" Analyze="True" AnalyzeAllChildren="True" />
   <Target Name="$(ProjectDir)/Tasty.SqlServer/bin/Debug/Tasty.SqlServer.dll" Analyze="True" AnalyzeAllChildren="True" />

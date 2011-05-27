@@ -32,14 +32,6 @@ namespace Tasty.Spreadsheets
         }
 
         /// <summary>
-        /// Gets the row's item collection.
-        /// </summary>
-        public IEnumerable<object> Items
-        {
-            get { return this.row.ItemArray; }
-        }
-
-        /// <summary>
         /// Gets the value of the item in the given column for this row.
         /// </summary>
         /// <param name="columnIndex">The index of the column to get the item value for.</param>

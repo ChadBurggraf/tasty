@@ -140,14 +140,15 @@ namespace Tasty.Spreadsheets
 
                 sheetNode.AppendChild(headerNode);
 
-                foreach (ISpreadsheetDataRow row in table.Rows)
+                for (int i = 0; i < table.Rows.Count; i++)
                 {
+                    ISpreadsheetDataRow row = table.Rows[i];
                     XmlNode rowNode = document.CreateElement("table:table-row", tableUri);
 
-                    for (int i = 0; i < row.Items.Count(); i++)
+                    for (int j = 0; j < table.Columns.Count; j++)
                     {
                         XmlNode cellNode = document.CreateElement("table:table-cell", tableUri);
-                        SetCellValue(document, cellNode, officeUri, tableUri, textUri, table.Columns[i].DataType, row[i]);
+                        SetCellValue(document, cellNode, officeUri, tableUri, textUri, table.Columns[j].DataType, row[j]);
                         rowNode.AppendChild(cellNode);
                     }
 

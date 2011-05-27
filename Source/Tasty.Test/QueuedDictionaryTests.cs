@@ -40,7 +40,7 @@ namespace Tasty.Test
                 value = dict[three];
             }
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 25; i++)
             {
                 dict[Guid.NewGuid()] = i;
             }
@@ -72,7 +72,7 @@ namespace Tasty.Test
                 value = dict[three];
             }
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 25; i++)
             {
                 dict[Guid.NewGuid()] = i;
             }
@@ -93,7 +93,7 @@ namespace Tasty.Test
             QueuedDictionary<Guid, int> dict = new QueuedDictionary<Guid, int>(3, QueuedDictionaryAccessCompareMode.LastAccessDateAscending);
             Stack<Guid> stack = new Stack<Guid>();
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 25; i++)
             {
                 Guid key = Guid.NewGuid();
                 dict[key] = i;
@@ -116,7 +116,7 @@ namespace Tasty.Test
             QueuedDictionary<Guid, int> dict = new QueuedDictionary<Guid, int>(3, QueuedDictionaryAccessCompareMode.LastAccessDateDescending);
             Queue<Guid> queue = new Queue<Guid>();
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 25; i++)
             {
                 Guid key = Guid.NewGuid();
                 dict[key] = i;
@@ -140,7 +140,7 @@ namespace Tasty.Test
             QueuedDictionary<Guid, int> dict = new QueuedDictionary<Guid, int>(3, QueuedDictionaryAccessCompareMode.CreationDateAscending);
             Stack<Guid> stack = new Stack<Guid>();
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 25; i++)
             {
                 Guid key = Guid.NewGuid();
                 dict[key] = i;
@@ -163,7 +163,7 @@ namespace Tasty.Test
             QueuedDictionary<Guid, int> dict = new QueuedDictionary<Guid, int>(3, QueuedDictionaryAccessCompareMode.CreationDateDescending);
             Queue<Guid> queue = new Queue<Guid>();
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 25; i++)
             {
                 Guid key = Guid.NewGuid();
                 dict[key] = i;

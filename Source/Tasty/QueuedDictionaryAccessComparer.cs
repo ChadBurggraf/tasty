@@ -46,19 +46,19 @@ namespace Tasty
                         result = x.AccessCount.CompareTo(y.AccessCount);
                         break;
                     case QueuedDictionaryAccessCompareMode.AccessCountDescending:
-                        result = -1 * x.AccessCount.CompareTo(y.AccessCount);
+                        result = y.AccessCount.CompareTo(x.AccessCount);
                         break;
                     case QueuedDictionaryAccessCompareMode.CreationDateAscending:
                         result = x.CreationDate.CompareTo(y.CreationDate);
                         break;
                     case QueuedDictionaryAccessCompareMode.CreationDateDescending:
-                        result = -1 * x.CreationDate.CompareTo(y.CreationDate);
+                        result = y.CreationDate.CompareTo(x.CreationDate);
                         break;
                     case QueuedDictionaryAccessCompareMode.LastAccessDateAscending:
                         result = x.LastAccessDate.CompareTo(y.LastAccessDate);
                         break;
                     case QueuedDictionaryAccessCompareMode.LastAccessDateDescending:
-                        result = -1 * x.LastAccessDate.CompareTo(y.LastAccessDate);
+                        result = y.LastAccessDate.CompareTo(x.LastAccessDate);
                         break;
                     default:
                         throw new NotImplementedException();

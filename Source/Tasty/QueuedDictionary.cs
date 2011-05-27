@@ -9,6 +9,7 @@ namespace Tasty
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
 
@@ -29,7 +30,9 @@ namespace Tasty
         private List<QueuedDictionaryAccess<TKey>> statistics;
         private QueuedDictionaryAccessComparer<TKey> statisticsComparer;
         private Dictionary<TKey, QueuedDictionaryAccess<TKey>> statisticsLookup;
-
+        private Stopwatch stopwatch = Stopwatch.StartNew();
+        private DateTime stopwatchStarted = DateTime.Now;
+        
         #endregion
 
         #region Construction
@@ -273,7 +276,7 @@ namespace Tasty
 
             set
             {
-                this[(TKey)key] = (TValue)value;
+                this.AddConcrete((TKey)key, (TValue)value);
             }
         }
 
@@ -286,15 +289,14 @@ namespace Tasty
         {
             get
             {
-                QueuedDictionaryAccess<TKey> access = this.StatisticsLookup[key];
-                access.AccessCount++;
-                access.LastAccessDate = DateTime.Now;
-                return this.InnerDictionary[key];
+                TValue value = this.InnerDictionary[key];
+                this.IncrementAccessStatistics(key);
+                return value;
             }
 
             set
             {
-                this.Add(key, value);
+                this.AddConcrete(key, value);
             }
         }
 
@@ -309,7 +311,7 @@ namespace Tasty
         /// <param name="value">The value to add.</param>
         public virtual void Add(object key, object value)
         {
-            this.Add((TKey)key, (TValue)value);
+            this.AddConcrete((TKey)key, (TValue)value);
         }
 
         /// <summary>
@@ -318,7 +320,7 @@ namespace Tasty
         /// <param name="item">The item to add.</param>
         public virtual void Add(KeyValuePair<TKey, TValue> item)
         {
-            this.Add(item.Key, item.Value);
+            this.AddConcrete(item.Key, item.Value);
         }
 
         /// <summary>
@@ -328,21 +330,7 @@ namespace Tasty
         /// <param name="value">The value to add.</param>
         public virtual void Add(TKey key, TValue value)
         {
-            if (!this.InnerDictionary.ContainsKey(key))
-            {
-                QueuedDictionaryAccess<TKey> access = new QueuedDictionaryAccess<TKey>(key);
-                this.Statistics.Add(access);
-                this.StatisticsLookup[key] = access;
-            }
-            else
-            {
-                QueuedDictionaryAccess<TKey> access = this.StatisticsLookup[key];
-                access.AccessCount++;
-                access.LastAccessDate = DateTime.Now;
-            }
-
-            this.InnerDictionary[key] = value;
-            this.Evict();
+            this.AddConcrete(key, value);
         }
 
         /// <summary>
@@ -495,22 +483,7 @@ namespace Tasty
         /// <returns>True if the key was found, false otherwise.</returns>
         public virtual bool Remove(TKey key)
         {
-            if (this.Contains(key))
-            {
-                if (this.InnerDictionary.Remove(key))
-                {
-                    QueuedDictionaryAccess<TKey> access = this.StatisticsLookup[key];
-                    this.StatisticsLookup.Remove(key);
-                    this.Statistics.Remove(access);
-                    this.SortStatistics();
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            return false;
+            return this.RemoveConcrete(key);
         }
 
         /// <summary>
@@ -523,9 +496,7 @@ namespace Tasty
         {
             if (this.InnerDictionary.TryGetValue(key, out value))
             {
-                QueuedDictionaryAccess<TKey> access = this.StatisticsLookup[key];
-                access.AccessCount++;
-                access.LastAccessDate = DateTime.Now;
+                this.IncrementAccessStatistics(key);
                 return true;
             }
 
@@ -535,6 +506,18 @@ namespace Tasty
         #endregion
 
         #region Protected Instance Methods
+
+        /// <summary>
+        /// Performs the concrete add or set operation of the given key/value pair.
+        /// </summary>
+        /// <param name="key">The key to add.</param>
+        /// <param name="value">The value to add or set.</param>
+        protected virtual void AddConcrete(TKey key, TValue value)
+        {
+            this.InnerDictionary[key] = value;
+            this.IncrementAccessStatistics(key);
+            this.Evict();
+        }
 
         /// <summary>
         /// Executes an eviction batch and evicts items in the dictionary until it reaches <see cref="MaximumSize"/> or less.
@@ -569,11 +552,70 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Increments the access count and last access date of the statistics for the given key,
+        /// creating a statistics entry if it does not already exist.
+        /// </summary>
+        /// <param name="key">The key to increment access statistics for.</param>
+        protected virtual void IncrementAccessStatistics(TKey key)
+        {
+            DateTime now = this.Now();
+
+            if (!this.StatisticsLookup.ContainsKey(key))
+            {
+                QueuedDictionaryAccess<TKey> access = new QueuedDictionaryAccess<TKey>(key, now);
+                this.Statistics.Add(access);
+                this.StatisticsLookup[key] = access;
+            }
+            else
+            {
+                QueuedDictionaryAccess<TKey> access = this.StatisticsLookup[key];
+                access.AccessCount++;
+                access.LastAccessDate = now;
+            }
+        }
+
+        /// <summary>
+        /// Performs the conrete remove of the given key.
+        /// </summary>
+        /// <param name="key">The key to remove.</param>
+        /// <returns>A value indicating whether the key was found.</returns>
+        protected virtual bool RemoveConcrete(TKey key)
+        {
+            if (this.Contains(key))
+            {
+                if (this.InnerDictionary.Remove(key))
+                {
+                    QueuedDictionaryAccess<TKey> access = this.StatisticsLookup[key];
+                    this.StatisticsLookup.Remove(key);
+                    this.Statistics.Remove(access);
+                    return true;
+                }
+
+                return false;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Sorts this instance's <see cref="Statistics"/> using the current <see cref="StatisticsComparer"/>.
         /// </summary>
         protected virtual void SortStatistics()
         {
             this.statistics.Sort(this.StatisticsComparer);
+        }
+
+        #endregion
+
+        #region Private Instance Methods
+
+        /// <summary>
+        /// Gets the current, hight-resolution, date/time.
+        /// </summary>
+        /// <returns>The current date/time.</returns>
+        protected DateTime Now()
+        {
+            return this.stopwatchStarted.Add(this.stopwatch.Elapsed);
         }
 
         #endregion

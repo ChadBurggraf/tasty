@@ -8,6 +8,7 @@ namespace Tasty.Spreadsheets
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -24,21 +25,7 @@ namespace Tasty.Spreadsheets
         private const string OdsTemplateName = "Tasty.Template.ods";
         private const string TableStyleName = "ta1";
         private const string TimeCellStyleName = "ce2";
-        private static ReadOnlyDictionary<string, string> ns;
-
-        /// <summary>
-        /// Initializes static members of the OdsWriter class.
-        /// </summary>
-        static OdsWriter()
-        {
-            Dictionary<string, string> n = new Dictionary<string, string>();
-            n["office"] = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
-            n["table"] = "urn:oasis:names:tc:opendocument:xmlns:table:1.0";
-            n["style"] = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
-            n["text"] = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
-            n["svg"] = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
-            ns = new ReadOnlyDictionary<string, string>(n);
-        }
+        private static ReadOnlyDictionary<string, string> ns = CreateNamespaceLookup();
 
         /// <summary>
         /// Gets the display name of this <see cref="ISpreadsheetWriter"/> implementation.
@@ -154,6 +141,21 @@ namespace Tasty.Spreadsheets
                     File.Delete(tempPath);
                 }
             }
+        }
+
+        /// <summary>
+        /// Creates a namespace lookup dictionary for use by the writer.
+        /// </summary>
+        /// <returns>A namespace lookup dictionary.</returns>
+        private static ReadOnlyDictionary<string, string> CreateNamespaceLookup()
+        {
+            Dictionary<string, string> n = new Dictionary<string, string>();
+            n["office"] = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
+            n["table"] = "urn:oasis:names:tc:opendocument:xmlns:table:1.0";
+            n["style"] = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+            n["text"] = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+            n["svg"] = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+            return new ReadOnlyDictionary<string, string>(n);
         }
 
         /// <summary>

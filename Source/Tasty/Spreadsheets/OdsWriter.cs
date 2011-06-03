@@ -1,14 +1,13 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="OdsWriter.cs" company="Tasty Codes">
 //     Copyright (c) 2010 Chad Burggraf.
-//     Adapted from code by Josip Kremenic, Copyright (c) Josip Kremenic 2009.
-//     The original can be found at http://www.codeproject.com/KB/office/ReadWriteOds.aspx
 // </copyright>
 //-----------------------------------------------------------------------
 
 namespace Tasty.Spreadsheets
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -21,59 +20,25 @@ namespace Tasty.Spreadsheets
     /// </summary>
     public class OdsWriter : SpreadsheetWriter
     {
-        /// <summary>
-        /// Gets the name of the style to apply to date cells.
-        /// </summary>
         private const string DateCellStyleName = "ce1";
-
-        /// <summary>
-        /// The name of the embedded ODS template file.
-        /// </summary>
         private const string OdsTemplateName = "Tasty.Template.ods";
-
-        /// <summary>
-        /// Gets the name of the style to apply to tables.
-        /// </summary>
         private const string TableStyleName = "ta1";
-
-        /// <summary>
-        /// Gets the name of the style to apply to time cells.
-        /// </summary>
         private const string TimeCellStyleName = "ce2";
+        private static ReadOnlyDictionary<string, string> ns;
 
         /// <summary>
-        /// A collection of ODF namespaces and their prefixes.
+        /// Initializes static members of the OdsWriter class.
         /// </summary>
-        private static string[][] odfNamespaces =
+        static OdsWriter()
         {
-            new string[] { "table", "urn:oasis:names:tc:opendocument:xmlns:table:1.0" },
-            new string[] { "office", "urn:oasis:names:tc:opendocument:xmlns:office:1.0" },
-            new string[] { "style", "urn:oasis:names:tc:opendocument:xmlns:style:1.0" },
-            new string[] { "text", "urn:oasis:names:tc:opendocument:xmlns:text:1.0" },            
-            new string[] { "draw", "urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" },
-            new string[] { "fo", "urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" },
-            new string[] { "dc", "http://purl.org/dc/elements/1.1/" },
-            new string[] { "meta", "urn:oasis:names:tc:opendocument:xmlns:meta:1.0" },
-            new string[] { "number", "urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" },
-            new string[] { "presentation", "urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" },
-            new string[] { "svg", "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" },
-            new string[] { "chart", "urn:oasis:names:tc:opendocument:xmlns:chart:1.0" },
-            new string[] { "dr3d", "urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" },
-            new string[] { "math", "http://www.w3.org/1998/Math/MathML" },
-            new string[] { "form", "urn:oasis:names:tc:opendocument:xmlns:form:1.0" },
-            new string[] { "script", "urn:oasis:names:tc:opendocument:xmlns:script:1.0" },
-            new string[] { "ooo", "http://openoffice.org/2004/office" },
-            new string[] { "ooow", "http://openoffice.org/2004/writer" },
-            new string[] { "oooc", "http://openoffice.org/2004/calc" },
-            new string[] { "dom", "http://www.w3.org/2001/xml-events" },
-            new string[] { "xforms", "http://www.w3.org/2002/xforms" },
-            new string[] { "xsd", "http://www.w3.org/2001/XMLSchema" },
-            new string[] { "xsi", "http://www.w3.org/2001/XMLSchema-instance" },
-            new string[] { "rpt", "http://openoffice.org/2005/report" },
-            new string[] { "of", "urn:oasis:names:tc:opendocument:xmlns:of:1.2" },
-            new string[] { "rdfa", "http://docs.oasis-open.org/opendocument/meta/rdfa#" },
-            new string[] { "config", "urn:oasis:names:tc:opendocument:xmlns:config:1.0" }
-        };
+            Dictionary<string, string> n = new Dictionary<string, string>();
+            n["office"] = "urn:oasis:names:tc:opendocument:xmlns:office:1.0";
+            n["table"] = "urn:oasis:names:tc:opendocument:xmlns:table:1.0";
+            n["style"] = "urn:oasis:names:tc:opendocument:xmlns:style:1.0";
+            n["text"] = "urn:oasis:names:tc:opendocument:xmlns:text:1.0";
+            n["svg"] = "urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0";
+            ns = new ReadOnlyDictionary<string, string>(n);
+        }
 
         /// <summary>
         /// Gets the display name of this <see cref="ISpreadsheetWriter"/> implementation.
@@ -99,139 +64,108 @@ namespace Tasty.Spreadsheets
         /// <param name="path">The path to write to.</param>
         public override void Write(ISpreadsheetDataSet dataSet, string path)
         {
-            XmlDocument document = new XmlDocument();
-            LoadDocumentWithTemplate(document);
+            string directory = Path.GetDirectoryName(path);
+            string tempPath = Path.Combine(directory, Path.GetRandomFileName());
 
-            XmlNamespaceManager namespaceManager = CreateNamespaceManager(document);
-            XmlNode sheetsNode = GetCleanSheetsRoot(document, namespaceManager);
-
-            string tableUri = namespaceManager.LookupNamespace("table");
-            string officeUri = namespaceManager.LookupNamespace("office");
-            string textUri = namespaceManager.LookupNamespace("text");
-
-            foreach (ISpreadsheetDataTable table in dataSet.Tables)
+            if (!Directory.Exists(directory))
             {
-                XmlNode sheetNode = document.CreateElement("table:table", tableUri);
+                Directory.CreateDirectory(directory);
+            }
 
-                XmlAttribute sheetNameAttribute = document.CreateAttribute("table:name", tableUri);
-                sheetNameAttribute.Value = table.Name;
-                sheetNode.Attributes.Append(sheetNameAttribute);
-
-                XmlAttribute sheetStyleAttribute = document.CreateAttribute("table:style-name", tableUri);
-                sheetStyleAttribute.Value = TableStyleName;
-                sheetNode.Attributes.Append(sheetStyleAttribute);
-
-                XmlNode columnDefNode = document.CreateElement("table:table-column", tableUri);
-
-                XmlAttribute columnCountAttribute = document.CreateAttribute("table:number-columns-repeated", tableUri);
-                columnCountAttribute.Value = table.Columns.Count.ToString(CultureInfo.InvariantCulture);
-                columnDefNode.Attributes.Append(columnCountAttribute);
-
-                sheetNode.AppendChild(columnDefNode);
-
-                XmlNode headerNode = document.CreateElement("table:table-row", tableUri);
-
-                foreach (ISpreadsheetDataColumn column in table.Columns)
+            try
+            {
+                using (XmlWriter xw = XmlWriter.Create(tempPath, new XmlWriterSettings() { Indent = true }))
                 {
-                    XmlNode cellNode = document.CreateElement("table:table-cell", tableUri);
-                    SetCellValue(document, cellNode, officeUri, tableUri, textUri, typeof(string), column.Name);
-                    headerNode.AppendChild(cellNode);
-                }
+                    xw.WriteStartElement("office", "document-content", ns["office"]);
 
-                sheetNode.AppendChild(headerNode);
-
-                for (int i = 0; i < table.Rows.Count; i++)
-                {
-                    ISpreadsheetDataRow row = table.Rows[i];
-                    XmlNode rowNode = document.CreateElement("table:table-row", tableUri);
-
-                    for (int j = 0; j < table.Columns.Count; j++)
+                    // Declare the namespaces.
+                    foreach (string key in ns.Keys)
                     {
-                        XmlNode cellNode = document.CreateElement("table:table-cell", tableUri);
-                        SetCellValue(document, cellNode, officeUri, tableUri, textUri, table.Columns[j].DataType, row[j]);
-                        rowNode.AppendChild(cellNode);
+                        xw.WriteAttributeString("xmlns", key, null, ns[key]);
                     }
 
-                    sheetNode.AppendChild(rowNode);
-                }
+                    // Font faces.
+                    xw.WriteStartElement("font-face-decls", ns["office"]);
+                    WriteFontFace(xw, "Arial", "Arial", "swiss", "variable");
+                    WriteFontFace(xw, "Arial Unicode MS", "'Arial Unicode MS'", "system", "variable");
+                    WriteFontFace(xw, "Tahoma", "Tahoma", "system", "variable");
+                    xw.WriteEndElement();
 
-                sheetsNode.AppendChild(sheetNode);
-            }
+                    // Cell and table styles.
+                    xw.WriteStartElement("automatic-styles", ns["office"]);
+                    WriteCellStyle(xw, "ce1", "table-cell", "Default", "N37");
+                    WriteCellStyle(xw, "ce2", "table-cell", "Default", "N5042");
+                    WriteTableStyle(xw, "ta1", "table", "Default", "true", "lr-tb");
+                    xw.WriteEndElement();
 
-            SaveDocumentWithTemplate(document, CreatePath(path));
-        }
+                    // Main body.
+                    xw.WriteStartElement("body", ns["office"]);
+                    xw.WriteStartElement("spreadsheet", ns["office"]);
 
-        /// <summary>
-        /// Creates an <see cref="XmlNamespaceManager"/> for the given document using
-        /// the ODF namespace set.
-        /// </summary>
-        /// <param name="document">The <see cref="XmlDocument"/> to create the <see cref="XmlNamespaceManager"/> for.</param>
-        /// <returns>An <see cref="XmlNamespaceManager"/>.</returns>
-        private static XmlNamespaceManager CreateNamespaceManager(XmlDocument document)
-        {
-            XmlNamespaceManager mgr = new XmlNamespaceManager(document.NameTable);
-
-            for (int i = 0; i < odfNamespaces.Length; i++)
-            {
-                mgr.AddNamespace(odfNamespaces[i][0], odfNamespaces[i][1]);
-            }
-
-            return mgr;
-        }
-
-        /// <summary>
-        /// Gets the sheets node from the given <see cref="XmlDocument"/>, cleaned of all of its child elements.
-        /// </summary>
-        /// <param name="document">The <see cref="XmlDocument"/> to get the node from.</param>
-        /// <param name="namespaceManager">The <see cref="XmlNamespaceManager"/> to use when searching the document.</param>
-        /// <returns>A clean sheets node.</returns>
-        private static XmlNode GetCleanSheetsRoot(XmlDocument document, XmlNamespaceManager namespaceManager)
-        {
-            XmlNodeList tables = document.SelectNodes("/office:document-content/office:body/office:spreadsheet/table:table", namespaceManager);
-            XmlNode sheetsRoot = tables[0].ParentNode;
-
-            foreach (XmlNode table in tables)
-            {
-                sheetsRoot.RemoveChild(table);
-            }
-
-            return sheetsRoot;
-        }
-
-        /// <summary>
-        /// Loads the given <see cref="XmlDocument"/> with the contents portion of the ODS template.
-        /// </summary>
-        /// <param name="document">The <see cref="XmlDocument"/> to load.</param>
-        private static void LoadDocumentWithTemplate(XmlDocument document)
-        {
-            using (Stream templateStream = Assembly.GetAssembly(typeof(DataSets)).GetManifestResourceStream(OdsTemplateName))
-            {
-                using (ZipFile odsFile = ZipFile.Read(templateStream))
-                {
-                    ZipEntry contentsEntry = odsFile["content.xml"];
-
-                    using (MemoryStream contentsStream = new MemoryStream())
+                    foreach (ISpreadsheetDataTable table in dataSet.Tables)
                     {
-                        contentsEntry.Extract(contentsStream);
-                        contentsStream.Seek(0, SeekOrigin.Begin);
+                        WriteTableStartElement(xw, table.Name, "ta1", "false");
+                        WriteTableColumnDefinition(xw, "co1", "Default", table.Columns.Count.ToString(CultureInfo.InvariantCulture));
 
-                        document.Load(contentsStream);
+                        // Header.
+                        xw.WriteStartElement("table-row", ns["table"]);
+
+                        foreach (ISpreadsheetDataColumn column in table.Columns)
+                        {
+                            WriteCell(xw, typeof(string), column.Name);
+                        }
+
+                        xw.WriteEndElement();
+
+                        // Content rows.
+                        for (int i = 0; i < table.Rows.Count; i++)
+                        {
+                            xw.WriteStartElement("table-row", ns["table"]);
+
+                            for (int j = 0; j < table.Columns.Count; j++)
+                            {
+                                WriteCell(xw, table.Columns[j].DataType, table.Rows[i][table.Columns[j].Name]);
+                            }
+
+                            xw.WriteEndElement();
+
+                            if (i % 100 == 0)
+                            {
+                                xw.Flush();
+                            }
+                        }
+
+                        xw.WriteEndElement();
+                        xw.Flush();
                     }
+
+                    xw.WriteEndElement();
+                    xw.WriteEndElement();
+
+                    xw.WriteEndElement();
+                }
+
+                SavePackage(tempPath, CreatePath(path));
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
                 }
             }
         }
 
         /// <summary>
-        /// Saves the given <see cref="XmlDocument"/> as the contents of the ODS template and
-        /// write the final ODS file to the given path.
+        /// Saves an ODS package, using the content document at the given path, to the given output path.
         /// </summary>
-        /// <param name="document">The <see cref="XmlDocument"/> to save as ODS contents.</param>
-        /// <param name="path">The path to write the ODS file to.</param>
-        private static void SaveDocumentWithTemplate(XmlDocument document, string path)
+        /// <param name="contentXmlPath">The path of the content document.</param>
+        /// <param name="outputPath">The output path to save the package to.</param>
+        private static void SavePackage(string contentXmlPath, string outputPath)
         {
-            if (File.Exists(path))
+            if (File.Exists(outputPath))
             {
-                File.Delete(path);
+                File.Delete(outputPath);
             }
 
             using (Stream templateStream = Assembly.GetAssembly(typeof(DataSets)).GetManifestResourceStream(OdsTemplateName))
@@ -240,34 +174,30 @@ namespace Tasty.Spreadsheets
                 {
                     odsFile.RemoveEntry("content.xml");
 
-                    using (MemoryStream contentsStream = new MemoryStream())
+                    using (FileStream contentStream = File.OpenRead(contentXmlPath))
                     {
-                        document.Save(contentsStream);
-                        contentsStream.Seek(0, SeekOrigin.Begin);
-                        odsFile.AddEntry("content.xml", contentsStream);
-                        odsFile.Save(path);
+                        odsFile.AddEntry("content.xml", contentStream);
+                        odsFile.Save(outputPath);
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Sets the value of the given cell <see cref="XmlNode"/>.
+        /// Writes a cell.
         /// </summary>
-        /// <param name="document">The <see cref="XmlDocument"/> the given cell belongs to.</param>
-        /// <param name="cellNode">The cell <see cref="XmlNode"/> to set the value of.</param>
-        /// <param name="officeUri">The office namespace URI to use.</param>
-        /// <param name="tableUri">The table namespace URI to use.</param>
-        /// <param name="textUri">The text namespace URI to use.</param>
-        /// <param name="columnType">The type of the column the cell belongs to.</param>
-        /// <param name="value">The value to set.</param>
-        private static void SetCellValue(XmlDocument document, XmlNode cellNode, string officeUri, string tableUri, string textUri, Type columnType, object value)
+        /// <param name="xw">The <see cref="XmlWriter"/> to write to.</param>
+        /// <param name="columnType">The cell's column type.</param>
+        /// <param name="value">The cell's value.</param>
+        private static void WriteCell(XmlWriter xw, Type columnType, object value)
         {
             string cellStyleName = String.Empty,
                 cellText = String.Empty,
                 cellValue = String.Empty,
                 cellValueName = "value",
                 cellValueType = String.Empty;
+
+            xw.WriteStartElement("table-cell", ns["table"]);
 
             if (value != null && value != DBNull.Value)
             {
@@ -319,31 +249,117 @@ namespace Tasty.Spreadsheets
 
             if (!String.IsNullOrEmpty(cellStyleName))
             {
-                XmlAttribute cellStyleNameAttribute = document.CreateAttribute("table:style-name", tableUri);
-                cellStyleNameAttribute.Value = cellStyleName;
-                cellNode.Attributes.Append(cellStyleNameAttribute);
+                xw.WriteAttributeString("style-name", ns["table"], cellStyleName.HtmlAttributeEncode());
             }
 
             if (!String.IsNullOrEmpty(cellValueType))
             {
-                XmlAttribute cellValueTypeAttribute = document.CreateAttribute("office:value-type", officeUri);
-                cellValueTypeAttribute.Value = cellValueType;
-                cellNode.Attributes.Append(cellValueTypeAttribute);
+                xw.WriteAttributeString("value-type", ns["office"], cellValueType.HtmlAttributeEncode());
             }
 
             if (!String.IsNullOrEmpty(cellValue))
             {
-                XmlAttribute cellValueAttribute = document.CreateAttribute(String.Concat("office:", cellValueName), officeUri);
-                cellValueAttribute.Value = cellValue;
-                cellNode.Attributes.Append(cellValueAttribute);
+                xw.WriteAttributeString(XmlConvert.EncodeName(cellValueName), ns["office"], cellValue.HtmlAttributeEncode());
             }
 
             if (!String.IsNullOrEmpty(cellText))
             {
-                XmlNode cellValueNode = document.CreateElement("text:p", textUri);
-                cellValueNode.InnerText = cellText;
-                cellNode.AppendChild(cellValueNode);
+                // WriteString encodes the value.
+                xw.WriteStartElement("p", ns["text"]);
+                xw.WriteString(cellText);
+                xw.WriteEndElement();
             }
+
+            xw.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes a preamble cell style element.
+        /// </summary>
+        /// <param name="xw">The <see cref="XmlWriter"/> to write to.</param>
+        /// <param name="name">The style's name.</param>
+        /// <param name="family">The style's family.</param>
+        /// <param name="parentStyleName">The style's parent style name.</param>
+        /// <param name="dataStyleName">The style's data style name.</param>
+        private static void WriteCellStyle(XmlWriter xw, string name, string family, string parentStyleName, string dataStyleName)
+        {
+            xw.WriteStartElement("style", ns["style"]);
+            xw.WriteAttributeString("name", ns["style"], name.HtmlAttributeEncode());
+            xw.WriteAttributeString("family", ns["style"], family.HtmlAttributeEncode());
+            xw.WriteAttributeString("parent-style-name", ns["style"], parentStyleName.HtmlAttributeEncode());
+            xw.WriteAttributeString("data-style-name-", ns["style"], dataStyleName.HtmlAttributeEncode());
+            xw.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes a preamble font face element.
+        /// </summary>
+        /// <param name="xw">The <see cref="XmlWriter"/> to write to.</param>
+        /// <param name="name">The font face's name.</param>
+        /// <param name="fontFamily">The font face's font family.</param>
+        /// <param name="fontFamilyGeneric">The font face's generic font family.</param>
+        /// <param name="fontPitch">The font face's pitch.</param>
+        private static void WriteFontFace(XmlWriter xw, string name, string fontFamily, string fontFamilyGeneric, string fontPitch)
+        {
+            xw.WriteStartElement("font-face", ns["style"]);
+            xw.WriteAttributeString("name", ns["style"], name.HtmlAttributeEncode());
+            xw.WriteAttributeString("font-family", ns["svg"], fontFamily.HtmlAttributeEncode());
+            xw.WriteAttributeString("font-family-generic", ns["style"], fontFamilyGeneric.HtmlAttributeEncode());
+            xw.WriteAttributeString("font-pitch", ns["style"], fontPitch.HtmlAttributeEncode());
+            xw.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes a table column definition.
+        /// </summary>
+        /// <param name="xw">The <see cref="XmlWriter"/> to write to.</param>
+        /// <param name="styleName">The column's style name.</param>
+        /// <param name="defaultCellStyleName">The column's default cell style name.</param>
+        /// <param name="numberColumnsRepeated">The number of columns being defined.</param>
+        private static void WriteTableColumnDefinition(XmlWriter xw, string styleName, string defaultCellStyleName, string numberColumnsRepeated)
+        {
+            xw.WriteStartElement("table-column", ns["table"]);
+            xw.WriteAttributeString("style-name", ns["table"], styleName.HtmlAttributeEncode());
+            xw.WriteAttributeString("default-cell-style-name", ns["table"], defaultCellStyleName.HtmlAttributeEncode());
+            xw.WriteAttributeString("number-columns-repeated", ns["table"], numberColumnsRepeated.HtmlAttributeEncode());
+            xw.WriteEndElement();
+        }
+
+        /// <summary>
+        /// Writes a table's start element.
+        /// </summary>
+        /// <param name="xw">The <see cref="XmlWriter"/> to write to.</param>
+        /// <param name="name">The table's name.</param>
+        /// <param name="styleName">The table's style name.</param>
+        /// <param name="print">The table's print value.</param>
+        private static void WriteTableStartElement(XmlWriter xw, string name, string styleName, string print)
+        {
+            xw.WriteStartElement("table", ns["table"]);
+            xw.WriteAttributeString("name", ns["table"], name.HtmlAttributeEncode());
+            xw.WriteAttributeString("style-name", ns["table"], styleName.HtmlAttributeEncode());
+            xw.WriteAttributeString("print", ns["table"], print.HtmlAttributeEncode());
+        }
+
+        /// <summary>
+        /// Writes a preamble table style element.
+        /// </summary>
+        /// <param name="xw">The <see cref="XmlWriter"/> to write to.</param>
+        /// <param name="name">The style's name.</param>
+        /// <param name="family">The style's family.</param>
+        /// <param name="masterPageName">The style's master page name.</param>
+        /// <param name="display">The style's display value.</param>
+        /// <param name="writingMode">The style's writing mode.</param>
+        private static void WriteTableStyle(XmlWriter xw, string name, string family, string masterPageName, string display, string writingMode)
+        {
+            xw.WriteStartElement("style", ns["style"]);
+            xw.WriteAttributeString("name", ns["style"], name.HtmlAttributeEncode());
+            xw.WriteAttributeString("family", ns["style"], family.HtmlAttributeEncode());
+            xw.WriteAttributeString("master-page-name", ns["style"], masterPageName.HtmlAttributeEncode());
+            xw.WriteStartElement("table-properties", ns["style"]);
+            xw.WriteAttributeString("display", ns["table"], display.HtmlAttributeEncode());
+            xw.WriteAttributeString("writing-mode", ns["style"], writingMode.HtmlAttributeEncode());
+            xw.WriteEndElement();
+            xw.WriteEndElement();
         }
     }
 }

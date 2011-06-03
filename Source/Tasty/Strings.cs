@@ -15,6 +15,7 @@ namespace Tasty
     using System.Security.Cryptography;
     using System.Text;
     using System.Text.RegularExpressions;
+    using System.Web;
 
     /// <summary>
     /// Provides extensions and helpers for strings.
@@ -242,6 +243,36 @@ namespace Tasty
 
             byte[] buffer = encoding.GetBytes(value);
             return BitConverter.ToString(crypto.ComputeHash(buffer)).Replace("-", String.Empty);
+        }
+
+        /// <summary>
+        /// Encodes the value for use in an HTML/XML attribute.
+        /// </summary>
+        /// <param name="value">The value to encode.</param>
+        /// <returns>The encoded value.</returns>
+        public static string HtmlAttributeEncode(this string value)
+        {
+            return HttpUtility.HtmlAttributeEncode(value ?? String.Empty);
+        }
+
+        /// <summary>
+        /// Decodes the given HTML/XML-encoded value.
+        /// </summary>
+        /// <param name="value">The value to decode.</param>
+        /// <returns>The decoded value.</returns>
+        public static string HtmlDecode(this string value)
+        {
+            return HttpUtility.HtmlDecode(value ?? String.Empty);
+        }
+
+        /// <summary>
+        /// Encodes the value for use in an HTML/XML element.
+        /// </summary>
+        /// <param name="value">The value to encode.</param>
+        /// <returns>The encoded value.</returns>
+        public static string HtmlEncode(this string value)
+        {
+            return HttpUtility.HtmlEncode(value ?? String.Empty);
         }
 
         /// <summary>

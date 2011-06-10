@@ -70,6 +70,7 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>Properties\SolutionInfo.cs</Link>
     </Compile>
+    <Compile Include="CollectionTests.cs" />
     <Compile Include="DataSetsTests.cs" />
     <Compile Include="EmailTaskTests.cs" />
     <Compile Include="GeocodeTests.cs" />

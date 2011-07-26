@@ -20,16 +20,54 @@ IF EXISTS (SELECT * FROM sys.assemblies WHERE [name] = 'Tasty.SqlServer')
 	DROP ASSEMBLY [Tasty.SqlServer]
 GO
 
-DECLARE @TastyAssemblyPath nvarchar(256)
-SELECT @TastyAssemblyPath = '{0}'
+DECLARE 
+	@TastyAssemblyPath nvarchar(256), 
+	@Success bit,
+	@ErrorMessage nvarchar(4000),
+	@ErrorSeverity int
+	
+SELECT 
+	@TastyAssemblyPath = '{0}',
+	@Success = 0
 
 IF @TastyAssemblyPath NOT LIKE N'%Tasty.SqlServer.dll'
 	SET @TastyAssemblyPath = N'C:\Program Files\Tasty\SqlServer\Tasty.SqlServer.dll'
 
-CREATE ASSEMBLY [Tasty.SqlServer]
-AUTHORIZATION [dbo] 
-FROM @TastyAssemblyPath
-WITH PERMISSION_SET = UNSAFE
+BEGIN TRY
+	CREATE ASSEMBLY [Tasty.SqlServer]
+	AUTHORIZATION [dbo] 
+	FROM @TastyAssemblyPath
+	WITH PERMISSION_SET = UNSAFE
+	
+	SET @Success = 1
+END TRY
+BEGIN CATCH
+	SELECT
+		@ErrorMessage = ERROR_MESSAGE(),
+		@ErrorSeverity = ERROR_SEVERITY()
+END CATCH
+
+IF @Success = 0
+BEGIN
+	BEGIN TRY
+		SET @TastyAssemblyPath = N'C:\Program Files (x86)\Tasty\SqlServer\Tasty.SqlServer.dll'
+		
+		CREATE ASSEMBLY [Tasty.SqlServer]
+		AUTHORIZATION [dbo] 
+		FROM @TastyAssemblyPath
+		WITH PERMISSION_SET = UNSAFE
+		
+		SET @Success = 1
+	END TRY
+	BEGIN CATCH
+		SELECT
+			@ErrorMessage = ERROR_MESSAGE(),
+			@ErrorSeverity = ERROR_SEVERITY()
+	END CATCH
+END
+
+IF @Success = 0
+	RAISERROR(@ErrorMessage, @ErrorSeverity, 18)
 GO
 
 CREATE FUNCTION [RegexIsMatch]

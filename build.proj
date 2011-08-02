@@ -27,20 +27,27 @@
       </PropertyGroup>
     </Otherwise>
   </Choose>
+
+  <ItemGroup>
+    <SolutionProjects Include="$(LibraryDir)\Tasty.csproj"/>
+    <SolutionProjects Include="$(ConsoleDir)\Tasty.Console.csproj"/>
+    <SolutionProjects Include="$(SqlServerDir)\Tasty.SqlServer.csproj"/>
+  </ItemGroup>
   
   <Target Name="Build" DependsOnTargets="EnsureConfigs">
     <RemoveDir Directories="$(BuildDir)"/>
-    <MakeDir Directories="$(BuildDir);$(BuildDir)\Library;$(BuildDir)\Console;$(BuildDir)\SqlServer;$(BuildDir)\JobService"/>
+    <MakeDir Directories="$(BuildDir)\Library;$(BuildDir)\Console;$(BuildDir)\SqlServer"/>
     
-    <MSBuild Projects="$(LibraryDir)\Tasty.csproj;$(ConsoleDir)\Tasty.Console.csproj;$(SqlServerDir)\Tasty.SqlServer.csproj" Properties="Configuration=$(Configuration);SignAssembly=$(SignAssembly);AssemblyOriginatorKeyFile=$(KeyFile)"/>
+    <MSBuild Projects="@(SolutionProjects)" Properties="Configuration=$(Configuration);SignAssembly=$(SignAssembly);AssemblyOriginatorKeyFile=$(KeyFile)"/>
   
     <Message Text='Merging assemblies into "Tasty.dll".'/>
-    <Exec Command='"$(ILMergePath)" /ndebug /internalize $(KeyFileArgs) /out:$(BuildDir)\Library\Tasty.dll "$(LibraryDir)\bin\$(Configuration)\Tasty.dll" "$(LibDir)\Ionic.Zip.Reduced.dll" "$(LibDir)\Npgsql.dll" "$(LibDir)\Mono.Security.dll"'/>
+    <Exec Command='"$(ILMergePath)" /internalize $(KeyFileArgs) /out:$(BuildDir)\Library\Tasty.dll "$(LibraryDir)\bin\$(Configuration)\Tasty.dll" "$(LibDir)\Ionic.Zip.Reduced.dll" "$(LibDir)\Npgsql.dll" "$(LibDir)\Mono.Security.dll"'/>
 
     <Message Text='Merging assemblies into "TastyConsole.exe".'/>
     <Exec Command='"$(ILMergePath)" /ndebug /internalize $(KeyFileArgs) /out:"$(BuildDir)\Console\TastyConsole.exe" "$(ConsoleDir)\bin\$(Configuration)\TastyConsole.exe" "$(LibDir)\log4net.dll" "$(LibDir)\NDesk.Options.dll"'/>
     
     <ItemGroup>
+      <LibraryFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.pdb"/>
       <LibraryFiles Include="$(LibraryDir)\bin\$(Configuration)\Tasty.xml"/>
       <LibraryFiles Include="$(LibDir)\AWSSDK.dll"/>
       <LibraryFiles Include="$(LibDir)\DocumentFormat.OpenXml.dll"/>

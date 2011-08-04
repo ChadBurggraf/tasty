@@ -72,11 +72,89 @@ namespace Tasty.Build
         /// <returns>A collection of SQL commands.</returns>
         public static IList<string> SplitSqlCommands(this string sql)
         {
-            // Split the resource into individual commands on "GO".
-            var parts = from c in Regex.Split(sql, @"[;\s]+GO([;\s]+|$)", RegexOptions.IgnoreCase | RegexOptions.Multiline)
-                        select c.Trim();
+            List<string> commands = new List<string>();
+            List<char> buffer = new List<char>();
+            bool inString = false;
 
-            return parts.Where(c => !String.IsNullOrEmpty(c)).ToArray();
+            Func<int> goIndex = () =>
+            {
+                char prev = '\0', curr;
+
+                for (int i = buffer.Count - 1; i >= 0; --i)
+                {
+                    curr = Char.ToUpperInvariant(buffer[i]);
+
+                    if (!Char.IsWhiteSpace(curr))
+                    {
+                        if (curr == 'G')
+                        {
+                            if (prev == 'O')
+                            {
+                                return i;
+                            }
+                            else
+                            {
+                                break;
+                            }
+                        }
+                        else if (curr != 'O')
+                        {
+                            break;
+                        }
+                    }
+
+                    prev = curr;
+                }
+
+                return -1;
+            };
+
+            foreach (char c in sql) 
+            {
+                if (c == '\'')
+                {
+                    inString = !inString;
+                }
+                else if (c == '\n' && !inString)
+                {
+                    int gi = goIndex();
+
+                    if (gi >= 0)
+                    {
+                        string command = new string(buffer.ToArray()).Substring(0, gi).Trim();
+
+                        if (!String.IsNullOrEmpty(command))
+                        {
+                            commands.Add(command);
+                        }
+
+                        buffer.Clear();
+                        continue;
+                    }
+                }
+
+                buffer.Add(c);
+            }
+
+            if (buffer.Count > 0)
+            {
+                string command = new string(buffer.ToArray());
+                int gi = goIndex();
+
+                if (gi >= 0)
+                {
+                    command = command.Substring(0, gi);
+                }
+
+                command = command.Trim();
+
+                if (!String.IsNullOrEmpty(command))
+                {
+                    commands.Add(command);
+                }
+            }
+
+            return commands.ToArray();
         }
 
         /// <summary>

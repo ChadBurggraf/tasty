@@ -7,7 +7,9 @@
 namespace Tasty.Test
 {
     using System;
+    using System.Collections.Generic;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Tasty.Build;
 
     /// <summary>
     /// Utility tests.
@@ -88,6 +90,30 @@ namespace Tasty.Test
             Assert.AreEqual("PascalCase", "pascal_case".FromLowercaseUnderscore());
             Assert.AreEqual("camelCase", "camel_case".FromLowercaseUnderscore(true));
             Assert.AreEqual("'Pascal0Case'", "'pascal0_case'".FromLowercaseUnderscore());
+        }
+
+        /// <summary>
+        /// Split SQL commands tests.
+        /// </summary>
+        [TestMethod]
+        public void UtilitySplitSqlCommands()
+        {
+            const string One = "SELECT * FROM Stuff\nGO";
+            const string Two = "SELECT * FROM Stuff\nGO\nINSERT INTO OtherStuff\nSELECT 'Blah'";
+            const string Three = "SELECT N'This\nGO\nis not a separator.'";
+
+            IList<string> c = One.SplitSqlCommands();
+            Assert.AreEqual(1, c.Count);
+            Assert.AreEqual("SELECT * FROM Stuff", c[0]);
+
+            c = Two.SplitSqlCommands();
+            Assert.AreEqual(2, c.Count);
+            Assert.AreEqual("SELECT * FROM Stuff", c[0]);
+            Assert.AreEqual("INSERT INTO OtherStuff\nSELECT 'Blah'", c[1]);
+
+            c = Three.SplitSqlCommands();
+            Assert.AreEqual(1, c.Count);
+            Assert.AreEqual("SELECT N'This\nGO\nis not a separator.'", c[0]);
         }
 
         /// <summary>

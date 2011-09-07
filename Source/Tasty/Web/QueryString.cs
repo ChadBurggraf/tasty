@@ -280,18 +280,59 @@ namespace Tasty.Web
         }
 
         /// <summary>
+        /// Converts this instance into an ordered URL-encoded query string,
+        /// sorted in descending order.
+        /// </summary>
+        /// <returns>A URL-encoded query string.</returns>
+        public string ToOrderedDescendingString()
+        {
+            return this.ToOrderedString(true);
+        }
+
+        /// <summary>
+        /// Converts this instance into an ordered URL-encoded query string,
+        /// sorted in ascending order.
+        /// </summary>
+        /// <returns>A URL-encoded query string.</returns>
+        public string ToOrderedString()
+        {
+            return this.ToOrderedString(false);
+        }
+
+        /// <summary>
         /// Converts this instance to a URL-encoded query string.
+        /// This method is equivalent to <see cref="ToOrderedString()"/>.
         /// </summary>
         /// <returns>A URL-encoded query string.</returns>
         public override string ToString()
         {
+            return this.ToOrderedString(false);
+        }
+
+        #endregion
+
+        #region Private Instance Methods
+
+        /// <summary>
+        /// Converts this instance into an ordered URL-encoded query string.
+        /// </summary>
+        /// <param name="descending">A value indicating whether to sort in descending order.</param>
+        /// <returns>A URL-encoded query string.</returns>
+        private string ToOrderedString(bool descending)
+        {
             StringBuilder sb = new StringBuilder();
+            IOrderedEnumerable<string> keys = descending ?
+                this.innerCollection.AllKeys.OrderByDescending(k => k, StringComparer.OrdinalIgnoreCase) :
+                this.innerCollection.AllKeys.OrderBy(k => k, StringComparer.OrdinalIgnoreCase);
 
-            for (int i = 0; i < this.innerCollection.Count; i++)
+            foreach (string key in keys)
             {
-                string key = HttpUtility.UrlEncode(this.innerCollection.GetKey(i));
+                string encodedKey = HttpUtility.UrlEncode(key);
+                IOrderedEnumerable<string> values = descending ?
+                    this.innerCollection.GetValues(key).OrderByDescending(v => v, StringComparer.OrdinalIgnoreCase) :
+                    this.innerCollection.GetValues(key).OrderBy(v => v, StringComparer.OrdinalIgnoreCase);
 
-                foreach (string value in this.innerCollection.GetValues(i))
+                foreach (string value in values)
                 {
                     sb.Append(key);
                     sb.Append("=");

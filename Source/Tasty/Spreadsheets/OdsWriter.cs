@@ -54,7 +54,7 @@ namespace Tasty.Spreadsheets
             string directory = Path.GetDirectoryName(path);
             string tempPath = Path.Combine(directory, Path.GetRandomFileName());
 
-            if (!Directory.Exists(directory))
+            if (!String.IsNullOrEmpty(directory) && !Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }

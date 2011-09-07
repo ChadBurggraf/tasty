@@ -82,6 +82,7 @@
     <Compile Include="ITestService.cs" />
     <Compile Include="PostgresUrlTokenStoreTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryStringTests.cs" />
     <Compile Include="QueuedDictionaryTests.cs" />
     <Compile Include="S3ExistsTests.cs" />
     <Compile Include="S3PublisherTests.cs" />

@@ -152,6 +152,20 @@ namespace Tasty
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Explicitly converting from an all lowercase string.")]
         public static string FromLowercaseUnderscore(this string value, bool camel)
         {
+            return value.FromLowercaseWithSeparator('_', camel);
+        }
+
+        /// <summary>
+        /// Converts the lower case string (with word boundaries separated by the given separator character)
+        /// into a PascalCase or camelCalse string.
+        /// </summary>
+        /// <param name="value">The string to convert.</param>
+        /// <param name="separator">The character used to denote word boundaries.</param>
+        /// <param name="camel">A value indicating whether to convert to camelCalse. If false, will convert to PascalCase.</param>
+        /// <returns>The converted string.</returns>
+        [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Explicitly converting from an all lowercase string.")]
+        public static string FromLowercaseWithSeparator(this string value, char separator, bool camel)
+        {
             value = (value ?? String.Empty).ToLowerInvariant().Trim();
 
             if (String.IsNullOrEmpty(value))
@@ -185,7 +199,7 @@ namespace Tasty
                         sb.Append(value[i].ToString().ToUpperInvariant());
                     }
                 }
-                else if (value[i] != '_')
+                else if (value[i] != separator)
                 {
                     sb.Append(value[i]);
                 }
@@ -500,6 +514,18 @@ namespace Tasty
         /// <returns>The converted string.</returns>
         public static string ToLowercaseUnderscore(this string value)
         {
+            return value.ToLowercaseWithSeparator('_');
+        }
+
+        /// <summary>
+        /// Converts the camelCase or PascalCase string to a lower-case string with a separator 
+        /// (e.g., camel_case or pascal-case, depending on the separator).
+        /// </summary>
+        /// <param name="value">The string to convert.</param>
+        /// <param name="separator">The separator to use.</param>
+        /// <returns>The converted string.</returns>
+        public static string ToLowercaseWithSeparator(this string value, char separator)
+        {
             value = (value ?? String.Empty).Trim();
 
             if (String.IsNullOrEmpty(value))
@@ -527,7 +553,7 @@ namespace Tasty
                 {
                     if (wordLetterNumber > 1 && !prevUpper)
                     {
-                        sb.Append("_");
+                        sb.Append(separator);
                     }
 
                     sb.Append(Char.ToLowerInvariant(value[i]));

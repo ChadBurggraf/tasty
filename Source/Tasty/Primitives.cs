@@ -394,6 +394,24 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Gets the number of pages the record count is spread across for the given page size.
+        /// </summary>
+        /// <param name="recordCount">The record count to get the page count for.</param>
+        /// <param name="pageSize">The page size.</param>
+        /// <returns>The page count for the give record count and page size.</returns>
+        public static int ToPageCount(this int recordCount, int pageSize)
+        {
+            recordCount = (int)Math.Ceiling((double)recordCount / pageSize);
+
+            if (recordCount < 1)
+            {
+                recordCount = 1;
+            }
+
+            return recordCount;
+        }
+
+        /// <summary>
         /// Formats the given <see cref="TimeSpan"/> into a pretty time string.
         /// Example: 3d 6h or 4h 36m or 12m 17s or 2.8s
         /// </summary>

@@ -310,6 +310,30 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Calculates the MD5 hash of a string.
+        /// </summary>
+        /// <param name="value">The string value to get the MD5 hash of.</param>
+        /// <returns>An MD5 hash.</returns>
+        public static string MD5Hash(this string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException("value", "value must contain a value.");
+            }
+
+            byte[] input = Encoding.UTF8.GetBytes(value);
+            byte[] hash = MD5.Create().ComputeHash(input);
+            StringBuilder hex = new StringBuilder();
+
+            foreach (byte b in hash)
+            {
+                hex.Append(b.ToString("X2"));
+            }
+
+            return hex.ToString();
+        }
+
+        /// <summary>
         /// Roots the path with the current value of <see cref="Environment.CurrentDirectory"/>, if it is not null or empty and is not already rooted.
         /// </summary>
         /// <param name="path">The path to root.</param>

@@ -452,6 +452,41 @@ namespace Tasty
         }
 
         /// <summary>
+        /// Gets the duration of a <see cref="TimeSpan"/> as a relative date string.
+        /// </summary>
+        /// <param name="timeSpan">The <see cref="TimeSpan"/> to get the duration of.</param>
+        /// <returns>A pretty, relative duration string.</returns>
+        public static string ToRelativeString(this TimeSpan timeSpan)
+        {
+            if (timeSpan < TimeSpan.FromSeconds(30))
+            {
+                return "just now";
+            }
+            else if (timeSpan < TimeSpan.FromSeconds(60))
+            {
+                return string.Concat(timeSpan.Seconds, " seconds ago");
+            }
+            else if (timeSpan < TimeSpan.FromMinutes(60))
+            {
+                return string.Concat(
+                    "about ",
+                    timeSpan.Minutes > 1 ? timeSpan.Minutes + " minutes" : "a minute",
+                    " ago");
+            }
+            else if (timeSpan < TimeSpan.FromHours(24))
+            {
+                return string.Concat(
+                    "about ",
+                    timeSpan.Hours > 1 ? timeSpan.Hours + " hours" : "an hour",
+                    " ago");
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
         /// Gets the spreadhseet column name (i.e., A or AB or EF) for the given column number.
         /// </summary>
         /// <param name="columnNumber">The column number (the first column is 1, not 0).</param>

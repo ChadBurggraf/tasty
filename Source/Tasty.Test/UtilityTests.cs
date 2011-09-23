@@ -139,6 +139,32 @@ namespace Tasty.Test
         }
 
         /// <summary>
+        /// To relative date string tests.
+        /// </summary>
+        [TestMethod]
+        public void UtilityToRelativeDateString()
+        {
+            DateTime first = new DateTime(1970, 1, 1);
+            DateTime second = first.AddSeconds(10);
+            Assert.AreEqual("just now", second.Subtract(first).ToRelativeString());
+
+            second = first.AddSeconds(45);
+            Assert.AreEqual("45 seconds ago", second.Subtract(first).ToRelativeString());
+
+            second = first.AddMinutes(1);
+            Assert.AreEqual("about a minute ago", second.Subtract(first).ToRelativeString());
+
+            second = first.AddMinutes(10);
+            Assert.AreEqual("about 10 minutes ago", second.Subtract(first).ToRelativeString());
+
+            second = first.AddHours(1);
+            Assert.AreEqual("about an hour ago", second.Subtract(first).ToRelativeString());
+
+            second = first.AddHours(4);
+            Assert.AreEqual("about 4 hours ago", second.Subtract(first).ToRelativeString());
+        }
+
+        /// <summary>
         /// Test copy properties class.
         /// </summary>
         private class CopyPropertiesTest

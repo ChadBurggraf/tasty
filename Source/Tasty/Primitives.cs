@@ -229,11 +229,11 @@ namespace Tasty
             if (type.GetCustomAttributes(typeof(FlagsAttribute), false).Count() > 0)
             {
                 List<string> descriptions = new List<string>();
-                int valueInt = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                long valueInt = Convert.ToInt64(value, CultureInfo.InvariantCulture);
 
                 foreach (string name in Enum.GetNames(type))
                 {
-                    int val = (int)Enum.Parse(type, name);
+                    long val = Convert.ToInt64(Enum.Parse(type, name), CultureInfo.InvariantCulture);
 
                     if ((val & valueInt) == val)
                     {

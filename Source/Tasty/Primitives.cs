@@ -452,37 +452,58 @@ namespace Tasty
         }
 
         /// <summary>
-        /// Gets the duration of a <see cref="TimeSpan"/> as a relative date string.
+        /// Gets the difference between now and the given date as a relative duration string.
         /// </summary>
-        /// <param name="timeSpan">The <see cref="TimeSpan"/> to get the duration of.</param>
+        /// <param name="value">The date value to get the relative string of.</param>
         /// <returns>A pretty, relative duration string.</returns>
-        public static string ToRelativeString(this TimeSpan timeSpan)
+        public static string ToRelativeString(this DateTime value)
         {
-            if (timeSpan < TimeSpan.FromSeconds(30))
+            DateTime now = value.Kind == DateTimeKind.Utc ? DateTime.UtcNow : DateTime.Now;
+            TimeSpan timeSpan = now.Subtract(value);
+
+            if (timeSpan.TotalMilliseconds < 1)
+            {
+                return "not yet";
+            }
+            else if (timeSpan.TotalMinutes < 1)
             {
                 return "just now";
             }
-            else if (timeSpan < TimeSpan.FromSeconds(60))
+            else if (timeSpan.TotalMinutes < 2)
             {
-                return string.Concat(timeSpan.Seconds, " seconds ago");
+                return "1 minute ago";
             }
-            else if (timeSpan < TimeSpan.FromMinutes(60))
+            else if (timeSpan.TotalMinutes < 60)
             {
-                return string.Concat(
-                    "about ",
-                    timeSpan.Minutes > 1 ? timeSpan.Minutes + " minutes" : "a minute",
-                    " ago");
+                return string.Format(CultureInfo.InvariantCulture, "{0:N0} minutes ago", timeSpan.Minutes);
             }
-            else if (timeSpan < TimeSpan.FromHours(24))
+            else if (timeSpan.TotalMinutes < 120)
             {
-                return string.Concat(
-                    "about ",
-                    timeSpan.Hours > 1 ? timeSpan.Hours + " hours" : "an hour",
-                    " ago");
+                return "1 hour ago";
+            }
+            else if (timeSpan.TotalHours < 24)
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0:N0} hours ago", timeSpan.Hours);
+            }
+            else if (timeSpan.TotalDays < 2)
+            {
+                return "yesterday";
+            }
+            else if (timeSpan.TotalDays < 7)
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0:N0} days ago", timeSpan.Days);
+            }
+            else if (timeSpan.TotalDays < 14)
+            {
+                return "1 week ago";
+            }
+            else if (timeSpan.TotalDays < 21)
+            {
+                return "2 weeks ago";
             }
             else
             {
-                throw new NotImplementedException();
+                return value.ToString("MMM d, yyyy");
             }
         }
 

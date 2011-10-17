@@ -144,24 +144,38 @@ namespace Tasty.Test
         [TestMethod]
         public void UtilityToRelativeDateString()
         {
-            DateTime first = new DateTime(1970, 1, 1);
-            DateTime second = first.AddSeconds(10);
-            Assert.AreEqual("just now", second.Subtract(first).ToRelativeString());
+            DateTime compare = DateTime.Now.AddSeconds(10);
+            Assert.AreEqual("not yet", compare.ToRelativeString());
 
-            second = first.AddSeconds(45);
-            Assert.AreEqual("45 seconds ago", second.Subtract(first).ToRelativeString());
+            compare = DateTime.Now.AddSeconds(-10);
+            Assert.AreEqual("just now", compare.ToRelativeString());
 
-            second = first.AddMinutes(1);
-            Assert.AreEqual("about a minute ago", second.Subtract(first).ToRelativeString());
+            compare = DateTime.Now.AddMinutes(-1.1);
+            Assert.AreEqual("1 minute ago", compare.ToRelativeString());
 
-            second = first.AddMinutes(10);
-            Assert.AreEqual("about 10 minutes ago", second.Subtract(first).ToRelativeString());
+            compare = DateTime.Now.AddMinutes(-25.1);
+            Assert.AreEqual("25 minutes ago", compare.ToRelativeString());
 
-            second = first.AddHours(1);
-            Assert.AreEqual("about an hour ago", second.Subtract(first).ToRelativeString());
+            compare = DateTime.Now.AddHours(-1.1);
+            Assert.AreEqual("1 hour ago", compare.ToRelativeString());
 
-            second = first.AddHours(4);
-            Assert.AreEqual("about 4 hours ago", second.Subtract(first).ToRelativeString());
+            compare = DateTime.Now.AddHours(-4.1);
+            Assert.AreEqual("4 hours ago", compare.ToRelativeString());
+
+            compare = DateTime.Now.AddDays(-1.1);
+            Assert.AreEqual("yesterday", compare.ToRelativeString());
+
+            compare = DateTime.Now.AddDays(-3.1);
+            Assert.AreEqual("3 days ago", compare.ToRelativeString());
+
+            compare = DateTime.Now.AddDays(-7.1);
+            Assert.AreEqual("1 week ago", compare.ToRelativeString());
+
+            compare = DateTime.Now.AddDays(-14.1);
+            Assert.AreEqual("2 weeks ago", compare.ToRelativeString());
+
+            compare = new DateTime(1970, 1, 1);
+            Assert.AreEqual("Jan 1, 1970", compare.ToRelativeString());
         }
 
         /// <summary>

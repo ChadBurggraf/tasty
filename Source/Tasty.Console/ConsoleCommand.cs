@@ -68,6 +68,8 @@ namespace Tasty.Console
             {
                 case "SQL-INSTALL":
                     return new SqlInstallCommand(args);
+                case "VALIDATE-OPEN-XML":
+                    return new ValidateOpenXmlCommand(args);
                 default:
                     throw new ArgumentException("The given command was not recognized.", "command");
             }
@@ -115,6 +117,18 @@ namespace Tasty.Console
         /// </summary>
         /// <param name="disposing">A value indicating whether to dispose of managed resources.</param>
         protected abstract void Dispose(bool disposing);
+
+        /// <summary>
+        /// Writes an error message.
+        /// </summary>
+        /// <param name="format">The message format to write.</param>
+        /// <param name="args">The message arguments to write.</param>
+        protected virtual void Error(string format, params object[] args)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            this.StandardError.WriteLine(format, args);
+            Console.ResetColor();
+        }
 
         /// <summary>
         /// Writes a help message to the standard output stream.

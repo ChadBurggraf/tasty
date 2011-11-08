@@ -89,6 +89,7 @@ namespace Tasty.Console
             output.WriteLine();
             output.WriteLine("Commands:");
             output.WriteLine("  sql-install                a SQL install script generator.");
+            output.WriteLine("  validate-open-xml          validate Open XML documents.");
             options.WriteOptionDescriptions(output);
         }
     }

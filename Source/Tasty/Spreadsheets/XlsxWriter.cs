@@ -110,6 +110,12 @@ namespace Tasty.Spreadsheets
                     worksheetPart.Worksheet.Save();
                 }
 
+                if (dataSet.Tables.Count == 0)
+                {
+                    WorksheetPart worksheetPart = AddWorksheet(workbookPart, sheets, "Sheet 1");
+                    worksheetPart.Worksheet.Save();
+                }
+
                 workbookPart.Workbook.Save();
             }
         }

@@ -40,8 +40,6 @@ namespace Tasty.Web.UrlTokens
         /// </summary>
         public void CleanExpiredUrlTokens()
         {
-            this.EnsureConnectionString();
-
             const string Sql = "DELETE FROM [TastyUrlToken] WHERE [Expires] < @Now";
 
             using (SqlConnection connection = new SqlConnection(this.ConnectionString))
@@ -65,8 +63,6 @@ namespace Tasty.Web.UrlTokens
         /// <param name="record">The URL token record to create.</param>
         public void CreateUrlToken(UrlTokenRecord record)
         {
-            this.EnsureConnectionString();
-
             const string Sql = "INSERT INTO [TastyUrlToken]([Key],[Type],[Data],[Created],[Expires]) VALUES(@Key,@Type,@Data,@Created,@Expires)";
 
             using (SqlConnection connection = new SqlConnection(this.ConnectionString))
@@ -96,12 +92,10 @@ namespace Tasty.Web.UrlTokens
         /// <returns>The URL token record identified by the given key.</returns>
         public UrlTokenRecord GetUrlToken(string key)
         {
-            if (String.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(key))
             {
                 throw new ArgumentNullException("key", "key must have a value.");
             }
-
-            this.EnsureConnectionString();
 
             const string Sql = "SELECT * FROM [TastyUrlToken] WHERE [Key] = @Key";
 

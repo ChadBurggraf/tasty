@@ -90,6 +90,7 @@
     <Compile Include="ServiceModelTests.cs" />
     <Compile Include="SetVersionTests.cs" />
     <Compile Include="SqlDateTimeAssert.cs" />
+    <Compile Include="SQLiteUrlTokenStoreTests.cs" />
     <Compile Include="SqlServerClrTests.cs" />
     <Compile Include="SqlServerUrlTokenStoreTests.cs" />
     <Compile Include="TestService.cs" />

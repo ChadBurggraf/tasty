@@ -28,6 +28,7 @@ namespace Tasty.Build
         #region Private Fields
 
         private string accessKeyId, secretAccessKeyId;
+        private int timeout;
         private bool useSsl;
         private AmazonS3 client;
         private IList<string> files;
@@ -108,6 +109,27 @@ namespace Tasty.Build
         {
             get { return this.publisherDelegate ?? (this.publisherDelegate = this); }
             set { this.publisherDelegate = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the timeout, in milliseconds, to use when making a request.
+        /// </summary>
+        public int Timeout
+        {
+            get
+            {
+                return this.timeout;
+            }
+
+            set
+            {
+                if (value < 0)
+                {
+                    throw new ArgumentOutOfRangeException("value", "value must be greater than or equal to 0.");
+                }
+
+                this.timeout = value;
+            }
         }
 
         /// <summary>
@@ -266,6 +288,17 @@ namespace Tasty.Build
         }
 
         /// <summary>
+        /// Sets the value of <see cref="Timeout"/> and returns this instance.
+        /// </summary>
+        /// <param name="timeout">The value to set.</param>
+        /// <returns>This instance.</returns>
+        public S3Publisher WithTimeout(int timeout)
+        {
+            this.Timeout = timeout;
+            return this;
+        }
+
+        /// <summary>
         /// Sets the value of <see cref="UseSsl"/> and returns this instance.
         /// </summary>
         /// <param name="useSsl">The value to set.</param>
@@ -412,8 +445,9 @@ namespace Tasty.Build
                     .WithBucketName(this.BucketName)
                     .WithCannedACL(S3CannedACL.PublicRead)
                     .WithContentType(contentType)
-                    .WithKey(objectKey);
-
+                    .WithKey(objectKey)
+                    .WithTimeout(this.Timeout);
+                
                 bool gzip = false;
                 string tempPath = null;
 

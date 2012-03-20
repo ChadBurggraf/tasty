@@ -42,8 +42,6 @@ namespace Tasty.Web.UrlTokens
         /// </summary>
         public void CleanExpiredUrlTokens()
         {
-            this.EnsureConnectionString();
-
             const string Sql = "DELETE FROM \"tasty_url_token\" WHERE \"expires\" < :now";
 
             using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
@@ -67,8 +65,6 @@ namespace Tasty.Web.UrlTokens
         /// <param name="record">The URL token record to create.</param>
         public void CreateUrlToken(UrlTokenRecord record)
         {
-            this.EnsureConnectionString();
-
             const string Sql = "INSERT INTO \"tasty_url_token\"(\"key\",\"type\",\"data\",\"created\",\"expires\") VALUES(:key,:type,:data,:created,:expires)";
 
             using (NpgsqlConnection connection = new NpgsqlConnection(this.ConnectionString))
@@ -98,12 +94,10 @@ namespace Tasty.Web.UrlTokens
         /// <returns>The URL token record identified by the given key.</returns>
         public UrlTokenRecord GetUrlToken(string key)
         {
-            if (String.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(key))
             {
                 throw new ArgumentNullException("key", "key must have a value.");
             }
-
-            this.EnsureConnectionString();
 
             const string Sql = "SELECT * FROM \"tasty_url_token\" WHERE \"key\" = :key";
 

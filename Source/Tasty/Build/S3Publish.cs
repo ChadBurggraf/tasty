@@ -110,6 +110,11 @@ namespace Tasty.Build
         public string SecretAccessKeyId { get; set; }
 
         /// <summary>
+        /// Gets or sets the timeout, in milliseconds, to use when making service requests.
+        /// </summary>
+        public int Timeout { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to connect to the service using SSL.
         /// </summary>
         public bool UseSsl { get; set; }
@@ -137,6 +142,7 @@ namespace Tasty.Build
                     .WithOverwriteExistingPrefix(this.OverwriteExistingPrefix)
                     .WithPrefix(this.Prefix)
                     .WithPublisherDelegate(this)
+                    .WithTimeout(this.Timeout)
                     .WithUseSsl(this.UseSsl)
                     .Publish();
             }

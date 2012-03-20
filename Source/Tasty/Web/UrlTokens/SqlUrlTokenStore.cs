@@ -31,6 +31,7 @@ namespace Tasty.Web.UrlTokens
         protected SqlUrlTokenStore(string connectionString)
         {
             this.ConnectionString = connectionString;
+            this.EnsureConnectionString();
         }
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace Tasty.Web.UrlTokens
         /// <exception cref="System.InvalidOperationException"></exception>
         protected void EnsureConnectionString()
         {
-            if (String.IsNullOrEmpty(this.ConnectionString))
+            if (string.IsNullOrEmpty(this.ConnectionString))
             {
                 string message = null;
                 string connectionStringName = null;

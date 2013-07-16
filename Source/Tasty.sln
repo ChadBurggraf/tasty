@@ -1,8 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty", "Tasty\Tasty.csproj", "{2FA9607D-DC0D-4318-B13D-028C2BA3FF85}"
-EndProject
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{185BB18E-0FD1-4E78-BD64-2FD8ED94B027}"
 	ProjectSection(SolutionItems) = preProject
 		..\build.proj = ..\build.proj
@@ -14,12 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Tasty.vsmdi = Tasty.vsmdi
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Test", "Tasty.Test\Tasty.Test.csproj", "{E5B6327D-3E79-424F-8BF2-126D3905631C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Console", "Tasty.Console\Tasty.Console.csproj", "{34565E03-092C-44D1-8F75-6AC7BD542A91}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.SqlServer", "Tasty.SqlServer\Tasty.SqlServer.csproj", "{C437CA7E-8233-44A5-B693-5829FA3888CA}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{5890438D-C5F7-4EC3-B878-5875926C985A}"
 	ProjectSection(SolutionItems) = preProject
 		Templates\App.config.template = Templates\App.config.template
@@ -27,6 +19,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 		Templates\S3Publish.proj.template = Templates\S3Publish.proj.template
 		Templates\Test.config.template = Templates\Test.config.template
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty", "Tasty\Tasty.csproj", "{2FA9607D-DC0D-4318-B13D-028C2BA3FF85}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Test", "Tasty.Test\Tasty.Test.csproj", "{E5B6327D-3E79-424F-8BF2-126D3905631C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.Console", "Tasty.Console\Tasty.Console.csproj", "{34565E03-092C-44D1-8F75-6AC7BD542A91}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasty.SqlServer", "Tasty.SqlServer\Tasty.SqlServer.csproj", "{C437CA7E-8233-44A5-B693-5829FA3888CA}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution

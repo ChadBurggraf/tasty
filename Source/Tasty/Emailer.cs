@@ -137,6 +137,7 @@ namespace Tasty
 
             this.Validate();
             SmtpClient client = this.CreateClient();
+            string body = this.template.Transform(model);
 
             using (MailMessage message = this.CreateMessage())
             {
@@ -145,7 +146,7 @@ namespace Tasty
                     model.Email = to;
                     message.To.Clear();
                     message.To.Add(to);
-                    message.Body = this.template.Transform(model);
+                    message.Body = body;
                     client.Send(message);
 
                     this.RaiseEvent(this.Sent, new EmailSentEventArgs(to));

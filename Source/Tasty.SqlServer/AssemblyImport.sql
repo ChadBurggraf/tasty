@@ -1,3 +1,6 @@
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[Levenshtein]') AND type IN (N'FN', N'IF', N'TF', N'FS', N'FT'))
+	DROP FUNCTION [Levenshtein]
+GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[RegexIsMatch]') AND type IN (N'FN', N'IF', N'TF', N'FS', N'FT'))
 	DROP FUNCTION [RegexIsMatch]
 GO
@@ -68,6 +71,16 @@ END
 
 IF @Success = 0
 	RAISERROR(@ErrorMessage, @ErrorSeverity, 18)
+GO
+
+CREATE FUNCTION [Levenshtein]
+(
+	@First nvarchar(max),
+	@Second nvarchar(max)
+)
+RETURNS float
+AS
+EXTERNAL NAME [Tasty.SqlServer].[Tasty.SqlServer.ClrFunctions].[Levenshtein]
 GO
 
 CREATE FUNCTION [RegexIsMatch]

@@ -20,6 +20,53 @@ namespace Tasty.SqlServer
     public partial class ClrFunctions
     {
         /// <summary>
+        /// Calculates the Levenshtein distance between two strings.
+        /// </summary>
+        /// <param name="first">The first string to compare.</param>
+        /// <param name="second">The second string to compare.</param>
+        /// <returns>The Levenshtein distance between the two strings.</returns>
+        [SqlFunction(IsDeterministic = true, IsPrecise = false)]
+        public static SqlDouble Levenshtein(string first, string second)
+        {
+            first = (first ?? string.Empty).Trim().ToUpperInvariant();
+            second = (second ?? string.Empty).Trim().ToUpperInvariant();
+            double result = 0;
+
+            if (string.IsNullOrEmpty(first) && string.IsNullOrEmpty(second))
+            {
+                result = 100;
+            }
+            else if (!string.IsNullOrEmpty(first) && !string.IsNullOrEmpty(second))
+            {
+                int fl = first.Length, sl = second.Length;
+                int[,] d = new int[fl + 1, sl + 1];
+
+                for (int i = 0; i <= fl; i++)
+                {
+                    d[i, 0] = i;
+                }
+
+                for (int i = 0; i <= sl; i++)
+                {
+                    d[0, i] = i;
+                }
+
+                for (int i = 1; i <= fl; i++)
+                {
+                    for (int j = 1; j <= sl; j++)
+                    {
+                        int cost = first[i - 1] == second[j - 1] ? 0 : 1;
+                        d[i, j] = Math.Min(Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1), d[i - 1, j - 1] + cost);
+                    }
+                }
+
+                result = Math.Round((1.0 - ((double)d[fl, sl] / (double)Math.Max(fl, sl))) * 100.0, 2);
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Gets a value indicating whether the given input string matches the given regular expression.
         /// </summary>
         /// <param name="input">The input to check against the regular expression.</param>
